@@ -1,13 +1,29 @@
 {
+    "_readme": {
+        "usage": "Copy this file to config/vault.json and fill in your credentials.",
+        "warning": "vault.json is in .gitignore — never commit real credentials.",
+        "docs": "See docs/BLACKWELL_SETUP.md for full configuration guide."
+    },
     "example_project": {
         "name": "project_name",
         "github": {
-            "repo": "https://github.com/kullanici/repo-adi.git",
+            "repo": "https://github.com/username/repo-name.git",
             "token": "ghp_your_github_personal_access_token_here"
         },
         "supabase": {
             "url": "https://your-project-id.supabase.co",
             "anon_key": "your-supabase-anon-key-here"
+        }
+    },
+    "second_project": {
+        "name": "second_project_name",
+        "github": {
+            "repo": "https://github.com/username/second-repo.git",
+            "token": "ghp_your_second_github_token_here"
+        },
+        "supabase": {
+            "url": "https://your-second-project-id.supabase.co",
+            "anon_key": "your-second-supabase-anon-key-here"
         }
     }
 }
