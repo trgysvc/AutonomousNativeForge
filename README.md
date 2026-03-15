@@ -138,7 +138,7 @@ Simple math: 70B in bfloat16 requires ~132GB VRAM. GB10 has 120GB. The OOM Kille
 ## Project Structure
 
 ```
-/autonomous-native-forge/
+/AutonomousNativeForge/
 ├── agents/
 │   ├── architect.js      # Document scanner + task decomposer
 │   ├── coder.js          # Native code producer
@@ -172,8 +172,8 @@ Simple math: 70B in bfloat16 requires ~132GB VRAM. GB10 has 120GB. The OOM Kille
 ### Launch
 ```bash
 # 1. Clone the repo
-git clone https://github.com/[username]/autonomous-native-forge.git
-cd autonomous-native-forge
+git clone https://github.com/trgysvc/AutonomousNativeForge.git
+cd AutonomousNativeForge
 
 # 2. Configure your projects
 cp config/vault.example.json config/vault.json
