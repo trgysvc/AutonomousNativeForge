@@ -304,4 +304,251 @@ Significant decisions that shaped the system — recorded so future contributors
 
 ---
 
+### SESSION-009 | [MILESTONE] | Full Rebuild From Scratch — System Operational
+**Date:** 2026-03-16
+**Duration:** ~9 hours
+**Operator:** Turgay Savacı
+
+#### Context
+Test environment resets daily at 02:00. This session required a complete rebuild from zero. No prior build artifacts, no cached packages. PyTorch and vLLM both had to be compiled and installed fresh.
+
+#### Objective
+Reach `Application startup complete` on vLLM serving DeepSeek-R1-Distill-Qwen-32B on Blackwell GB10.
+
+---
+
+#### FAIL-008 — cu121 wheel not found for aarch64
+🔴 CRITICAL  
+Standard protocol called for `pip3 install --pre torch ... --index-url .../cu121`. On aarch64 (sbsa-linux), no cu121 wheel exists.
+
+```
+ERROR: Could not find a version that satisfies the requirement torch (from versions: none)
+```
+
+Root Cause: PyTorch nightly cu121 index does not publish aarch64 binaries. The original protocol was written assuming x86_64.
+
+Fix: Switch to cu130 index — this is the correct index for Blackwell aarch64:
+```bash
+sudo pip3 install --pre torch torchvision torchaudio \
+  --index-url https://download.pytorch.org/whl/nightly/cu130 \
+  --break-system-packages
+```
+
+Verified: `torch.cuda.is_available()` returned `True` with `torch-2.12.0.dev+cu130`.
+
+---
+
+#### FAIL-009 — ncclWaitSignal undefined symbol (first encounter)
+🔴 CRITICAL  
+After installing cu130 PyTorch, importing torch failed:
+
+```
+ImportError: libtorch_cuda.so: undefined symbol: ncclWaitSignal
+```
+
+Root Cause: The system NCCL libraries (apt-installed) did not include `ncclWaitSignal` — a symbol introduced in newer NCCL versions. pip-installed `nvidia-nccl-cu13` was not being picked up by the linker.
+
+Fix: Force the correct NCCL library via `LD_PRELOAD`:
+```bash
+export LD_PRELOAD=/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib/libnccl.so.2
+python3 -c "import torch; print(torch.cuda.is_available())"
+# True
+```
+
+---
+
+#### FAIL-010 — libnuma.h not found during vLLM CPU extension build
+🟡 WARNING  
+During `pip install -e .`, vLLM's CPU extension (`csrc/cpu/utils.cpp`) failed:
+
+```
+fatal error: numa.h: No such file or directory
+```
+
+Root Cause: `libnuma-dev` was not installed. vLLM's CPU extension requires NUMA memory management headers.
+
+Fix:
+```bash
+sudo apt-get install -y libnuma-dev
+```
+
+---
+
+#### FAIL-011 — ABI Mismatch: MessageLogger undefined symbol (persistent, 6 attempts)
+🔴 CRITICAL — Most time-consuming failure of the session  
+After all build steps completed, launching vLLM consistently failed with:
+
+```
+ImportError: /home/nvidia/vllm/vllm/_C.abi3.so: undefined symbol: _ZN3c1013MessageLoggerC1EPKciib
+```
+
+Root Cause (confirmed via `nm`):
+
+```bash
+# vLLM binary expected (old signature):
+U _ZN3c1013MessageLoggerC1EPKciib        # (const char*, int, int, bool)
+
+# PyTorch library provided (new signature):
+T _ZN3c1013MessageLoggerC1ENS_14SourceLocationEib   # (SourceLocation, int, bool)
+```
+
+vLLM compiled against old PyTorch headers but runtime linked against new cu130 library. This is a classic ABI mismatch caused by pip's build isolation — pip downloads a separate, older torch into a temporary environment for compilation, producing a binary incompatible with the installed cu130 torch.
+
+Fix — `--no-build-isolation` with explicit `sudo -E env` injection:
+
+```bash
+sudo -E env \
+  LD_PRELOAD="/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib/libnccl.so.2" \
+  LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib:/usr/local/cuda-13.0/targets/sbsa-linux/lib:/usr/local/cuda-13.0/lib64" \
+  MAX_JOBS=8 \
+  pip3 install -e . --no-deps --no-build-isolation --break-system-packages
+```
+
+Why this works: `--no-build-isolation` prevents pip from creating an isolated build environment with different torch headers. The torch used for compilation is now the same cu130 binary that runs at runtime. ABI mismatch eliminated.
+
+Verification:
+```bash
+nm -D vllm/_C.abi3.so | grep MessageLogger
+# Before fix: EPKciib (old signature)
+# After fix:  SourceLocation (new signature — matches cu130 libc10.so)
+```
+
+---
+
+#### Final Working Sequence (v2 Protocol)
+
+```bash
+# 1. OS dependency
+sudo apt-get install -y libnuma-dev
+
+# 2. Clean slate
+cd /home/nvidia/vllm
+sudo rm -rf build/ vllm.egg-info/
+sudo find . -name "*.so" -delete
+sudo pip3 uninstall vllm torch torchvision torchaudio -y --break-system-packages
+pip3 cache purge
+
+# 3. Install Blackwell-compatible PyTorch (cu130, aarch64)
+sudo pip3 install --pre torch torchvision torchaudio \
+  --index-url https://download.pytorch.org/whl/nightly/cu130 \
+  --break-system-packages
+
+# 4. Build vLLM without isolation (ABI fix)
+sudo -E env \
+  LD_PRELOAD="/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib/libnccl.so.2" \
+  LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib:/usr/local/cuda-13.0/targets/sbsa-linux/lib:/usr/local/cuda-13.0/lib64" \
+  MAX_JOBS=8 \
+  pip3 install -e . --no-deps --no-build-isolation --break-system-packages
+
+# 5. Launch
+export VLLM_USE_V1=0
+export LD_PRELOAD="/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib/libnccl.so.2"
+export LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/nvidia/nccl/lib:/usr/local/cuda-13.0/targets/sbsa-linux/lib:/usr/local/cuda-13.0/lib64:$LD_LIBRARY_PATH"
+
+CUDA_LAUNCH_BLOCKING=1 python3 -m vllm.entrypoints.openai.api_server \
+  --model "/home/nvidia/.cache/models/deepseek-r1-32b" \
+  --tensor-parallel-size 1 \
+  --max-model-len 32768 \
+  --dtype bfloat16 \
+  --port 8000 \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.90 \
+  --enforce-eager
+```
+
+Result: `Application startup complete` — DeepSeek-R1-32B serving on port 8000.
+
+#### Learned
+1. `cu121` wheel does not exist for aarch64. The correct index for Blackwell GB10 is `cu130`.
+2. pip's build isolation is the root cause of ABI mismatches on Blackwell. `--no-build-isolation` is mandatory when the system torch differs from what pip would download.
+3. `sudo -E` alone is insufficient to pass `LD_PRELOAD` through pip's subprocess chain. Must use `sudo -E env VAR=value pip3 ...` to inject environment into the subprocess.
+4. `nm -D` is the definitive diagnostic tool for ABI mismatches — comparing symbol signatures between the binary and the library reveals exactly what went wrong.
+5. Daily resets enforce rigorous reproducibility. Every step that "worked once" must be documented precisely or it will fail on the next reset.
+
+#### State After Session
+Full system operational. vLLM serving DeepSeek-R1-32B on Blackwell GB10. All environment variables documented. Ready for automation via setup script.
+
+---
+
+### SESSION-010 | [MILESTONE] | Automation — setup_blackwell.sh
+**Date:** 2026-03-16
+**Duration:** ~1 hour
+**Operator:** Turgay Savacı
+
+#### Objective
+Eliminate manual rebuild after daily 02:00 system reset. One command must reproduce the entire working environment.
+
+#### What Was Built
+`/home/nvidia/vllm/setup_blackwell.sh` — a single script encoding the entire v2 protocol including all ABI fixes, dependency installation, and service activation.
+
+#### Usage
+```bash
+chmod +x /home/nvidia/vllm/setup_blackwell.sh
+/home/nvidia/vllm/setup_blackwell.sh
+```
+
+Script covers: libnuma-dev install → clean slate → cu130 torch → no-isolation vLLM build → systemd service creation → service start.
+
+#### Pending
+Full MAS pipeline (4-agent end-to-end) test is scheduled for the next 3-day access window.
+
+---
+
+## Pending Issues
+
+| ID | Description | Severity | Status |
+|---|---|---|---|
+| ISSUE-001 | 45min timeout may block multi-agent parallelism | 🟡 WARNING | Open |
+| ISSUE-002 | CoT `<think>` blocks require manual strip regex | 🟢 INFO | SOLVED |
+| ISSUE-003 | V0 engine performance vs V1 benchmarked | 🟢 INFO | Open |
+| ISSUE-004 | DEVLOG.md growth and log rotation | 🟢 INFO | Open |
+| ISSUE-005 | Full MAS pipeline end-to-end test pending 3-day access window | 🟡 WARNING | Open |
+
+---
+
+## Architecture Decisions Log
+
+---
+
+### ADR-001 — Native EventEmitter over Message Broker
+**Date:** 2026-03-13
+**Decision:** Use Node.js built-in `EventEmitter` for inter-agent communication instead of Redis, RabbitMQ, or any external message broker.  
+**Reason:** Zero external dependencies. The entire agent bus fits in a single file. Any developer can read and understand the communication layer in under 5 minutes.  
+**Trade-off:** No persistence across restarts. Acceptable for current stage — agents reconstruct state from queue/inbox files.  
+**Revisit when:** Agent count exceeds 8 or cross-machine distribution is required.
+
+---
+
+### ADR-002 — 32B Model Over 70B
+**Date:** 2026-03-13
+**Decision:** DeepSeek-R1-Distill-Qwen-32B as the primary reasoning model.  
+**Reason:** Hardware constraint (120GB VRAM) makes 70B non-viable. 32B with 56GB KV Cache headroom outperforms a memory-constrained 70B on long context tasks.  
+**Revisit when:** Multi-GPU NVIDIA setup or Apple M4 Ultra (192GB Unified Memory) is available.
+
+---
+
+### ADR-003 — V0 Engine Lock
+**Date:** 2026-03-13
+**Decision:** `VLLM_USE_V1=0` hardcoded in deployment config.  
+**Reason:** V1 engine produces silent unresponsive states on long CoT sequences. V0 is slower but stable. Stability is non-negotiable in an autonomous pipeline.  
+**Revisit when:** vLLM V1 engine releases a Blackwell-specific stability fix.
+
+---
+
+### ADR-004 — systemd over Manual Launch
+**Date:** 2026-03-17
+**Decision:** vLLM deployed as a systemd service (`vllm-deepseek.service`) rather than a manual terminal process.  
+**Reason:** Manual launch is fragile in a reset-prone test environment. systemd provides automatic restart on failure, clean environment isolation, and eliminates Gnome/Xorg scheduler interference — which allowed raising `gpu-memory-utilization` from 0.85 to 0.90.  
+**Trade-off:** Slightly harder to debug (logs via `journalctl` instead of terminal). Acceptable given stability gains.
+
+---
+
+### ADR-005 — LD_PRELOAD for NCCL ABI Resolution
+**Date:** 2026-03-17
+**Decision:** Force NCCL library via `LD_PRELOAD` at both compile and runtime.  
+**Reason:** Blackwell's NCCL ABI is specific enough that default linker resolution picks the wrong symbols. Silent runtime failures (`ncclWaitSignal`, `MessageLogger`) only appear under load.  
+**Trade-off:** Tightly couples the build to a specific NCCL path. Path must be verified after system updates.
+
+---
+
 *This log is written by a human, not generated by an AI. Entries reflect real sessions, real failures, and real decisions.*
