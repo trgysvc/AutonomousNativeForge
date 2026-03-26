@@ -108,20 +108,33 @@ sudo pip3 install --pre torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/nightly/cu130 \
   --break-system-packages
 
-# vLLM source build (--no-build-isolation) için kritik derleme araçları
-# setuptools_scm, cmake, ninja ve wheel eksikliği metadata generation hatasına yol açar.
-sudo pip3 install setuptools_scm cmake ninja wheel --break-system-packages
+# Torch sürümünü kilitleyen bir kısıtlama (constraint) dosyası oluşturuyoruz.
+# Bu dosya, pip'in sonraki adımlarda torch'u kafasına göre silmesini engeller.
+pip3 list | grep torch | awk '{print $1"==" $2}' > /tmp/torch_constraints.txt
+
+# vLLM source build için kritik araçları bu kısıtlamaya göre kuruyoruz.
+sudo pip3 install setuptools==77.0.3 "numpy<2.3" setuptools_scm cmake ninja wheel \
+  -c /tmp/torch_constraints.txt --break-system-packages
 
 # vLLM runtime (çalışma zamanı) bağımlılıkları (uvloop, fastapi, vb.)
-# --no-deps ile kurduğumuz için bu bağımlılıkları manuel ama toplu olarak kuruyoruz.
-# torch'u atlayarak (grep -v) mevcut nightly sürümümüzü koruyoruz.
-if [ -f "requirements.txt" ]; then
+# vLLM artık tek bir requirements.txt yerine bir klasör (requirements/) kullanıyor.
+if [ -d "requirements" ]; then
+    echo "📦 requirements/ klasörü taranıyor..."
+    for req_file in requirements/*.txt; do
+        grep -vE "torch|torchvision|torchaudio" "$req_file" > "${req_file}.tmp"
+        sudo pip3 install -r "${req_file}.tmp" -c /tmp/torch_constraints.txt --break-system-packages || true
+    done
+elif [ -f "requirements.txt" ]; then
     grep -vE "torch|torchvision|torchaudio" requirements.txt > requirements_runtime.txt
-    sudo pip3 install -r requirements_runtime.txt --break-system-packages
+    sudo pip3 install -r requirements_runtime.txt -c /tmp/torch_constraints.txt --break-system-packages
 else
-    # Fallback: En kritik olanları manuel kur
-    sudo pip3 install uvloop fastapi uvicorn pydantic openai requests sentencepiece numpy --break-system-packages
+    sudo pip3 install uvloop fastapi uvicorn pydantic openai requests sentencepiece "numpy<2.3" --break-system-packages
 fi
+
+# FlashInfer Kaynaktan Derleme (Blackwell-aarch64 için en temiz yol)
+echo ">>> FlashInfer (v0.6.6) kaynaktan derleniyor..."
+sudo pip3 install git+https://github.com/flashinfer-ai/flashinfer.git@v0.6.6 \
+  -c /tmp/torch_constraints.txt --break-system-packages || echo "⚠️ FlashInfer derlemesi atlanıyor (Triton kullanılabilir)."
 
 # --- ADIM 6: ÇEVRESEL DEĞİŞKENLER VE METADATA YAMASI ---
 echo ">>> [6/11] Değişkenler mühürleniyor ve pyproject.toml yamalanıyor..."
@@ -137,8 +150,9 @@ sed -i '/license-files =/d' pyproject.toml 2>/dev/null || true
 
 # --- ADIM 7: vLLM ABI FIX DERLEME (KRİTİK ADIM) ---
 echo ">>> [7/11] vLLM izolasyonsuz derleniyor (ABI Fix)..."
-# Orijinal başarılı formül - Tüm flaglar korunmuştur
+# Versiyon tespit hatasını aşmak için VLLM_VERSION_OVERRIDE eklendi
 sudo -E env \
+  VLLM_VERSION_OVERRIDE="0.18.1rc1.dev" \
   LD_PRELOAD="$NCCL_PRELOAD" \
   LD_LIBRARY_PATH="$LD_LIB" \
   TORCH_CUDA_ARCH_LIST="12.1" \
