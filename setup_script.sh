@@ -2,7 +2,7 @@
 # ============================================================
 # ANF — Autonomous Native Forge (Ultimate Setup)
 # Blackwell GB10 vLLM + DeepSeek-R1-32B + Node.js Entegrasyonu
-# Versiyon: 3.9.4 | Tarih: 2026-03-26
+# Versiyon: 4.0.0 | Tarih: 2026-03-26
 # STATUS: FULL VERSION - NO SHORTENING - ORIGINAL METHOD PRESERVED
 # ============================================================
 set -e
