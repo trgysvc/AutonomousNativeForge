@@ -112,6 +112,17 @@ sudo pip3 install --pre torch torchvision torchaudio \
 # setuptools_scm, cmake, ninja ve wheel eksikliği metadata generation hatasına yol açar.
 sudo pip3 install setuptools_scm cmake ninja wheel --break-system-packages
 
+# vLLM runtime (çalışma zamanı) bağımlılıkları (uvloop, fastapi, vb.)
+# --no-deps ile kurduğumuz için bu bağımlılıkları manuel ama toplu olarak kuruyoruz.
+# torch'u atlayarak (grep -v) mevcut nightly sürümümüzü koruyoruz.
+if [ -f "requirements.txt" ]; then
+    grep -vE "torch|torchvision|torchaudio" requirements.txt > requirements_runtime.txt
+    sudo pip3 install -r requirements_runtime.txt --break-system-packages
+else
+    # Fallback: En kritik olanları manuel kur
+    sudo pip3 install uvloop fastapi uvicorn pydantic openai requests sentencepiece numpy --break-system-packages
+fi
+
 # --- ADIM 6: ÇEVRESEL DEĞİŞKENLER VE METADATA YAMASI ---
 echo ">>> [6/11] Değişkenler mühürleniyor ve pyproject.toml yamalanıyor..."
 export CUDA_HOME="$CUDA_HOME"
