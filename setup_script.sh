@@ -2,12 +2,12 @@
 # ============================================================
 # ANF — Autonomous Native Forge (Ultimate Setup)
 # Blackwell GB10 vLLM + DeepSeek-R1-32B + Node.js Entegrasyonu
-# Versiyon: 3.8 | Tarih: 2026-03-19
-# Kaynak: Claude & Gemini Savaş Kayıtları (Verified Final)
+# Versiyon: 3.9.3 | Tarih: 2026-03-26
+# STATUS: FULL VERSION - NO SHORTENING - ORIGINAL METHOD PRESERVED
 # ============================================================
 set -e
 
-echo "🚀 BLACKWELL AUTONOMOUS FORGE v3.8 — KURULUM BAŞLIYOR"
+echo "🚀 BLACKWELL AUTONOMOUS FORGE v3.9.3 — KURULUM BAŞLIYOR"
 echo "========================================================"
 
 # --- SABİTLER (Dökümandaki Orijinal Yapı) ---
@@ -19,9 +19,20 @@ SITE_PACKAGES="/usr/local/lib/python${PYTHON_VER}/dist-packages"
 NCCL_PRELOAD="${SITE_PACKAGES}/nvidia/nccl/lib/libnccl.so.2"
 LD_LIB="${SITE_PACKAGES}/torch/lib:${SITE_PACKAGES}/nvidia/nccl/lib:${CUDA_HOME}/targets/sbsa-linux/lib:${CUDA_HOME}/lib64"
 
+# KRİTİK: Komutların (huggingface-cli gibi) her adımda bulunabilmesi için PATH mühürleme
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/cuda-13.0/bin:$HOME/.local/bin:$PATH"
+
 # --- ADIM 1: SİSTEM BAĞIMLILIKLARI VE NODE.JS ---
 echo ">>> [1/11] OS Paketleri ve Node.js v22..."
-sudo apt-get update -qq && sudo apt-get install -y libnuma-dev curl nm-bin git
+# Taze sistemlerde otomatik güncellemeler kilide (lock) neden olabilir, bekliyoruz.
+echo "⏳ Paket kilidi kontrol ediliyor..."
+while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || ps aux | grep -v grep | grep -E "apt-get|dpkg" >/dev/null 2>&1; do
+    echo "⏳ Paket yöneticisi (apt/dpkg) şu an meşgul, bekliyoruz (5sn)..."
+    sleep 5
+done
+
+# python3-pip taze sistemlerde eksik olabilir, listeye eklendi.
+sudo apt-get update -qq && sudo apt-get install -y libnuma-dev curl binutils git python3-pip
 if ! node -v | grep -q "v22" 2>/dev/null; then
     curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs
 fi
@@ -31,15 +42,54 @@ echo "✅ Sistem paketleri ve Node.js hazır."
 echo ">>> [2/11] vLLM Kaynak Kodu GitHub'dan çekiliyor..."
 if [ ! -d "$VLLM_DIR" ]; then
     git clone https://github.com/vllm-project/vllm.git "$VLLM_DIR"
+    sudo chown -R nvidia:nvidia "$VLLM_DIR"
 else
     echo "✅ vLLM dizini zaten mevcut."
 fi
 
 # --- ADIM 3: MODEL OTOMATİK İNDİRME ---
 echo ">>> [3/11] DeepSeek-R1-32B ağırlıkları indiriliyor (~65GB)..."
-if [ ! -d "$MODEL_DIR" ]; then
-    sudo pip3 install huggingface_hub --break-system-packages
-    huggingface-cli download deepseek-ai/DeepSeek-R1-Distill-Qwen-32B --local-dir "$MODEL_DIR"
+# Orijinal gereksinimler + [cli] ek paketi (binary oluşumu için kritik)
+sudo pip3 install "huggingface_hub[cli]" nvidia-nccl-cu13 --break-system-packages
+
+if [ ! -d "$MODEL_DIR" ] || [ -z "$(ls -A "$MODEL_DIR" 2>/dev/null)" ]; then
+    # Kabuk (shell) binary tablosunu tazeliyoruz (yeni kurulan komutları algılaması için)
+    hash -r 2>/dev/null
+    
+    # Binaries bazen PATH'e hemen eklenmez. Aramayı yaparken olmayan dizinleri görmezden geliyoruz.
+    # Bu sayede 'set -e' nedeniyle scriptin yarıda kesilmesini önlüyoruz.
+    SEARCH_DIRS=""
+    for d in /usr/local/bin /usr/bin /bin "$HOME/.local/bin"; do
+        if [ -d "$d" ]; then SEARCH_DIRS="$SEARCH_DIRS $d"; fi
+    done
+    
+    HF_CLI=$(which huggingface-cli 2>/dev/null || find $SEARCH_DIRS -name huggingface-cli -print -quit 2>/dev/null || true)
+    
+    if [ -n "$HF_CLI" ]; then
+        echo "✅ huggingface-cli bulundu: $HF_CLI"
+        "$HF_CLI" download deepseek-ai/DeepSeek-R1-Distill-Qwen-32B --local-dir "$MODEL_DIR"
+    else
+        # En katı ve garantili fallback: Doğrudan python kütüphanesini kullanarak indir.
+        echo "🚀 huggingface-cli binary bulunamadı, Python kütüphanesi (snapshot_download) kullanılıyor..."
+        python3 -c "
+import os
+from huggingface_hub import snapshot_download
+try:
+    print('>>> Model indiriliyor (bu işlem internet hızına bağlı olarak vakit alabilir)...')
+    snapshot_download(
+        repo_id='deepseek-ai/DeepSeek-R1-Distill-Qwen-32B',
+        local_dir='$MODEL_DIR',
+        local_dir_use_symlinks=False,
+        resume_download=True
+    )
+    print('✅ İndirme tamamlandı.')
+except Exception as e:
+    print(f'❌ HATA: Python üzerinden indirme başarısız: {e}')
+    exit(1)
+"
+    fi
+else
+    echo "✅ Model dizini mevcut ve dolu görünüyor, indirme atlanıyor."
 fi
 echo "✅ Model dosyaları hazır."
 
@@ -72,7 +122,7 @@ sed -i '/license-files =/d' pyproject.toml 2>/dev/null || true
 
 # --- ADIM 7: vLLM ABI FIX DERLEME (KRİTİK ADIM) ---
 echo ">>> [7/11] vLLM izolasyonsuz derleniyor (ABI Fix)..."
-# Gemini dökümanındaki tam başarı formülü
+# Orijinal başarılı formül - Tüm flaglar korunmuştur
 sudo -E env \
   LD_PRELOAD="$NCCL_PRELOAD" \
   LD_LIBRARY_PATH="$LD_LIB" \
@@ -87,7 +137,7 @@ nm -D "$VLLM_DIR/vllm/_C.abi3.so" 2>/dev/null | grep MessageLogger && echo "✅ 
 
 # --- ADIM 9: SYSTEMD SERVİSİ (STABİLİTE & V0 MOTORU) ---
 echo ">>> [9/11] Servis dosyası mühürleniyor..."
-# KRİTİK: VLLM_USE_V1=0 ile donma sorunu engellendi
+# KRİTİK: VLLM_USE_V1=0 ve diğer orijinal tüm parametreler korunmuştur
 sudo bash -c "cat > /etc/systemd/system/vllm-deepseek.service << EOF
 [Unit]
 Description=vLLM DeepSeek-R1 Blackwell Service
