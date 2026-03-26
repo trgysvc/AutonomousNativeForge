@@ -2,7 +2,7 @@
 # ============================================================
 # ANF — Autonomous Native Forge (Ultimate Setup)
 # Blackwell GB10 vLLM + DeepSeek-R1-32B + Node.js Entegrasyonu
-# Versiyon: 3.9.3 | Tarih: 2026-03-26
+# Versiyon: 3.9.4 | Tarih: 2026-03-26
 # STATUS: FULL VERSION - NO SHORTENING - ORIGINAL METHOD PRESERVED
 # ============================================================
 set -e
@@ -43,8 +43,10 @@ echo ">>> [2/11] vLLM Kaynak Kodu GitHub'dan çekiliyor..."
 if [ ! -d "$VLLM_DIR" ]; then
     git clone https://github.com/vllm-project/vllm.git "$VLLM_DIR"
     sudo chown -R nvidia:nvidia "$VLLM_DIR"
+    cd "$VLLM_DIR" && git checkout main
 else
-    echo "✅ vLLM dizini zaten mevcut."
+    echo "✅ vLLM dizini zaten mevcut. Ana dala (main) geçiliyor..."
+    cd "$VLLM_DIR" && git checkout . && git checkout main && git pull origin main
 fi
 
 # --- ADIM 3: MODEL OTOMATİK İNDİRME ---
@@ -141,6 +143,7 @@ echo ">>> [6/11] Değişkenler mühürleniyor ve pyproject.toml yamalanıyor..."
 export CUDA_HOME="$CUDA_HOME"
 export TORCH_CUDA_ARCH_LIST="12.1"
 export VLLM_TARGET_DEVICE="cuda"
+export VLLM_ATTENTION_BACKEND=TRITON
 export LD_LIBRARY_PATH="$LD_LIB:$LD_LIBRARY_PATH"
 export PATH="$CUDA_HOME/bin:$PATH"
 

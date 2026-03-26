@@ -115,15 +115,16 @@ This isn't dogma — it's a deliberate architectural choice:
 ## Hardware & Infrastructure
 
 ### Hardware Support
-- **NVIDIA GPU**: Optimized for Blackwell GB10 (120GB VRAM) and CUDA-enabled architectures.
+- **NVIDIA GPU**: Optimized for Blackwell GB10 (120GB VRAM). Requires **CUDA 13.0** and **cu130 nightly** PyTorch builds for `aarch64`.
 - **Apple Silicon**: Fully compatible with M-series chips utilizing **Unified Memory** for large context windows.
 - **NPU Engines**: Support for local AI accelerators (NPU) in modern mobile/desktop workstations.
-- **Model:DeepSeek-R1-Distill-Qwen-32B (bfloat16 — ~64GB VRAM)
+- **Model**: DeepSeek-R1-Distill-Qwen-32B (bfloat16 — ~64GB VRAM).
 
 ### TEST SYSTEM
 Server:  vLLM OpenAI-compatible API (port 8000)
 Runtime: Node.js v22+
-OS:      Linux (aarch64)
+OS:      Ubuntu 22.04+ (aarch64 / Blackwell)
+Deps:    `libnuma-dev`, `python3-dev`, `build-essential`
 
 ### Why 32B and Not 70B?
 Simple math: 70B in bfloat16 requires ~132GB VRAM. GB10 has 120GB. The OOM Killer doesn't negotiate.  
@@ -166,24 +167,27 @@ Simple math: 70B in bfloat16 requires ~132GB VRAM. GB10 has 120GB. The OOM Kille
 
 ### Prerequisites
 - Node.js v22+
-- vLLM running locally (see [Blackwell Setup Guide](./blackwell_setup.md))
-- DeepSeek-R1-Distill-Qwen-32B downloaded via `huggingface-cli`
+- Blackwell GB10 or compatible GPU/NPU
+- GitHub Personal Access Token (for agent interaction)
 
-### Launch
+### Automatic Setup (Blackwell Dedicated)
+The most reliable way to get ANF running on a Blackwell system is our automated setup script:
+
 ```bash
 # 1. Clone the repo
 git clone https://github.com/trgysvc/AutonomousNativeForge.git
 cd AutonomousNativeForge
 
-# 2. Configure your projects
+# 2. Run the ultimate setup script (v3.9.3)
+# This handles: Dependencies -> cu130 Torch -> vLLM Source Build (ABI Fix) -> systemd
+./setup_script.sh
+
+# 3. Configure your projects
 cp config/vault.example.json config/vault.json
 # Edit vault.json with your GitHub tokens and project info
 
-# 3. Drop a spec document into the discovery folder
-cp your-spec.md docs/reference/[project_id]/
-
 # 4. Start the factory
-node bootstrap.js
+node agents/bootstrap.js
 ```
 
 The factory wakes up. Architect discovers your spec. The pipeline runs.
