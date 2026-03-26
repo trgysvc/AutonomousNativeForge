@@ -102,10 +102,12 @@ async function discoverNewProjects() {
                     const content = fs.readFileSync(fullPath, 'utf-8');
                     
                     const planPrompt = `Sen bir Baş Mimarsın. Aşağıdaki teknik dökümanı analiz et ve uygulanabilir, atomik yazılım görevlerine böl. 
+                    Her görev için ilgili programlama dilinin standartlarına uygun (örneğin Node.js için src/utils/...), profesyonel bir dosya yolu belirle.
+
                     DÖKÜMAN:
                     ${content}
                     
-                    Yanıtı SADECE şu JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "..."}]`;
+                    Yanıtı SADECE şu JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "..."}]`;
                     
                     try {
                         log(`🧠 [${project_id}] İçin iş planı DeepSeek-R1 ile hesaplanıyor...`);

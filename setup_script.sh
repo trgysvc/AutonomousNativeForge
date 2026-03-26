@@ -31,8 +31,8 @@ while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || ps aux | grep -v
     sleep 5
 done
 
-# python3-pip taze sistemlerde eksik olabilir, listeye eklendi.
-sudo apt-get update -qq && sudo apt-get install -y libnuma-dev curl binutils git python3-pip
+# python3-pip ve python3-dev taze sistemlerde eksik olabilir, listeye eklendi.
+sudo apt-get update -qq && sudo apt-get install -y libnuma-dev curl binutils git python3-pip python3-dev build-essential
 if ! node -v | grep -q "v22" 2>/dev/null; then
     curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs
 fi
@@ -102,11 +102,15 @@ sudo pip3 uninstall vllm torch torchvision torchaudio -y --break-system-packages
 sudo pip3 cache purge # Yetki sorunu için sudo eklendi
 
 # --- ADIM 5: PYTORCH CU130 (BLACKWELL AARCH64 ÖZEL) ---
-echo ">>> [5/11] PyTorch cu130 Nightly yükleniyor..."
+echo ">>> [5/11] PyTorch cu130 Nightly ve Derleme Araçları yükleniyor..."
 # cu121 aarch64'te çalışmaz, dökümandaki cu130 kararı esastır
 sudo pip3 install --pre torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/nightly/cu130 \
   --break-system-packages
+
+# vLLM source build (--no-build-isolation) için kritik derleme araçları
+# setuptools_scm, cmake, ninja ve wheel eksikliği metadata generation hatasına yol açar.
+sudo pip3 install setuptools_scm cmake ninja wheel --break-system-packages
 
 # --- ADIM 6: ÇEVRESEL DEĞİŞKENLER VE METADATA YAMASI ---
 echo ">>> [6/11] Değişkenler mühürleniyor ve pyproject.toml yamalanıyor..."

@@ -71,7 +71,7 @@ async function processTask(task) {
 
     const code = await ask('CODER', prompt, __dirname);
     
-    const filePath = task.file_path || path.join(projectPath, `${task.task_id}${ext}`);
+    const filePath = task.file_path ? path.join(projectPath, task.file_path) : path.join(projectPath, `${task.task_id}${ext}`);
     if (!fs.existsSync(path.dirname(filePath))) {
         fs.mkdirSync(path.dirname(filePath), { recursive: true });
     }

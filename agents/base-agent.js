@@ -83,7 +83,8 @@ async function pushToGithub(projectId, filePath, content, commitMessage) {
     const token = config.github.token;
     const repoPath = new URL(config.github.repo).pathname;
     const ownerRepo = repoPath.replace('.git', '').substring(1);
-    const fileName = path.basename(filePath);
+    const relativeFilePath = path.relative(path.join(__dirname, '..', 'src', projectId), filePath).replace(/\\/g, '/');
+    const fileName = relativeFilePath;
 
     // 1. Mevcut SHA'yı al (Eğer dosya varsa)
     let currentSha = null;

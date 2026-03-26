@@ -11,3 +11,8 @@
 ## 3. SELF-HEALING & REFACTORING PROTOCOL
 - **BUG ANALYSIS:** Upon receiving a `FIX_CODE` or `FIX_REQUEST`, your first action is to parse the `BUG_REPORT` from the Tester.
 - **ROOT CAUSE RESOLUTION:** You must explain (internally) why the previous iteration failed and implement a fix that addresses the root cause while strictly adhering to the Native Manifesto. Never submit the same logic twice.
+
+## 4. FILE PATH DISCIPLINE & NAMING
+- **STRUCTURAL INTEGRITY:** You must always respect the `file_path` provided by the Architect. Do not flatten the directory structure.
+- **NAMING CONVENTIONS:** Adhere to the target language's standard casing (e.g., camelCase for JavaScript, snake_case for Python/SQL, PascalCase for Swift/React components).
+- **DIR CREATION:** If the path includes new directories, assume they will be created by the system, but ensure your code imports reference them correctly.
