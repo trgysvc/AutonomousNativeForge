@@ -1,0 +1,186 @@
+aurapos/
+│
+├── apps/
+│   ├── pos/                          # POS ekranı — Next.js PWA
+│   │   ├── app/                      # App Router sayfaları
+│   │   │   ├── (auth)/
+│   │   │   │   └── pin/page.tsx      # PIN giriş ekranı
+│   │   │   ├── (pos)/
+│   │   │   │   ├── tables/page.tsx   # Masa planı
+│   │   │   │   ├── order/[id]/page.tsx
+│   │   │   │   └── payment/[id]/page.tsx
+│   │   │   └── layout.tsx
+│   │   ├── components/
+│   │   │   ├── tables/               # Masa planı bileşenleri
+│   │   │   ├── order/                # Sipariş bileşenleri
+│   │   │   ├── payment/              # Ödeme bileşenleri
+│   │   │   └── kds/                  # KDS bileşenleri (aynı app, farklı rota)
+│   │   ├── lib/
+│   │   │   ├── electric.ts           # ElectricSQL client başlatma
+│   │   │   ├── supabase.ts           # Supabase client (anon key)
+│   │   │   └── hardware.ts           # Hardware Bridge API çağrıları
+│   │   ├── public/
+│   │   │   └── sw.js                 # Service Worker (Workbox)
+│   │   ├── next.config.js            # PWA config (next-pwa)
+│   │   └── package.json
+│   │
+│   ├── dashboard/                    # İşletme yönetim paneli — Next.js
+│   │   ├── app/
+│   │   │   ├── (auth)/
+│   │   │   │   └── login/page.tsx
+│   │   │   ├── (panel)/
+│   │   │   │   ├── page.tsx          # Ana dashboard / AI insights
+│   │   │   │   ├── branches/
+│   │   │   │   ├── menu/
+│   │   │   │   ├── staff/
+│   │   │   │   ├── stock/
+│   │   │   │   ├── reports/
+│   │   │   │   ├── settings/
+│   │   │   │   └── payments/
+│   │   │   └── layout.tsx
+│   │   ├── components/
+│   │   │   ├── ui/                   # Ortak UI (shadcn/ui tabanlı)
+│   │   │   ├── charts/               # Recharts wrapper'ları
+│   │   │   └── ai/                   # AI insight kartları
+│   │   ├── lib/
+│   │   │   └── supabase.ts
+│   │   └── package.json
+│   │
+│   ├── kds/                          # Mutfak Ekranı — Next.js (TV'de açık kalır)
+│   │   ├── app/
+│   │   │   └── page.tsx              # Tek sayfa, WebSocket driven
+│   │   ├── components/
+│   │   │   ├── OrderCard.tsx
+│   │   │   ├── StationFilter.tsx     # Mutfak / Bar / Soğuk büfe
+│   │   │   └── TimerBadge.tsx
+│   │   └── package.json
+│   │
+│   ├── waiter-app/                   # Garson tablet — React Native
+│   │   ├── src/
+│   │   │   ├── screens/
+│   │   │   │   ├── TablesScreen.tsx
+│   │   │   │   ├── OrderScreen.tsx
+│   │   │   │   └── ProfileScreen.tsx
+│   │   │   ├── components/
+│   │   │   ├── lib/
+│   │   │   │   ├── electric.ts       # ElectricSQL React Native client
+│   │   │   │   └── api.ts            # Hardware bridge + backend calls
+│   │   │   └── navigation/
+│   │   ├── android/
+│   │   ├── ios/
+│   │   └── package.json
+│   │
+│   └── branch-server/                # Şube Node Sunucusu — offline kalp atışı
+│       ├── src/
+│       │   ├── index.ts              # Fastify server başlatma
+│       │   ├── electric.ts           # PGlite + ElectricSQL şube sync
+│       │   ├── routes/
+│       │   │   ├── orders.ts
+│       │   │   ├── payments.ts
+│       │   │   └── hardware.ts       # Hardware bridge endpoint'leri
+│       │   ├── hardware/             # Driver'ları burada çözer
+│       │   │   └── index.ts          # HARDWARE_DEVICE env → driver yükle
+│       │   └── sync/
+│       │       ├── engine.ts         # ElectricSQL sync yöneticisi
+│       │       └── conflict.ts       # Conflict resolution kuralları
+│       ├── data/
+│       │   └── branch.db             # Şube SQLite dosyası (PGlite)
+│       └── package.json
+│
+├── packages/                         # Tüm app'lerin paylaştığı kodlar
+│   │
+│   ├── shared-types/                 # TypeScript tip tanımları
+│   │   ├── src/
+│   │   │   ├── order.ts              # Order, OrderItem, OrderStatus
+│   │   │   ├── payment.ts            # Payment, PaymentMethod
+│   │   │   ├── menu.ts               # Category, Product, Portion, Option
+│   │   │   ├── staff.ts              # Staff, Role, Permission
+│   │   │   ├── hardware.ts           # ReceiptObject, ApprovalResponse vb.
+│   │   │   └── index.ts
+│   │   └── package.json
+│   │
+│   ├── hardware/                     # Tüm donanım driver'ları
+│   │   ├── payment-terminal/
+│   │   │   ├── mock-driver.ts
+│   │   │   ├── real-driver-ingenico-a910.ts
+│   │   │   ├── real-driver-ingenico-move5000.ts
+│   │   │   ├── real-driver-beko.ts
+│   │   │   └── index.ts              # HARDWARE_DEVICE → driver yükle
+│   │   ├── printer/
+│   │   │   ├── mock-driver.ts
+│   │   │   ├── real-driver-usb.ts
+│   │   │   ├── real-driver-network.ts
+│   │   │   └── index.ts
+│   │   ├── drawer/
+│   │   │   ├── mock-driver.ts
+│   │   │   ├── real-driver-escpos.ts  # Yazıcı üzerinden
+│   │   │   ├── real-driver-serial.ts  # Doğrudan seri port
+│   │   │   └── index.ts              # DRAWER_MODE → driver yükle
+│   │   ├── display/                  # Müşteri ekranı
+│   │   │   ├── mock-driver.ts
+│   │   │   ├── real-driver-serial.ts
+│   │   │   └── index.ts
+│   │   ├── barcode/
+│   │   │   ├── mock-driver.ts
+│   │   │   └── index.ts
+│   │   ├── scale/                    # Terazi
+│   │   │   ├── mock-driver.ts
+│   │   │   └── index.ts
+│   │   └── IHardwareDriver.ts        # Tüm driver'ların implement etmesi gereken interface
+│   │
+│   ├── ui/                           # Paylaşılan React bileşenleri
+│   │   ├── src/
+│   │   │   ├── Button.tsx
+│   │   │   ├── Table.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── InsightCard.tsx       # AI insight kartı
+│   │   │   └── index.ts
+│   │   └── package.json
+│   │
+│   ├── electric-config/              # ElectricSQL şube sync konfigürasyonu
+│   │   ├── src/
+│   │   │   ├── shapes.ts             # Hangi tablolar sync edilir
+│   │   │   └── client.ts             # PGlite + Electric client factory
+│   │   └── package.json
+│   │
+│   └── ai/                           # AI agent'ları
+│       ├── src/
+│       │   ├── orchestrator.ts       # DeepSeek R1 orchestrator
+│       │   ├── agents/
+│       │   │   ├── insight.ts        # Dashboard uyarı üretici
+│       │   │   ├── stock.ts          # Stok tahmin ajanı
+│       │   │   ├── tester.ts         # Hata tespit ajanı
+│       │   │   └── coder.ts          # Fix üretici (V2.0+)
+│       │   └── prompts/              # Her ajan için sistem promptları
+│       └── package.json
+│
+├── supabase/                         # Supabase proje dosyaları
+│   ├── migrations/                   # SQL migration'lar (sıralı)
+│   │   ├── 001_init_schema.sql
+│   │   ├── 002_rls_policies.sql
+│   │   ├── 003_functions.sql
+│   │   └── 004_seed_data.sql
+│   ├── functions/                    # Supabase Edge Functions
+│   │   ├── ai-insights/              # AI insight hesaplama
+│   │   └── efatura-webhook/          # e-Fatura callback
+│   └── config.toml
+│
+├── scripts/                          # Geliştirici yardımcı scriptler
+│   ├── test-all-mocks.ts             # Tüm mock driver'ları test et
+│   ├── seed-demo-data.ts             # Demo veri yükle
+│   ├── switch-hardware.ts            # HARDWARE_DEVICE değiştir + restart
+│   └── check-sync-status.ts          # ElectricSQL sync durumu kontrol
+│
+├── docker/
+│   ├── docker-compose.yml            # Tüm servisler
+│   ├── docker-compose.staging.yml
+│   └── Dockerfile.branch-server      # Şube sunucu image
+│
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                    # Test + lint (her PR)
+│       └── deploy.yml                # Staging/prod deploy
+│
+├── turbo.json                        # Turborepo pipeline config
+├── pnpm-workspace.yaml               # pnpm workspace tanımı
+└── package.json                      # Root package.json

@@ -15,10 +15,10 @@ function checkPolicy(code) {
     const forbidden = ['express', 'mongoose', 'axios', 'lodash', 'dotenv', 'nodemon'];
     const issues = [];
     
+    // Hallucination Protection Protocol (PRD Line 9-11 Logic)
     const lines = code.split('\n');
     lines.forEach((line, index) => {
         const trimmed = line.trim();
-        // Sadece aktif kod satırlarını kontrol et (require veya import)
         const isImportOrRequire = (trimmed.startsWith('import') || trimmed.includes('require(')) && 
                                    !trimmed.startsWith('//') && 
                                    !trimmed.startsWith('/*');
@@ -27,9 +27,14 @@ function checkPolicy(code) {
             forbidden.forEach(lib => {
                 const regex = new RegExp(`['"]${lib}['"]`, 'i');
                 if (regex.test(trimmed)) {
-                    issues.push(`🛡️ Policy İhlali: '${lib}' kullanımı projenin native felsefesine aykırıdır (Line: ${index + 1})`);
+                    issues.push(`🛡️ PROTOCOL VIOLATION: '${lib}' kullanımı PRD-Satır 4.5 uyarınca yasaktır (L:${index + 1})`);
                 }
             });
+
+            // Specific check for Express which is strictly forbidden in AuraPOS (Fastify is used)
+            if (trimmed.toLowerCase().includes('express')) {
+                issues.push(`⚠️ PRD İHLALİ: Express yerine Fastify kullanmalısın (PRD v4.1) (L:${index + 1})`);
+            }
         }
     });
 

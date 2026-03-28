@@ -45,7 +45,27 @@ async function dispatchNextTasks(projectId) {
     const manifest = getManifest(projectId);
     const pendingTasks = manifest.tasks.filter(t => t.status === 'PENDING');
     
+    // Sprint Gate: Get the hierarchy of current tasks
+    const allTaskIds = manifest.tasks.map(t => t.task_id);
+    const sprints = [...new Set(allTaskIds.map(id => id.split('-')[0]))].sort(); // S0, S1, S2...
+
     for (const task of pendingTasks) {
+        const currentSprint = task.task_id.split('-')[0];
+        const sprintIndex = sprints.indexOf(currentSprint);
+
+        // Eğer önceki bir sprint'te hala tamamlanmamış (DONE olmayan) görev varsa, bu görevi başlatma
+        if (sprintIndex > 0) {
+            const previousSprints = sprints.slice(0, sprintIndex);
+            const unfinishedInPrevious = manifest.tasks.filter(t => 
+                previousSprints.includes(t.task_id.split('-')[0]) && t.status !== 'DONE'
+            );
+
+            if (unfinishedInPrevious.length > 0) {
+                // log(`⏳ [${projectId}] Sprint Kilidi: ${currentSprint} başlatılamaz. Önceki sprintler bitmeli.`);
+                continue; 
+            }
+        }
+
         const dependenciesMet = !task.depends_on || task.depends_on.every(depId => {
             const dep = manifest.tasks.find(t => t.task_id === depId);
             return dep && dep.status === 'DONE';
@@ -57,7 +77,7 @@ async function dispatchNextTasks(projectId) {
             sendMessage('CODER', 'WRITE_CODE', { 
                 ...task, 
                 project_id: projectId, 
-                project_manifest: manifest // Coder'a tüm resmi ver
+                project_manifest: manifest 
             });
         }
     }
@@ -163,8 +183,12 @@ async function discoverNewProjects() {
                     const content = fs.readFileSync(fullPath, 'utf-8');
                     
                     const planPrompt = `Sen bir Baş Mimarsın. Teknik dökümanı atomik görevlere böl. 
-                    BAĞIMLILIKLARI BELİRLE (depends_on listesi oluştur).
-                    Dosya yollarını MUTLAK SURETLE proje root'una göre ver (örn: src/components/...).
+                    
+                    KRİTİK KURALLAR (MANDATORY):
+                    1. ID MAPPING: task_id dökümandaki başlık kodlarını (S0-1, S0-1.1, S2-4) doğrudan anahtar olarak kullanmalıdır.
+                    2. MUTLAK YOL: file_path dökümanda belirtilen monorepo yapısına (apps/pos/src/index.ts, packages/shared/...) uygun olmalı.
+                    3. PATH VALIDATION: Her file_path mutlaka dosya uzantısıyla (.js, .ts, .tsx, .json, .sql, .md, .yml, .sh) bitmelidir. DIZIN YOLU YASAKTIR.
+                    4. BAĞIMLILIKLAR: depends_on listesini tam döküman hiyerarşisine göre oluştur.
                     
                     Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
                     
@@ -174,7 +198,19 @@ async function discoverNewProjects() {
                         if (!match) throw new Error("JSON üretilemedi.");
                         
                         const tasks = JSON.parse(match[0]);
-                        tasks.forEach(t => handleMessage({ type: 'TASK_READY', project_id, ...t }));
+                        const validTasks = [];
+
+                        tasks.forEach(t => {
+                            // Path Validation (Strict Fail)
+                            const isValidPath = /\.(js|ts|tsx|json|sql|md|yml|sh)$/.test(t.file_path);
+                            if (!isValidPath) {
+                                log(`🛡️ [STRICT FAIL] [${project_id}] ${t.task_id} için geçersiz yol (Dizine yazılamaz): ${t.file_path}`);
+                                return;
+                            }
+                            validTasks.push(t);
+                        });
+
+                        validTasks.forEach(t => handleMessage({ type: 'TASK_READY', project_id, ...t }));
 
                         fs.renameSync(fullPath, path.join(projectPath, `_${file}`));
                         log(`✅ [${project_id}] Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);

@@ -17,6 +17,8 @@ function getProjectTree(projectPath) {
 }
 
 async function processTask(task) {
+    // Monorepo Support: Architect gives the full path from root (e.g., apps/pos/src/index.ts)
+    // We use the project directory as the base authority.
     const projectPath = path.join(SRC, task.project_id);
     if (!fs.existsSync(projectPath)) fs.mkdirSync(projectPath, { recursive: true });
 
