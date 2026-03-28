@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { ask, start, log, sendMessage, getAuthorizedPath, safeWriteFile } = require('./base-agent');
-
+const PROMPT_MODE = 'MINIMAL'; // Forge V3 Standard
 const SRC = path.join(__dirname, '..', 'src');
 
 /**
@@ -16,103 +16,60 @@ function getProjectTree(projectPath) {
     } catch (e) { return "Dizin okunamadı."; }
 }
 
-async function processTask(task) {
-    // Monorepo Support: Architect gives the full path from root (e.g., apps/pos/src/index.ts)
-    // We use the project directory as the base authority.
-    const projectPath = path.join(SRC, task.project_id);
+async function handleMessage(msg) {
+    const { type, project_id, task_id, file_path, title, desc, steer_instruction, project_manifest } = msg;
+    const projectPath = path.join(SRC, project_id);
     if (!fs.existsSync(projectPath)) fs.mkdirSync(projectPath, { recursive: true });
 
+    // Dil algılama
+    const ext = path.extname(file_path || (task_id + '.ts')).toLowerCase();
+    const langMap = { '.js': 'Node.js', '.ts': 'TypeScript', '.tsx': 'React/Next.js (TypeScript)', '.sql': 'PostgreSQL' };
+    const targetLang = langMap[ext] || 'Code';
+
+    const projectTree = getProjectTree(projectPath);
     const configPath = path.join(projectPath, 'config.json');
-    
-    // Proje bazlı anahtarları oku (Güvenlik için tokenları temizle)
     let configStr = '{}';
     if (fs.existsSync(configPath)) {
         try {
             const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
             if (config.github) config.github.token = 'REDACTED';
-            if (config.supabase) config.supabase.key = 'REDACTED';
             configStr = JSON.stringify(config, null, 2);
-        } catch (e) { log(`⚠️ Config okuma hatası: ${e.message}`); }
+        } catch (e) {}
     }
 
-    // Dil algılama
-    const ext = path.extname(task.file_path || (task.task_id + '.js')).toLowerCase();
-    const langMap = {
-        '.js': 'Node.js',
-        '.ts': 'TypeScript',
-        '.tsx': 'React/Next.js (TypeScript)',
-        '.swift': 'Swift (Apple Silicon Optimized)',
-        '.py': 'Python',
-        '.sql': 'PostgreSQL/Supabase SQL',
-        '.html': 'HTML5',
-        '.css': 'Tailwind CSS / CSS3'
-    };
-    const targetLang = langMap[ext] || 'Source Code';
+    let prompt = `Sen bir Kod Yazma Uzmanısın (Forge V3 - Mode: ${PROMPT_MODE}). 
+    GÖREV: ${title}
+    HEDEF DOSYA: ${file_path}
+    DİL: ${targetLang}
+    
+    KRİTİK TALİMAT: ${desc}
+    
+    BAĞLAM:
+    - Çalışma Dizini: ${projectPath}
+    - Proje Ağacı: ${projectTree}
+    - İzinli Kütüphaneler: Sadece PRD'de belirtilen en güncel sürümleri kullan.
+    
+    Kural 1: Architectural kararlar verme, sadece dökümandaki teknik spesifikasyonu uygula.
+    Kural 2: Markdown bloğu kullanmadan SADECE ${targetLang} kodu döndür.`;
 
-    const projectTree = getProjectTree(projectPath);
-
-    // Dökümantasyon Bağlamı
-    const docContextSection = task.doc_context ? `
-    REFERANS DÖKÜMANTASYON STANDARTLARI:
-    ${task.doc_context}
-    Lütfen yukarıdaki resmi dökümanlardaki en güncel pattern ve özellikleri kullanarak kod üret.` : "";
-
-    const contextHeader = `
-    CURRENT WORKING DIRECTORY: ${projectPath}
-    PROJECT STRUCTURE:
-    ${projectTree}
-    `;
-
-    let prompt = "";
-    if (task.type === 'FIX_CODE') {
-        log(`🔧 Hata Düzeltiliyor (${targetLang}): [${task.project_id}] ${task.task_id}`);
-        const currentCode = fs.readFileSync(task.file_path, 'utf8');
-        prompt = `
-        ${contextHeader}
-        PROJE: ${task.project_id}
-        DİL: ${targetLang}
-        KİMLİK VERİLERİ: ${configStr}
-        DOSYA YOLU: ${task.file_path}
-        ${docContextSection}
-        
-        MEVCUT HATALI KOD:
-        ${currentCode}
-        
-        HATA RAPORU:
-        ${task.description}
-        
-        KRİTİK KURAL (EISDIR Engelleme): Hedef yol bir dizin değil, her zaman yeni bir dosya ismi olmalıdır.
-        Lütfen hatayı düzelt ve sadece güncel ${targetLang} kodunu döndür. Markdown bloğu kullanma.`;
+    if (type === 'STEER_CODE' || msg.type === 'FIX_CODE') {
+        log(`🧭 STEERING: [${project_id}] ${task_id} yönlendirme ile düzeltiliyor...`);
+        const currentCode = fs.existsSync(file_path) ? fs.readFileSync(file_path, 'utf8') : "";
+        prompt += `\n\nMEVCUT KOD:\n${currentCode}\n\nYÖNLENDİRME (STEER): ${steer_instruction || msg.description}`;
     } else {
-        log(`✍️ Kod Yazılıyor (${targetLang}): [${task.project_id}] ${task.title}`);
-        prompt = `
-        ${contextHeader}
-        PROJE: ${task.project_id}
-        DİL: ${targetLang}
-        KİMLİK VERİLERİ (Supabase/GitHub): ${configStr}
-        GÖREV: ${task.desc}
-        BAŞLIK: ${task.title}
-        ${docContextSection}
-        
-        KRİTİK KURAL (EISDIR Engelleme): Hedef yolun bir dizin (directory) değil, her zaman yeni bir dosya ismi (filename) olduğundan emin ol. Eğer bir dizin zaten mevcutsa (örn: src/), içine yeni bir dosya üret (örn: src/index.js).
-        
-        Lütfen sadece ${targetLang} kodunu döndür. Markdown bloğu kullanma.`;
+        log(`✍️ CODER: [${project_id}] ${task_id} yazılıyor...`);
     }
 
     try {
         const code = await ask('CODER', prompt, __dirname);
+        const filePath = getAuthorizedPath(projectPath, file_path || `${task_id}${ext}`);
         
-        // Path Authority & EISDIR Prevention
-        const relativePath = task.file_path || `${task.task_id}${ext}`;
-        const filePath = getAuthorizedPath(projectPath, relativePath);
-
         safeWriteFile(filePath, code);
-        
-        sendMessage('ARCHITECT', 'CODE_FINISHED', { ...task, file_path: filePath });
+        sendMessage('ARCHITECT', 'CODE_FINISHED', { ...msg, file_path: filePath });
     } catch (err) {
         log(`❌ CODER HATASI: ${err.message}`);
-        sendMessage('ARCHITECT', 'BUG_REPORT', { ...task, description: `CODER HATASI: ${err.message}` });
+        sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `CODER HATASI: ${err.message}` });
     }
 }
 
-start('CODER', processTask);
+start('CODER', handleMessage);

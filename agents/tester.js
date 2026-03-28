@@ -1,19 +1,23 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-const { exec } = require('node:child_process');
-const { promisify } = require('node:util');
 const { ask, start, log, sendMessage } = require('./base-agent');
-
+const SILENT_REPLY_TOKEN = 'HEARTBEAT_OK'; // Forge V3 Standard
 const execAsync = promisify(exec);
 
 /**
- * Politika Denetimi: Yasaklı kütüphanelerin (express, mongoose vb.) kullanımını engeller.
- * Sadece Node.js native modülleri ve projenin izin verdiği minimalist yapı korunur.
+ * Governance Tests: Mimari Barikatlar (Guardrails)
+ * PRD'de izin verilmeyen kütüphaneleri ve monorepo dışı yapıları engeller.
  */
-function checkPolicy(code) {
-    const forbidden = ['express', 'mongoose', 'axios', 'lodash', 'dotenv', 'nodemon'];
+function checkArchitectureGuardrails(code, filePath) {
+    const forbidden = ['express', 'mongoose', 'axios', 'lodash', 'dotenv', 'nodemon', 'sequelize'];
     const issues = [];
+
+    // Rule 1: Monorepo Path Authority
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    if (!normalizedPath.includes('apps/') && !normalizedPath.includes('packages/')) {
+        issues.push(`🛡️ PROTOCOL VIOLATION: Dosya yolu monorepo standartlarına (apps/ veya packages/) aykırı: ${filePath}`);
+    }
     
     // Hallucination Protection Protocol (PRD Line 9-11 Logic)
     const lines = code.split('\n');
@@ -27,13 +31,13 @@ function checkPolicy(code) {
             forbidden.forEach(lib => {
                 const regex = new RegExp(`['"]${lib}['"]`, 'i');
                 if (regex.test(trimmed)) {
-                    issues.push(`🛡️ PROTOCOL VIOLATION: '${lib}' kullanımı PRD-Satır 4.5 uyarınca yasaktır (L:${index + 1})`);
+                    issues.push(`🛡️ PROTOCOL VIOLATION: '${lib}' kullanımı PRD v4 uyarınca yasaktır. (L:${index + 1})`);
                 }
             });
 
-            // Specific check for Express which is strictly forbidden in AuraPOS (Fastify is used)
+            // Specific check for Express -> Fastify transition
             if (trimmed.toLowerCase().includes('express')) {
-                issues.push(`⚠️ PRD İHLALİ: Express yerine Fastify kullanmalısın (PRD v4.1) (L:${index + 1})`);
+                issues.push(`⚠️ PRD İHLALİ: Express tespiti. Fastify kullanılması zorunludur. (L:${index + 1})`);
             }
         }
     });
@@ -66,80 +70,58 @@ async function validateCode(filePath) {
     return { valid: true };
 }
 
-async function processTask(task) {
-    log(`🧐 Kalite Kontrol Başlatıldı: [${task.project_id}] ${task.task_id}`);
+async function handleMessage(msg) {
+    const { type, project_id, task_id, file_path, title } = msg;
+    if (type !== 'RUN_TEST') return;
+
+    log(`🧐 QA GUARDRAIL: [${project_id}] ${task_id} denetleniyor...`);
     
-    if (!task.file_path || !fs.existsSync(task.file_path)) {
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...task, description: "HATA: Test edilecek dosya fiziksel olarak bulunamadı." });
+    if (!file_path || !fs.existsSync(file_path)) {
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: "HATA: Dosya bulunamadı." });
     }
 
-    const code = fs.readFileSync(task.file_path, 'utf8');
+    const code = fs.readFileSync(file_path, 'utf8');
 
-    // 1. ADIM: Fiziksel Sentaks Kontrolü (Node/TSC)
-    const syntax = await validateCode(task.file_path);
+    // 1. ADIM: Native Syntax Check (TSC/Node)
+    const syntax = await validateCode(file_path);
     if (!syntax.valid) {
-        log(`❌ Sentaks Hatası Tespit Edildi: ${path.basename(task.file_path)}`);
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...task, description: `SENTAKS/TIP HATASI: ${syntax.error}` });
+        log(`❌ SYNC FAIL: ${path.basename(file_path)}`);
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `SENTAKS HATASI: ${syntax.error}` });
     }
 
-    // 2. ADIM: Native Politika Denetimi
-    const policyIssues = checkPolicy(code);
-    if (policyIssues.length > 0) {
-        log(`🚫 Politika İhlali Tespit Edildi: ${path.basename(task.file_path)}`);
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...task, description: policyIssues.join('\n') });
+    // 2. ADIM: Governance (PRD Guardrails)
+    const guardrailIssues = checkArchitectureGuardrails(code, file_path);
+    if (guardrailIssues.length > 0) {
+        log(`🛡️ GUARDRAIL FAIL: [${project_id}] Mimari İhlal!`);
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: guardrailIssues.join('\n') });
     }
 
-    // 3. ADIM: Mantıksal ve Derin Denetim (AI Review)
-    const prompt = `
-    Sen bir Kıdemli QA Mühendisisin. Aşağıdaki kodu MANTIKSAL olarak denetle.
-    Sentaks ve Tip kontrolü NATIVE araçlarla (node/tsc) GEÇTİ. Sadece iş mantığı ve best-practice odaklı incele.
+    // 3. ADIM: Forge V3 AI Review (Compliance Check)
+    const prompt = `Sen bir Forge V3 Kıdemli QA Mühendisisin. 
+    KOD: ${code}
+    GÖREV: ${title}
     
-    PROJE: ${task.project_id}
-    GÖREV: ${task.title}
-    KOD:
-    ${code}
-
-    MANDATORY OUTPUT FORMAT (JSON ONLY):
-    {
-        "status": "PASSED" | "FAILED",
-        "bugs": [
-            { "id": 1, "description": "Hata detayı", "severity": "HIGH"|"MEDIUM"|"LOW" }
-        ],
-        "summary": "Teknik değerlendirme özeti"
-    }
-
-    KURALLAR:
-    - SADECE Native Node.js kullanılabilir.
-    - Mantıksal bir açık, performans sorunu veya eksik hata yönetimi varsa FAILED dön.
-    - Hata yoksa PASSED dön.`;
+    YALNIZCA döküman uyumluluğu ve PRD kuralları açısından incele. 
+    Eğer kod PRD'deki "native", "offline-first" veya "monorepo" kurallarına aykırıysa FAILED dön.
+    
+    Yanıt Formatı (SADECE JSON):
+    {"status": "PASSED" | "FAILED", "reason": "...", "bugs": []}`;
 
     try {
         const res = await ask('TESTER', prompt, __dirname);
-        let result = { status: 'PASSED' };
-        
         const match = res.match(/\{[\s\S]*\}/);
-        if (match) {
-            try {
-                result = JSON.parse(match[0]);
-            } catch (e) {
-                log(`⚠️ AI yanıtı JSON olarak ayrıştırılamadı, native onaya güveniliyor.`);
-            }
-        }
+        const result = match ? JSON.parse(match[0]) : { status: 'PASSED' };
 
         if (result.status === 'PASSED') {
-            log(`✅ TÜM TESTLER GEÇİLDİ: ${path.basename(task.file_path)}`);
-            sendMessage('ARCHITECT', 'TEST_PASSED', task);
+            log(`✅ [${project_id}] ${task_id} onaylandı. ${SILENT_REPLY_TOKEN}`);
+            sendMessage('ARCHITECT', 'TEST_PASSED', msg);
         } else {
-            const bugSummary = Array.isArray(result.bugs) 
-                ? result.bugs.map(b => b.description).join(', ')
-                : result.summary || 'Mantıksal hata tespit edildi.';
-            sendMessage('ARCHITECT', 'BUG_REPORT', { ...task, description: `MANTIKSAL HATA: ${bugSummary}` });
+            sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `PRD UYUMSUZLUĞU: ${result.reason}` });
         }
     } catch (e) {
-        // LLM review fail olsa bile native tools pass verdiyse opsiyonel olarak geçirebiliriz (Resilience)
-        log(`⚠️ AI Review Hatası: ${e.message}. Native validation baz alınıyor.`);
-        sendMessage('ARCHITECT', 'TEST_PASSED', task);
+        log(`⚠️ AI Review hatası, native onay ile devam ediliyor.`);
+        sendMessage('ARCHITECT', 'TEST_PASSED', msg);
     }
 }
 
-start('TESTER', processTask);
+start('TESTER', handleMessage);

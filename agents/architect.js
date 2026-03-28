@@ -7,6 +7,7 @@ const MAX_RETRIES = 3;
 const retryCounts = {};
 
 let isDiscovering = false;
+const PROMPT_MODE = 'FULL'; // Forge V3 Standard
 
 /**
  * Manifest Management: Tracks project state and task dependencies
@@ -135,25 +136,25 @@ async function handleMessage(msg) {
             retryCounts[task_id] = (retryCounts[task_id] || 0) + 1;
             
             if (retryCounts[task_id] > MAX_RETRIES) {
-                log(`${prefix} ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.`);
+                log(`${prefix} ⛔ MAX RETRY (${MAX_RETRIES}) AŞILDI. Re-planning başlatılıyor.`);
                 updateTaskStatus(project_id, task_id, 'FAILED');
                 
-                // RE-PLANNING: Architect'e görevi revize etmesi için mesaj gönder
-                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}
-                HATA: ${description}
-                3 kez denendi ama düzelmedi. Lütfen bu görevi analiz et ve yapılması gereken mimari değişikliği veya yeni bir yaklaşımı açıkla. 
-                Gerekirse görevi daha küçük parçalara böl veya file_path değiştir.`;
-                
+                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nHATA: ${description}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revize et.`;
                 const rca = await ask('ARCHITECT', planPrompt, __dirname);
-                log(`${prefix} 📋 Re-planning Yanıtı: ${rca}`);
-                
-                // Eskalasyon raporu
                 const rcaPath = path.join(__dirname, '..', 'queue', 'error', `${task_id}_RCA.md`);
                 fs.writeFileSync(rcaPath, `# RE-PLANNING REPORT: ${task_id}\n\n${rca}`);
             } else {
-                log(`${prefix} 🔄 SELF-HEALING: Hata düzeltme isteği (${retryCounts[task_id]}/${MAX_RETRIES})`);
+                // Forge V3: Steering Protocol
+                log(`${prefix} 🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (${retryCounts[task_id]}/${MAX_RETRIES})`);
                 updateTaskStatus(project_id, task_id, 'FIXING');
-                sendMessage('CODER', 'FIX_CODE', msg);
+                
+                const steerPrompt = `Kritik Hata Analizi: ${description}\n\nBu hata PRD veya Sprint kurallarına aykırı mı? Eğer öyleyse Coder'a şu yönlendirmeyi yap: "Dökümandaki X kuralına uyarak Y dosyasını Z şeklinde düzelt." Yanıtını kısa ve öz bir STEER mesajı olarak ver.`;
+                const steerMessage = await ask('ARCHITECT', steerPrompt, __dirname);
+                
+                sendMessage('CODER', 'STEER_CODE', { 
+                    ...msg, 
+                    steer_instruction: steerMessage 
+                });
             }
             break;
     }
@@ -173,51 +174,52 @@ async function discoverNewProjects() {
         const projects = fs.readdirSync(refDir);
         for (const project_id of projects) {
             const projectPath = path.join(refDir, project_id);
+            if (!fs.lstatSync(projectPath).isDirectory()) continue;
+
+            const files = fs.readdirSync(projectPath).filter(f => f.endsWith('.md') && !f.startsWith('_'));
+            if (files.length === 0) continue;
+
+            log(`🔍 [${project_id}] Multi-Doc Synthesis başlatılıyor (${files.length} dosya)...`);
             
-            if (fs.lstatSync(projectPath).isDirectory()) {
-                const files = fs.readdirSync(projectPath).filter(f => f.endsWith('.md') && !f.startsWith('_'));
+            // Tüm dökümanları tek bir bağlamda birleştir
+            let combinedContent = "";
+            files.forEach(file => {
+                combinedContent += `\n\n--- FILE: ${file} ---\n\n` + fs.readFileSync(path.join(projectPath, file), 'utf-8');
+            });
+
+            const planPrompt = `Sen bir Baş Mimarsın (Forge V3 - Mode: ${PROMPT_MODE}). 
+            Aşağıdaki bağlantılı teknik dökümanları (PRD, Sprints, Ref) analiz et ve EKSİKSİZ bir iş listesi çıkar.
+
+            KRİTİK KURALLAR:
+            1. ID MAPPING: task_id dökümandaki başlık kodlarını (S0-1, S0-1.1 vb.) KESİN anahtar olarak kullan.
+            2. MONOREPO AUTHORITY: file_path 'apps/' veya 'packages/' ile başlamak zorundadır.
+            3. ATOMIC FLOW: Her kod yazma görevi için bir 'read_skill' adımı zorunludur. Coder önce dökümanı okumalı.
+            4. STRICT FAIL: Dosya uzantısı olmayan (.ts, .js vb.) her yol REDDEDİLECEKTİR.
+            
+            TEKNİK BAĞLAM: ${combinedContent}
+
+            Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
+
+            try {
+                const res = await ask('ARCHITECT', planPrompt, __dirname);
+                const match = res.match(/\[[\s\S]*\]/);
+                if (!match) throw new Error("JSON üretilemedi.");
                 
-                for (const file of files) {
-                    log(`📄 Yeni döküman tespit edildi: [${project_id}] ${file}`);
-                    const fullPath = path.join(projectPath, file);
-                    const content = fs.readFileSync(fullPath, 'utf-8');
-                    
-                    const planPrompt = `Sen bir Baş Mimarsın. Teknik dökümanı atomik görevlere böl. 
-                    
-                    KRİTİK KURALLAR (MANDATORY):
-                    1. ID MAPPING: task_id dökümandaki başlık kodlarını (S0-1, S0-1.1, S2-4) doğrudan anahtar olarak kullanmalıdır.
-                    2. MUTLAK YOL: file_path dökümanda belirtilen monorepo yapısına (apps/pos/src/index.ts, packages/shared/...) uygun olmalı.
-                    3. PATH VALIDATION: Her file_path mutlaka dosya uzantısıyla (.js, .ts, .tsx, .json, .sql, .md, .yml, .sh) bitmelidir. DIZIN YOLU YASAKTIR.
-                    4. BAĞIMLILIKLAR: depends_on listesini tam döküman hiyerarşisine göre oluştur.
-                    
-                    Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
-                    
-                    try {
-                        const res = await ask('ARCHITECT', planPrompt, __dirname);
-                        const match = res.match(/\[[\s\S]*\]/);
-                        if (!match) throw new Error("JSON üretilemedi.");
-                        
-                        const tasks = JSON.parse(match[0]);
-                        const validTasks = [];
-
-                        tasks.forEach(t => {
-                            // Path Validation (Strict Fail)
-                            const isValidPath = /\.(js|ts|tsx|json|sql|md|yml|sh)$/.test(t.file_path);
-                            if (!isValidPath) {
-                                log(`🛡️ [STRICT FAIL] [${project_id}] ${t.task_id} için geçersiz yol (Dizine yazılamaz): ${t.file_path}`);
-                                return;
-                            }
-                            validTasks.push(t);
-                        });
-
-                        validTasks.forEach(t => handleMessage({ type: 'TASK_READY', project_id, ...t }));
-
-                        fs.renameSync(fullPath, path.join(projectPath, `_${file}`));
-                        log(`✅ [${project_id}] Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);
-                    } catch (e) {
-                        log(`❌ [${project_id}] Planlama Hatası: ${e.message}`);
+                const tasks = JSON.parse(match[0]);
+                const manifest = getManifest(project_id);
+                
+                tasks.forEach(t => {
+                    const isValidPath = /\.(js|ts|tsx|json|sql|md|yml|sh)$/.test(t.file_path);
+                    if (isValidPath && !manifest.tasks.find(mt => mt.task_id === t.task_id)) {
+                        handleMessage({ type: 'TASK_READY', project_id, ...t });
                     }
-                }
+                });
+
+                // İşlenen dosyaları mühürle
+                files.forEach(file => fs.renameSync(path.join(projectPath, file), path.join(projectPath, `_${file}`)));
+                log(`✅ [${project_id}] Multi-Doc Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);
+            } catch (e) {
+                log(`❌ [${project_id}] Planlama Hatası: ${e.message}`);
             }
         }
     } finally {
@@ -226,6 +228,16 @@ async function discoverNewProjects() {
 }
 
 setInterval(discoverNewProjects, 60000);
-discoverNewProjects();
+
+// CLI Support: node agents/architect.js [projectId]
+const cliProjectId = process.argv[2];
+if (cliProjectId) {
+    log(`🚀 [CLI] Proje doğrudan başlatılıyor: ${cliProjectId}`);
+    // discoverNewProjects parametre alacak şekilde geliştirilebilir 
+    // veya doğrudan manifest üzerinden akış tetiklenebilir.
+    dispatchNextTasks(cliProjectId);
+} else {
+    discoverNewProjects();
+}
 
 start('ARCHITECT', handleMessage).catch(e => log(`KRİTİK HATA: ${e.message}`));

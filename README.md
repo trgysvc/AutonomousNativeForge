@@ -23,10 +23,10 @@ Runs on local hardware: **NVIDIA GPU (Blackwell)**, **Apple Silicon (Unified Mem
 
 | Agent | Role | Responsibility |
 |---|---|---|
-| 🎯 **PM Agent** | The Composer | Breaks user requests into atomic technical tasks |
-| 🏗️ **Architect Agent** | The Sound Engineer | Designs file structure, selects native modules |
-| ⚙️ **Coder Agent** | The Performer | Writes code — native modules only, zero `npm install` |
-| 🔍 **Reviewer Agent** | The Critic | Audits for security, performance, and dependency violations |
+| 🏗️ **Architect** | Generalissimo | Multi-Doc Synthesis & Steering Protocol |
+| ⚙️ **Coder** | Specialist | Atomic Task Implementation (Native ONLY) |
+| 🛡️ **Tester** | Guardrail | Architecture & PRD Governance Auditor |
+| 📚 **Docs** | Archivist | Autonomous DEVLOG & Knowledge Recording |
 
 ---
 
@@ -53,17 +53,11 @@ Every single one of these failures is **documented, timestamped, and publicly av
                         │
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│              PM AGENT (Decomposition)               │
-│         Breaks request into atomic JSON tasks       │
-└───────────────────────┬─────────────────────────────┘
-                        │ EventEmitter Bus
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│           ARCHITECT AGENT (System Design)           │
+│              ARCHITECT (Doc Synthesis)              │
 │    Scans docs/reference/ → DeepSeek-R1 reasoning    │
 │         Produces file structure + task plan         │
-└───────────────────────┬─────────────────────────────┘
-                        │ queue/inbox/[project_id]/
+└─────────────────────────────────────────────────────┘
+                        │ EventEmitter Bus
                         ▼
 ┌─────────────────────────────────────────────────────┐
 │             CODER AGENT (Production)                │
@@ -74,13 +68,27 @@ Every single one of these failures is **documented, timestamped, and publicly av
               ┌─────────┴─────────┐
               │                   │
               ▼                   ▼
-        TEST PASSED           TEST FAILED
+        TEST PASSED           TEST FAILED (Steering)
               │                   │
               ▼                   ▼
-    GitHub Auto-Push        Self-Healing Loop
-    (Native HTTPS)          (Max 3 retries →
-                             ERROR_REPORT)
+    GitHub Auto-Push        ARCHITECT STEERING
+    (Native HTTPS)          (Self-Healing Loop)
 ```
+
+---
+
+## ⚒️ Universal Forge: Project Discovery
+
+ANF V3 operates as a **document-driven** factory. It doesn't wait for manual tasks; it discovers them from your technical specifications.
+
+### How to Build Any Project:
+1. **Drop your PRD/Spec**: Create a folder in `docs/reference/[YOUR_PROJECT_ID]`
+2. **Add .md files**: Put your PRDs, Sprint Tasks, or Technical References there.
+3. **Ignite**: Run `node agents/architect.js [YOUR_PROJECT_ID]` or start the full bootstrap.
+
+The **Architect** will synthesize all documents, build a dynamic `manifest.json`, and coordinate with the **Coder** and **Tester** to realize the architecture — autonomously.
+
+---
 
 **Communication:** Native `EventEmitter` — no message brokers, no Redis, no Kafka.  
 **State Management:** In-memory `MemoryState` object per session — no external databases.  
@@ -178,13 +186,13 @@ The most reliable way to get ANF running on a Blackwell system is our automated 
 git clone https://github.com/trgysvc/AutonomousNativeForge.git
 cd AutonomousNativeForge
 
-# 2. Run the ultimate setup script (v3.9.3)
-# This handles: Dependencies -> cu130 Torch -> vLLM Source Build (ABI Fix) -> systemd
-./setup_script.sh
+# 2. Run the Blackwell setup script
+# This handles: GPU Dependencies -> CUDA -> vLLM Environment
+./GB10_installation_script.sh
 
 # 3. Configure your projects
-cp config/vault.example.json config/vault.json
-# Edit vault.json with your GitHub tokens and project info
+# Drop your PRD/Spec files into:
+docs/reference/[PROJE_ID]/
 
 # 4. Start the factory
 node agents/bootstrap.js

@@ -1,0 +1,62 @@
+Autonomous Native Forge — vLLM & DeepSeek-R1 Kurulum Protokolü
+Bu döküman, NVIDIA Blackwell, Apple Silicon (Unified Memory) ve NPU tabanlı otonom çıkarım sistemlerinin sorunsuz çalıştırılması için doğrulanmış adımları içerir.
+1. Çevresel Değişkenler ve CUDA Yapılandırması
+Blackwell GPU ve CUDA 13.0 uyumu için sistem yolları aşağıdaki gibi mühürlenmelidir:
+Bash
+export CUDA_HOME=/usr/local/cuda-13.0
+export LD_LIBRARY_PATH=$CUDA_HOME/targets/sbsa-linux/lib:$CUDA_HOME/lib64:/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
+export PATH=$CUDA_HOME/bin:$PATH
+
+
+2. PyTorch CUDA 13.0 Mühürlemesi
+Sistemdeki varsayılan +cpu sürümü silinmeli ve Blackwell (sm_100) uyumlu CUDA 13.0 binary'leri kurulmalıdır:
+Bash
+pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 --break-system-packages
+
+
+3. vLLM Kaynak Koddan Derleme (Build from Source)
+pyproject.toml üzerindeki metadata hatalarını (license-files ve format) bypass etmek ve derlemeyi Blackwell'e özel mühürlemek için:
+Metadata Yaması:
+Bash
+sed -i 's/license = "Apache-2.0"/license = {text = "Apache-2.0"}/g' pyproject.toml
+sed -i '/license-files =/d' pyproject.toml
+
+
+Derleme Komutu:
+OOM (Out of Memory) hatalarını önlemek için MAX_JOBS sınırlanmalıdır:
+Bash
+export TORCH_CUDA_ARCH_LIST="12.1"
+export VLLM_TARGET_DEVICE="cuda"
+MAX_JOBS=8 python3 setup.py build_ext --inplace
+
+
+4. Model Seçimi ve VRAM Yönetimi
+Blackwell GB10 (120GB VRAM) için model-kapasite matematiği:
+* 70B (bfloat16): 132GB > 120GB (Yetersiz - OOM Killer).
+* 32B (bfloat16): ~64GB (İdeal - Yüksek KV Cache Alanı).
+Model İndirme (hf-cli):
+Bash
+huggingface-cli download deepseek-ai/DeepSeek-R1-Distill-Qwen-32B \
+  --local-dir /home/nvidia/.cache/models/deepseek-r1-32b
+
+
+5. vLLM Servis Başlatma (Deployment)
+OS süreçlerine (Gnome, Xorg vb.) yer bırakmak için gpu-memory-utilization %85-90 aralığında tutulmalıdır:
+# Kararlı (V0) motoru kullanmak için bu değişkeni mühürle
+export VLLM_USE_V1=0
+—
+CUDA_LAUNCH_BLOCKING=1 python3 -m vllm.entrypoints.openai.api_server \
+  --model "/home/nvidia/.cache/models/deepseek-r1-32b" \
+  --tensor-parallel-size 1 \
+  --max-model-len 32768 \
+  --dtype bfloat16 \
+  --port 8000 \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.85 \
+  --enforce-eager
+
+
+
+
+6. v1 Proje Anayasası (Teknik Standartlar)
+Ajanların (Project-A, Project-B, Project-C) uymak zorunda olduğu kurallar:
