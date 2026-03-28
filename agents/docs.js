@@ -37,4 +37,43 @@ async function processTask(task) {
     sendMessage('ARCHITECT', 'DOCS_COMPLETE', task);
 }
 
-start('DOCS', processTask);
+async function updateSystemState(msg) {
+    const { project_id, project_manifest } = msg;
+    log(`📊 Sistem Durumu Güncelleniyor: [${project_id}]`);
+
+    const manifest = project_manifest || { tasks: [] };
+    const doneTasks = manifest.tasks.filter(t => t.status === 'DONE');
+    const technicalDebt = manifest.tasks.filter(t => t.status === 'DONE' && (t.desc.toLowerCase().includes('geçici') || t.desc.toLowerCase().includes('temp') || t.desc.toLowerCase().includes('workaround')));
+
+    const prompt = `
+    Sen bir Baş Mimarsın. Projenin şu anki fiziksel ve mantıksal durumunu özetleyen bir SYSTEM_STATE.md içeriği hazırla.
+    PROJE: ${project_id}
+    TAMAMLANAN GÖREVLER: ${JSON.stringify(doneTasks.map(t => t.title))}
+    TEKNİK BORÇLAR: ${JSON.stringify(technicalDebt.map(t => t.title))}
+    
+    Format:
+    # SYSTEM STATE: ${project_id}
+    ## 🏗️ Mimari Özet
+    ## ✅ Tamamlanan Özellikler
+    ## ⚠️ Teknik Borç ve Riskler (Technical Debt)
+    ## 🗺️ Sonraki Adımlar
+    
+    Dil: Teknik Türkçe.`;
+
+    const response = await ask('DOCS', prompt, __dirname);
+    
+    const statePath = path.join(__dirname, '..', 'src', project_id, 'SYSTEM_STATE.md');
+    fs.writeFileSync(statePath, response);
+    log(`✅ SYSTEM_STATE.md güncellendi.`);
+}
+
+async function handleMessage(msg) {
+    const { type } = msg;
+    if (type === 'WRITE_DOCS') {
+        await processTask(msg);
+    } else if (type === 'UPDATE_STATE') {
+        await updateSystemState(msg);
+    }
+}
+
+start('DOCS', handleMessage);

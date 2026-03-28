@@ -672,4 +672,37 @@ ANF is no longer a tool; it is a **Universal Forge**. The workspace is clean, pr
 
 ---
 
+### SESSION-015 | [MILESTONE] | V4 Strategic Layer — Intelligence & Shielding
+**Date:** 2026-03-28
+**Duration:** ~3 hours
+**Operator:** Antigravity (AI) & Turgay Savacı
+
+#### Objective
+Elevate ANF to V4 by implementing the "Universal Autonomous Software Factory" strategic layer: Shadow Tester (Security), Active Recall (Learning), Consensus (Peer Review), and Self-Doc (State Management).
+
+#### What Was Attempted
+1. **Active Recall**: Integrated `common_lessons.json` (Global) and `knowledge.json` (Local) with context-aware filtering in `coder.js`.
+2. **Shadow Tester**: Developed `security_guardrail.js` (Regex-scanner) and integrated it into `tester.js` with remediation steering.
+3. **Self-Doc**: Updated `docs.js` to manage a per-project `SYSTEM_STATE.md` with explicit Technical Debt tracking.
+4. **Consensus**: Modified `architect.js` to invoke dual-profile (Cost vs Performance) reviews for S0/Schema tasks with a performance-weighted synthesis logic.
+
+#### What Happened
+🟢 INFO — **Strategic Success.** The system now proactively avoids repeating mistakes by injecting filtered lessons into the prompt. Shadow Tester successfully catches hardcoded secrets and "steers" the Coder to .env patterns. Architectural planning now includes a "Performance vs Cost" dialectic, with the Architect prioritizing speed (<2s) per PRD V4.
+
+#### Fixes & Features Applied
+- **Learning**: `architect.js` extracts lessons after 2+ retries. `coder.js` filters lessons by context keywords.
+- **Security**: `security_guardrail.js` scans for secrets, `eval()`, and ReDoS patterns.
+- **State**: `docs.js` tracks workarounds as technical debt in `SYSTEM_STATE.md`.
+- **Synthesis**: `architect.js` runs `REVIEWER_COST` and `REVIEWER_PERF` personas before final manifest commitment.
+
+#### Learned
+1. **Context Bloat Prevention**: Mandatory filtering of the knowledge base is required. Injecting the entire history into every task is unsustainable.
+2. **Remediation > Rejection**: In security, simply failing a test isn't enough. The agent needs a specific "Remediation Steer" (e.g., "Use process.env instead of hardcoding") to break the failure loop.
+3. **Weighting the Dialectic**: Consensus is powerful, but "Performance" must remain the immovable anchor of the Forge's identity.
+
+#### State After Session
+ANF V4 is operational. The factory is now self-learning, security-hardened, and architecturally resilient.
+
+---
+
 *This log is written by a human-guided AI. Entries reflect real technical breakthroughs and the absolute victory over the Blackwell setup entropy.*

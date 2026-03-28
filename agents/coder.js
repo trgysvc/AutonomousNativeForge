@@ -16,6 +16,37 @@ function getProjectTree(projectPath) {
     } catch (e) { return "Dizin okunamadı."; }
 }
 
+/**
+ * Active Recall: Context-Aware Lesson Filtering
+ */
+function getRelevantLessons(projectId, title, desc) {
+    const globalPath = path.join(__dirname, '..', 'common_lessons.json');
+    const projectPath = path.join(__dirname, '..', 'src', projectId, 'knowledge.json');
+    let allLessons = [];
+
+    [globalPath, projectPath].forEach(p => {
+        if (fs.existsSync(p)) {
+            try {
+                const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+                allLessons = allLessons.concat(data.lessons || []);
+            } catch (e) {}
+        }
+    });
+
+    const contextKeywords = (title + " " + desc).toLowerCase();
+    const relevant = allLessons.filter(lesson => 
+        lesson.context.some(kw => contextKeywords.includes(kw.toLowerCase()))
+    );
+
+    if (relevant.length === 0) return "";
+
+    let lessonStr = "\n\n🧠 GEÇMİŞ DENEYİM / KRİTİK DERSLER:\n";
+    relevant.forEach(l => {
+        lessonStr += `- [${l.id}] ${l.rule}\n`;
+    });
+    return lessonStr;
+}
+
 async function handleMessage(msg) {
     const { type, project_id, task_id, file_path, title, desc, steer_instruction, project_manifest } = msg;
     const projectPath = path.join(SRC, project_id);
@@ -51,6 +82,10 @@ async function handleMessage(msg) {
     
     Kural 1: Architectural kararlar verme, sadece dökümandaki teknik spesifikasyonu uygula.
     Kural 2: Markdown bloğu kullanmadan SADECE ${targetLang} kodu döndür.`;
+
+    // Active Recall Injection
+    const lessons = getRelevantLessons(project_id, title, desc);
+    if (lessons) prompt += lessons;
 
     if (type === 'STEER_CODE' || msg.type === 'FIX_CODE') {
         log(`🧭 STEERING: [${project_id}] ${task_id} yönlendirme ile düzeltiliyor...`);

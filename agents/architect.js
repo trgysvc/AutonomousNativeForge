@@ -27,6 +27,47 @@ function saveManifest(projectId, manifest) {
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 }
 
+/**
+ * Active Recall: Record a lesson learned from a failure
+ */
+async function recordLesson(projectId, taskId, description) {
+    const lessonPrompt = `Bu görev başarısız oldu: ${taskId}\nHata: ${description}\n\nBundan çıkarılması gereken 'Evrensel bir Ders' var mı? (Örn: 'X kütüphanesi yerine Y kullanılmalı'). 
+    Eğer varsa dersi JSON formatında ver: {"global": true/false, "context": ["tag1"], "rule": "..."}.
+    Global true ise tüm Forge için geçerli, false ise sadece bu proje (${projectId}) için geçerlidir. 
+    Eğer ders yoksa "NO_LESSON" dön.`;
+
+    try {
+        const res = await ask('ARCHITECT', lessonPrompt, __dirname);
+        if (res.includes("NO_LESSON")) return;
+
+        const match = res.match(/\{[\s\S]*\}/);
+        if (!match) return;
+        const lesson = JSON.parse(match[0]);
+
+        const filePath = lesson.global 
+            ? path.join(__dirname, '..', 'common_lessons.json')
+            : path.join(__dirname, '..', 'src', projectId, 'knowledge.json');
+
+        let data = { lessons: [] };
+        if (fs.existsSync(filePath)) {
+            data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        }
+
+        lesson.id = `${taskId}_${Date.now()}`;
+        data.lessons.push({
+            id: lesson.id,
+            context: lesson.context,
+            rule: lesson.rule,
+            severity: "CRITICAL"
+        });
+
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+        log(`🧠 BELLEK GÜNCELLENDİ: ${lesson.global ? 'Global' : projectId} dersi işlendi.`);
+    } catch (e) {
+        log(`⚠️ Ders kaydedilemedi: ${e.message}`);
+    }
+}
+
 function updateTaskStatus(projectId, taskId, status, extra = {}) {
     const manifest = getManifest(projectId);
     const task = manifest.tasks.find(t => t.task_id === taskId);
@@ -147,6 +188,11 @@ async function handleMessage(msg) {
                 // Forge V3: Steering Protocol
                 log(`${prefix} 🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (${retryCounts[task_id]}/${MAX_RETRIES})`);
                 updateTaskStatus(project_id, task_id, 'FIXING');
+
+                // Active Recall: Check if this should be a lesson
+                if (retryCounts[task_id] >= 2) {
+                    recordLesson(project_id, task_id, description);
+                }
                 
                 const steerPrompt = `Kritik Hata Analizi: ${description}\n\nBu hata PRD veya Sprint kurallarına aykırı mı? Eğer öyleyse Coder'a şu yönlendirmeyi yap: "Dökümandaki X kuralına uyarak Y dosyasını Z şeklinde düzelt." Yanıtını kısa ve öz bir STEER mesajı olarak ver.`;
                 const steerMessage = await ask('ARCHITECT', steerPrompt, __dirname);
@@ -156,6 +202,14 @@ async function handleMessage(msg) {
                     steer_instruction: steerMessage 
                 });
             }
+            break;
+            
+        case 'DOCS_COMPLETE':
+            log(`${prefix} 📄 Dokümantasyon tamamlandı. Sistem durumu güncelleniyor...`);
+            sendMessage('DOCS', 'UPDATE_STATE', { 
+                ...msg, 
+                project_manifest: getManifest(project_id) 
+            });
             break;
     }
 }
@@ -201,11 +255,37 @@ async function discoverNewProjects() {
             Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
 
             try {
-                const res = await ask('ARCHITECT', planPrompt, __dirname);
-                const match = res.match(/\[[\s\S]*\]/);
+                // Phase 1: Initial Planning
+                const rawPlan = await ask('ARCHITECT', planPrompt, __dirname);
+                const match = rawPlan.match(/\[[\s\S]*\]/);
                 if (!match) throw new Error("JSON üretilemedi.");
+                let tasks = JSON.parse(match[0]);
+
+                // Phase 2: Peer Review (Consensus)
+                log(`⚖️ CONSENSUS: [${project_id}] Peer Review başlatılıyor...`);
                 
-                const tasks = JSON.parse(match[0]);
+                const costPrompt = `Aşağıdaki planı "Maliyet ve Verimlilik" (Cost-Oriented) açısından eleştir. Nereden tasarruf edilebilir? Gereksiz adımlar var mı?\nPLAN: ${JSON.stringify(tasks)}`;
+                const perfPrompt = `Aşağıdaki planı "Yüksek Performans ve Ölçeklenebilirlik" (Performance-Oriented) açısından eleştir. Nerede darboğaz olabilir? Daha native/hızlı bir yol var mı?\nPLAN: ${JSON.stringify(tasks)}`;
+                
+                const [costReview, perfReview] = await Promise.all([
+                    ask('REVIEWER_COST', costPrompt, __dirname),
+                    ask('REVIEWER_PERF', perfPrompt, __dirname)
+                ]);
+
+                // Phase 3: Synthesis (Performance-Weighted)
+                log(`🧬 SYNTHESIS: [${project_id}] Görüşler birleştiriliyor...`);
+                const synthesisPrompt = `Sen Baş Mimarsın. İki farklı görüşü (Maliyet ve Performans) değerlendirerek final planı oluştur.
+                KRİTİK: PRD V4 uyarınca "Yüksek Performans" (<2s yüklenme) her zaman maliyetten önceliklidir.
+                COST REVIEW: ${costReview}
+                PERF REVIEW: ${perfReview}
+                ORIGINAL PLAN: ${JSON.stringify(tasks)}
+                
+                Final planı SADECE JSON array olarak döndür.`;
+                
+                const finalPlanRaw = await ask('ARCHITECT', synthesisPrompt, __dirname);
+                const finalMatch = finalPlanRaw.match(/\[[\s\S]*\]/);
+                if (finalMatch) tasks = JSON.parse(finalMatch[0]);
+
                 const manifest = getManifest(project_id);
                 
                 tasks.forEach(t => {
@@ -217,7 +297,7 @@ async function discoverNewProjects() {
 
                 // İşlenen dosyaları mühürle
                 files.forEach(file => fs.renameSync(path.join(projectPath, file), path.join(projectPath, `_${file}`)));
-                log(`✅ [${project_id}] Multi-Doc Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);
+                log(`✅ [${project_id}] Consensus Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);
             } catch (e) {
                 log(`❌ [${project_id}] Planlama Hatası: ${e.message}`);
             }

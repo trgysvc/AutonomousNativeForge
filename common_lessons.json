@@ -1,0 +1,16 @@
+{
+  "lessons": [
+    {
+      "id": "FORBIDDEN_LIB_AXIOS",
+      "context": ["network", "http", "api"],
+      "rule": "Do not use 'axios'. Use native 'node:http' or 'fetch' if available. PRD V4 strictly prohibits external HTTP clients to minimize dependencies.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "FORBIDDEN_LIB_EXPRESS",
+      "context": ["server", "web", "api"],
+      "rule": "Do not use 'express'. Use 'fastify' for high-performance requirements as per PRD V4.",
+      "severity": "CRITICAL"
+    }
+  ]
+}

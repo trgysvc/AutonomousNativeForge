@@ -23,10 +23,10 @@ Runs on local hardware: **NVIDIA GPU (Blackwell)**, **Apple Silicon (Unified Mem
 
 | Agent | Role | Responsibility |
 |---|---|---|
-| 🏗️ **Architect** | Generalissimo | Multi-Doc Synthesis & Steering Protocol |
-| ⚙️ **Coder** | Specialist | Atomic Task Implementation (Native ONLY) |
-| 🛡️ **Tester** | Guardrail | Architecture & PRD Governance Auditor |
-| 📚 **Docs** | Archivist | Autonomous DEVLOG & Knowledge Recording |
+| 🏗️ **Architect** | Generalissimo | Multi-Doc Synthesis, Consensus Mechanism & Steering Protocol |
+| ⚙️ **Coder** | Specialist | Atomic Task Implementation & Active Recall (Learning) |
+| 🛡️ **Tester** | Guardrail | Shadow Tester (Security Scan) & Governance Auditor |
+| 📚 **Docs** | Archivist | Autonomous DEVLOG & System State (Technical Debt) Management |
 
 ---
 
@@ -117,6 +117,31 @@ This isn't dogma — it's a deliberate architectural choice:
 - **Maximum performance** — no abstraction layer overhead
 - **Portability** — runs on any Node.js v22+ environment, no `npm install` required
 - **Forced understanding** — if you write it native, you understand what it actually does
+
+---
+
+## 🚀 V4 Strategic Layer: The Intelligence Upgrade
+
+ANF V4 introduces the **Strategic Layer**, moving from simple task execution to autonomous cognitive governance.
+
+### 1. 🧠 Active Recall (Context-Aware Learning)
+The factory now learns from its failures. If a task fails (e.g., due to a banned library), the **Architect** extracts a "Lesson Learned". This lesson is injected into the **Coder's** prompt only when relevant to the current task's context, preventing context-window bloat while ensuring the same mistake is never repeated.
+
+### 2. 🕵️ Shadow Tester (Security-First Static Analysis)
+A dedicated `security_guardrail.js` module performs real-time static analysis:
+- **Secret Detection**: Catches hardcoded API keys and tokens.
+- **Dangerous Patterns**: Flags `eval()`, insecure `regex` (ReDoS), and direct shell execution.
+- **Remediation Steer**: Instead of just failing, the Tester provides a specific "Steer Instruction" to guide the Coder to a secure implementation (e.g., using `.env`).
+
+### 3. ⚖️ Peer-Review Consensus
+For critical architectural tasks (S0) and Database Schema changes, ANF invokes a **Consensus Mechanism**:
+- **Dialectic Review**: "Cost-Oriented" vs "Performance-Oriented" agent personas evaluate the plan.
+- **Synthesis**: The Architect synthesizes a final plan, weighting **Performance** (PRD V4 Compliance) above all else.
+
+### 4. 📋 Self-Doc (State & Technical Debt)
+The `SYSTEM_STATE.md` file tracks the physical reality of the project:
+- **Feature Map**: Real-time summary of implemented components.
+- **Technical Debt**: Explicitly tracks workarounds and temporary fixes, allowing the Architect to schedule "Refactor Sprints" autonomously.
 
 ---
 
@@ -226,10 +251,12 @@ We specifically track:
 - [x] Multi-tenant credential isolation
 - [x] Self-healing loop (3 retries → ERROR_REPORT)
 - [x] Autonomous GitHub push via native HTTPS
+- [x] **V4 Strategic Layer**: Active Recall, Shadow Tester, Consensus
+- [x] **Self-Doc**: SYSTEM_STATE.md with Technical Debt tracking
 - [ ] Apple Silicon port (MLX backend)
 - [ ] ASUS Ascend NPU inference integration
 - [ ] Web UI for real-time agent monitoring
-- [ ] Multi-model routing (small model for simple tasks, 32B for deep reasoning)
+- [ ] Autonomous Refactoring Sprints (Debt Clearance)
 - [ ] Community plugin system for custom agents
 
 ---

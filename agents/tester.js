@@ -1,7 +1,10 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const { exec } = require('node:child_process');
+const { promisify } = require('node:util');
 const { ask, start, log, sendMessage } = require('./base-agent');
+const { scanCode } = require('./security_guardrail');
 const SILENT_REPLY_TOKEN = 'HEARTBEAT_OK'; // Forge V3 Standard
 const execAsync = promisify(exec);
 
@@ -94,6 +97,16 @@ async function handleMessage(msg) {
     if (guardrailIssues.length > 0) {
         log(`🛡️ GUARDRAIL FAIL: [${project_id}] Mimari İhlal!`);
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: guardrailIssues.join('\n') });
+    }
+
+    // 2.5 ADIM: Shadow Tester (Security Scan)
+    log(`🕵️ SHADOW TESTER: [${project_id}] Güvenlik denetimi yapılıyor...`);
+    const securityFindings = scanCode(code);
+    if (securityFindings.length > 0) {
+        log(`🚨 SECURITY FAIL: [${project_id}] Kritik açık tespit edildi!`);
+        const firstFinding = securityFindings[0];
+        const steerMsg = `GÜVENLİK İHLALİ: ${firstFinding.reason} (L:${firstFinding.line})\nÖNERİ: ${firstFinding.steer}`;
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: steerMsg });
     }
 
     // 3. ADIM: Forge V3 AI Review (Compliance Check)
