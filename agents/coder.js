@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-const { ask, start, log, sendMessage } = require('./base-agent');
+const { ask, start, log, sendMessage, getAuthorizedPath, safeWriteFile } = require('./base-agent');
 
 const SRC = path.join(__dirname, '..', 'src');
 
@@ -32,7 +32,7 @@ async function processTask(task) {
     };
     const targetLang = langMap[ext] || 'Source Code';
 
-    // Dökümantasyon Bağlamı (Architect'ten gelen linkler)
+    // Dökümantasyon Bağlamı
     const docContextSection = task.doc_context ? `
     REFERANS DÖKÜMANTASYON STANDARTLARI:
     ${task.doc_context}
@@ -55,6 +55,7 @@ async function processTask(task) {
         HATA RAPORU:
         ${task.description}
         
+        KRİTİK KURAL (EISDIR Engelleme): Hedef yol bir dizin değil, her zaman yeni bir dosya ismi olmalıdır.
         Lütfen hatayı düzelt ve sadece güncel ${targetLang} kodunu döndür. Markdown bloğu kullanma.`;
     } else {
         log(`✍️ Kod Yazılıyor (${targetLang}): [${task.project_id}] ${task.title}`);
@@ -66,20 +67,25 @@ async function processTask(task) {
         BAŞLIK: ${task.title}
         ${docContextSection}
         
+        KRİTİK KURAL (EISDIR Engelleme): Hedef yolun bir dizin (directory) değil, her zaman yeni bir dosya ismi (filename) olduğundan emin ol. Eğer bir dizin zaten mevcutsa (örn: src/), içine yeni bir dosya üret (örn: src/index.js).
+        
         Lütfen sadece ${targetLang} kodunu döndür. Markdown bloğu kullanma.`;
     }
 
-    const code = await ask('CODER', prompt, __dirname);
-    
-    const filePath = task.file_path ? path.join(projectPath, task.file_path) : path.join(projectPath, `${task.task_id}${ext}`);
-    if (!fs.existsSync(path.dirname(filePath))) {
-        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    try {
+        const code = await ask('CODER', prompt, __dirname);
+        
+        // Path Authority & EISDIR Prevention
+        const relativePath = task.file_path || `${task.task_id}${ext}`;
+        const filePath = getAuthorizedPath(projectPath, relativePath);
+
+        safeWriteFile(filePath, code);
+        
+        sendMessage('ARCHITECT', 'CODE_FINISHED', { ...task, file_path: filePath });
+    } catch (err) {
+        log(`❌ CODER HATASI: ${err.message}`);
+        sendMessage('ARCHITECT', 'BUG_REPORT', { ...task, description: `CODER HATASI: ${err.message}` });
     }
-    
-    fs.writeFileSync(filePath, code, 'utf-8');
-    log(`💾 Kod Mühürlendi: ${filePath}`);
-    
-    sendMessage('ARCHITECT', 'CODE_FINISHED', { ...task, file_path: filePath });
 }
 
-start('CODER', processTask);
+start('CODER', processTask);

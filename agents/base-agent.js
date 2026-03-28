@@ -26,6 +26,55 @@ function log(msg) {
     }
 }
 
+function cleanResponse(content) {
+    // 1. Strip thinking blocks (handles unclosed tags by clearing until end of string)
+    let clean = content.replace(/<(think|\|thinking\|)>[\s\S]*?(?:<\/\1>|$)/gi, '').trim();
+    
+    // 2. Extract first markdown block if present, otherwise return cleaned text
+    const match = clean.match(/```(?:\w+)?\n([\s\S]*?)```/);
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+    
+    return clean;
+}
+
+function getAuthorizedPath(projectPath, targetRelativePath) {
+    const resolvedPath = path.resolve(projectPath, targetRelativePath);
+    const resolvedProjectRoot = path.resolve(projectPath);
+    
+    if (!resolvedPath.startsWith(resolvedProjectRoot)) {
+        throw new Error(`🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): ${targetRelativePath}`);
+    }
+    return resolvedPath;
+}
+
+function safeWriteFile(filePath, content) {
+    // 1. EISDIR Check
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+        throw new Error(`❌ EISDIR: '${filePath}' bir dizindir, dosya değil! Lütfen geçerli bir dosya adı ekleyin.`);
+    }
+
+    // 2. Ensure directory exists
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    // 3. Write
+    fs.writeFileSync(filePath, content, 'utf8');
+
+    // 4. Physical Verification
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`❌ YAZMA HATASI: Dosya fiziksel olarak oluşturulamadı: ${filePath}`);
+    }
+    const stats = fs.statSync(filePath);
+    if (stats.size === 0 && content.length > 0) {
+        throw new Error(`❌ YAZMA HATASI: Dosya boyutu 0 byte (Yazma başarısız): ${filePath}`);
+    }
+
+    log(`💾 Dosya mühürlendi (${stats.size} bytes): ${path.basename(filePath)}`);
+    return true;
+}
+
 async function ask(agentName, prompt, agentDir = __dirname) {
     const skillPath = path.join(agentDir, `${agentName.toLowerCase()}.md`);
     let skillContent = '';
@@ -62,8 +111,8 @@ async function ask(agentName, prompt, agentDir = __dirname) {
             res.on('end', () => {
                 try {
                     const parsed = JSON.parse(body);
-                    const content = parsed.choices[0].message.content;
-                    const clean = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                    const rawContent = parsed.choices[0].message.content;
+                    const clean = cleanResponse(rawContent);
                     resolve(clean);
                 } catch (e) { reject(e); }
             });
@@ -85,6 +134,14 @@ async function pushToGithub(projectId, filePath, content, commitMessage) {
     const ownerRepo = repoPath.replace('.git', '').substring(1);
     const relativeFilePath = path.relative(path.join(__dirname, '..', 'src', projectId), filePath).replace(/\\/g, '/');
     const fileName = relativeFilePath;
+
+    // 0. SECRET_BLACKLIST Check
+    const SECRET_BLACKLIST = ['.env', 'config.json', '.git/', 'vault.json'];
+    const isSecret = SECRET_BLACKLIST.some(secret => fileName.toLowerCase().includes(secret.toLowerCase()));
+    if (isSecret) {
+        log(`🛡️ GÜVENLİK ENGELİ: Hassas dosya GitHub'a gönderilemez: ${fileName}`);
+        return false;
+    }
 
     // 1. Mevcut SHA'yı al (Eğer dosya varsa)
     let currentSha = null;

@@ -70,6 +70,39 @@ function initializeFolders() {
     });
 }
 
+function recoverStuckTasks() {
+    log("🔄 Yetim görevler kurtarılıyor (Recovery)...");
+    const PROCESSING = path.join(BASE_DIR, 'queue', 'processing');
+    const INBOX = path.join(BASE_DIR, 'queue', 'inbox');
+
+    if (!fs.existsSync(PROCESSING)) return;
+
+    const files = fs.readdirSync(PROCESSING).filter(f => f.endsWith('.json'));
+    files.forEach(f => {
+        try {
+            const source = path.join(PROCESSING, f);
+            const content = JSON.parse(fs.readFileSync(source, 'utf8'));
+            
+            // Metadata güncelleme: recovery_count artır ve ismi işaretle
+            content.recovery_count = (content.recovery_count || 0) + 1;
+            const targetAgent = content.type ? content.type.split('_')[0].toLowerCase() : 'architect'; // Basit tahmin veya default
+            
+            // Eğer dosya adında zaten _recovered_ yoksa ekle
+            const newFileName = f.includes('_recovered_') ? f : f.replace('.json', `_recovered_${Date.now()}.json`);
+            const targetDir = path.join(INBOX, targetAgent);
+            
+            if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+            
+            fs.writeFileSync(path.join(targetDir, newFileName), JSON.stringify(content, null, 2));
+            fs.unlinkSync(source);
+            
+            log(`   + [RECOVERED] ${f} -> ${targetAgent} (Count: ${content.recovery_count})`);
+        } catch (err) {
+            log(`   ❌ [RECOVERY HATASI] ${f}: ${err.message}`);
+        }
+    });
+}
+
 function deployProjectCredentials() {
     log("🔑 Supabase ve GitHub anahtarları mühürleniyor...");
     
@@ -158,6 +191,7 @@ async function runBootstrap() {
     console.log("\n🚀 AUTONOMOUS NATIVE FORGE - KİMLİK DOĞRULAMALI KURULUM\n");
     
     initializeFolders();
+    recoverStuckTasks();
     deployProjectCredentials();
     checkCoreAgents();
     
