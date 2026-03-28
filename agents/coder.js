@@ -5,17 +5,32 @@ const { ask, start, log, sendMessage, getAuthorizedPath, safeWriteFile } = requi
 
 const SRC = path.join(__dirname, '..', 'src');
 
+/**
+ * Project Tree: Generates a simple directory map for the agent context
+ */
+function getProjectTree(projectPath) {
+    try {
+        if (!fs.existsSync(projectPath)) return "Dizin henüz oluşturulmadı.";
+        const files = fs.readdirSync(projectPath, { recursive: true });
+        return files.slice(0, 50).join('\n'); // İlk 50 dosyayı döndür
+    } catch (e) { return "Dizin okunamadı."; }
+}
+
 async function processTask(task) {
     const projectPath = path.join(SRC, task.project_id);
+    if (!fs.existsSync(projectPath)) fs.mkdirSync(projectPath, { recursive: true });
+
     const configPath = path.join(projectPath, 'config.json');
     
     // Proje bazlı anahtarları oku (Güvenlik için tokenları temizle)
     let configStr = '{}';
     if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        if (config.github) config.github.token = 'REDACTED';
-        if (config.supabase) config.supabase.key = 'REDACTED'; // Varsa temizle
-        configStr = JSON.stringify(config, null, 2);
+        try {
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            if (config.github) config.github.token = 'REDACTED';
+            if (config.supabase) config.supabase.key = 'REDACTED';
+            configStr = JSON.stringify(config, null, 2);
+        } catch (e) { log(`⚠️ Config okuma hatası: ${e.message}`); }
     }
 
     // Dil algılama
@@ -32,17 +47,26 @@ async function processTask(task) {
     };
     const targetLang = langMap[ext] || 'Source Code';
 
+    const projectTree = getProjectTree(projectPath);
+
     // Dökümantasyon Bağlamı
     const docContextSection = task.doc_context ? `
     REFERANS DÖKÜMANTASYON STANDARTLARI:
     ${task.doc_context}
     Lütfen yukarıdaki resmi dökümanlardaki en güncel pattern ve özellikleri kullanarak kod üret.` : "";
 
+    const contextHeader = `
+    CURRENT WORKING DIRECTORY: ${projectPath}
+    PROJECT STRUCTURE:
+    ${projectTree}
+    `;
+
     let prompt = "";
     if (task.type === 'FIX_CODE') {
         log(`🔧 Hata Düzeltiliyor (${targetLang}): [${task.project_id}] ${task.task_id}`);
         const currentCode = fs.readFileSync(task.file_path, 'utf8');
         prompt = `
+        ${contextHeader}
         PROJE: ${task.project_id}
         DİL: ${targetLang}
         KİMLİK VERİLERİ: ${configStr}
@@ -60,6 +84,7 @@ async function processTask(task) {
     } else {
         log(`✍️ Kod Yazılıyor (${targetLang}): [${task.project_id}] ${task.title}`);
         prompt = `
+        ${contextHeader}
         PROJE: ${task.project_id}
         DİL: ${targetLang}
         KİMLİK VERİLERİ (Supabase/GitHub): ${configStr}
@@ -88,4 +113,4 @@ async function processTask(task) {
     }
 }
 
-start('CODER', processTask);
+start('CODER', processTask);

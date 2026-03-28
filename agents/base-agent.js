@@ -15,6 +15,16 @@ const ERROR = path.join(QUEUE, 'error');
 
 const SYS_LOG = path.join(__dirname, '..', 'sys.log');
 
+// Security Blacklist for GitHub Pushes
+const SECRET_BLACKLIST = [
+    '.env',
+    'config.json',
+    'vault.json',
+    'node_modules',
+    '.git',
+    '.DS_Store'
+];
+
 function log(msg) {
     const timestamp = new Date().toISOString();
     const formatted = `[${timestamp}] ${msg}`;
@@ -26,19 +36,30 @@ function log(msg) {
     }
 }
 
+/**
+ * Extraction Pipe: Cleans LLM response from thinking tokens and markdown wrappers
+ */
 function cleanResponse(content) {
-    // 1. Strip thinking blocks (handles unclosed tags by clearing until end of string)
+    if (!content) return "";
+
+    // 1. Thinking Stripper (Handles DeepSeek & GLM patterns, even unclosed tags)
     let clean = content.replace(/<(think|\|thinking\|)>[\s\S]*?(?:<\/\1>|$)/gi, '').trim();
     
-    // 2. Extract first markdown block if present, otherwise return cleaned text
-    const match = clean.match(/```(?:\w+)?\n([\s\S]*?)```/);
-    if (match && match[1]) {
-        return match[1].trim();
-    }
+    // 2. Multi-block Extraction (Join multiple markdown blocks if present)
+    const codeBlockRegex = /```(?:[a-z]*)\n([\s\S]*?)```/gi;
+    const matches = [...clean.matchAll(codeBlockRegex)];
     
-    return clean;
+    if (matches.length > 0) {
+        return matches.map(m => m[1]).join('\n\n').trim();
+    }
+
+    // 3. Fallback: Strip single-line or incomplete blocks
+    return clean.replace(/^```|```$/g, '').trim();
 }
 
+/**
+ * Path Authority: Ensures the file path is within the project directory
+ */
 function getAuthorizedPath(projectPath, targetRelativePath) {
     const resolvedPath = path.resolve(projectPath, targetRelativePath);
     const resolvedProjectRoot = path.resolve(projectPath);
@@ -49,6 +70,9 @@ function getAuthorizedPath(projectPath, targetRelativePath) {
     return resolvedPath;
 }
 
+/**
+ * Action-Observation Loop: Verify file after writing with physical check
+ */
 function safeWriteFile(filePath, content) {
     // 1. EISDIR Check
     if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
@@ -111,8 +135,14 @@ async function ask(agentName, prompt, agentDir = __dirname) {
             res.on('end', () => {
                 try {
                     const parsed = JSON.parse(body);
-                    const rawContent = parsed.choices[0].message.content;
-                    const clean = cleanResponse(rawContent);
+                    const content = parsed.choices[0].message.content;
+                    const clean = cleanResponse(content);
+                    
+                    if (!clean || clean.length < 5) {
+                        reject(new Error("Hatalı Format: Kod bloğu bulunamadı veya yanit boş."));
+                        return;
+                    }
+                    
                     resolve(clean);
                 } catch (e) { reject(e); }
             });
@@ -125,6 +155,14 @@ async function ask(agentName, prompt, agentDir = __dirname) {
 }
 
 async function pushToGithub(projectId, filePath, content, commitMessage) {
+    const fileName = path.basename(filePath);
+    
+    // Security Check: Blacklist filter
+    if (SECRET_BLACKLIST.some(blocked => fileName.includes(blocked) || filePath.includes(blocked))) {
+        log(`🛡️ GÜVENLİK: ${fileName} hassas veri içerdiği için GitHub'a gönderilmedi.`);
+        return false;
+    }
+
     const configPath = path.join(__dirname, '..', 'src', projectId, 'config.json');
     if (!fs.existsSync(configPath)) throw new Error(`Config eksik: ${projectId}`);
     
@@ -132,16 +170,10 @@ async function pushToGithub(projectId, filePath, content, commitMessage) {
     const token = config.github.token;
     const repoPath = new URL(config.github.repo).pathname;
     const ownerRepo = repoPath.replace('.git', '').substring(1);
-    const relativeFilePath = path.relative(path.join(__dirname, '..', 'src', projectId), filePath).replace(/\\/g, '/');
-    const fileName = relativeFilePath;
-
-    // 0. SECRET_BLACKLIST Check
-    const SECRET_BLACKLIST = ['.env', 'config.json', '.git/', 'vault.json'];
-    const isSecret = SECRET_BLACKLIST.some(secret => fileName.toLowerCase().includes(secret.toLowerCase()));
-    if (isSecret) {
-        log(`🛡️ GÜVENLİK ENGELİ: Hassas dosya GitHub'a gönderilemez: ${fileName}`);
-        return false;
-    }
+    
+    // Path Normalization for Relative Path
+    const projectRoot = path.join(__dirname, '..', 'src', projectId);
+    const relativeFilePath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
 
     // 1. Mevcut SHA'yı al (Eğer dosya varsa)
     let currentSha = null;
@@ -149,7 +181,7 @@ async function pushToGithub(projectId, filePath, content, commitMessage) {
         currentSha = await new Promise((resolve, reject) => {
             const options = {
                 hostname: 'api.github.com',
-                path: `/repos/${ownerRepo}/contents/${fileName}`,
+                path: `/repos/${ownerRepo}/contents/${relativeFilePath}`,
                 method: 'GET',
                 headers: {
                     'Authorization': `token ${token}`,
@@ -188,7 +220,7 @@ async function pushToGithub(projectId, filePath, content, commitMessage) {
     return new Promise((resolve, reject) => {
         const options = {
             hostname: 'api.github.com',
-            path: `/repos/${ownerRepo}/contents/${fileName}`,
+            path: `/repos/${ownerRepo}/contents/${relativeFilePath}`,
             method: 'PUT',
             headers: {
                 'Authorization': `token ${token}`,
@@ -225,23 +257,45 @@ async function start(agentName, processTask) {
     const agentInbox = path.join(INBOX, agentName.toLowerCase());
     if (!fs.existsSync(agentInbox)) fs.mkdirSync(agentInbox, { recursive: true });
 
-    while (true) {
-        const files = fs.readdirSync(agentInbox).filter(f => f.endsWith('.json'));
-        for (const f of files) {
-            const source = path.join(agentInbox, f);
-            const target = path.join(PROCESSING, f);
-            fs.renameSync(source, target);
+    // Orphan Recovery
+    if (fs.existsSync(PROCESSING)) {
+        const existingProcessing = fs.readdirSync(PROCESSING).filter(f => f.startsWith(agentName.toLowerCase()));
+        for (const f of existingProcessing) {
+            log(`♻️ Orphan task kurtarıldı: ${f}`);
+            const source = path.join(PROCESSING, f);
             try {
-                const task = JSON.parse(fs.readFileSync(target, 'utf-8'));
+                const task = JSON.parse(fs.readFileSync(source, 'utf-8'));
                 await processTask(task);
-                fs.renameSync(target, path.join(DONE, f));
+                fs.renameSync(source, path.join(DONE, f));
             } catch (err) {
-                log(`❌ Hata: ${err.message}`);
-                fs.renameSync(target, path.join(ERROR, f));
+                log(`❌ Orphan Hata: ${err.message}`);
+                fs.renameSync(source, path.join(ERROR, f));
+            }
+        }
+    }
+
+    while (true) {
+        if (fs.existsSync(agentInbox)) {
+            const files = fs.readdirSync(agentInbox).filter(f => f.endsWith('.json'));
+            for (const f of files) {
+                const source = path.join(agentInbox, f);
+                const target = path.join(PROCESSING, f);
+                if (!fs.existsSync(PROCESSING)) fs.mkdirSync(PROCESSING, { recursive: true });
+                fs.renameSync(source, target);
+                try {
+                    const task = JSON.parse(fs.readFileSync(target, 'utf-8'));
+                    await processTask(task);
+                    if (!fs.existsSync(DONE)) fs.mkdirSync(DONE, { recursive: true });
+                    fs.renameSync(target, path.join(DONE, f));
+                } catch (err) {
+                    log(`❌ Hata: ${err.message}`);
+                    if (!fs.existsSync(ERROR)) fs.mkdirSync(ERROR, { recursive: true });
+                    fs.renameSync(target, path.join(ERROR, f));
+                }
             }
         }
         await new Promise(r => setTimeout(r, 5000));
     }
 }
 
-module.exports = { ask, start, log, sendMessage, pushToGithub };
+module.exports = { ask, start, log, sendMessage, pushToGithub, safeWriteFile, getAuthorizedPath, cleanResponse };

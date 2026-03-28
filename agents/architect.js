@@ -9,6 +9,61 @@ const retryCounts = {};
 let isDiscovering = false;
 
 /**
+ * Manifest Management: Tracks project state and task dependencies
+ */
+function getManifest(projectId) {
+    const manifestPath = path.join(__dirname, '..', 'src', projectId, 'manifest.json');
+    if (!fs.existsSync(path.dirname(manifestPath))) fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+    
+    if (!fs.existsSync(manifestPath)) {
+        fs.writeFileSync(manifestPath, JSON.stringify({ project_id: projectId, tasks: [] }, null, 2));
+    }
+    return JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+}
+
+function saveManifest(projectId, manifest) {
+    const manifestPath = path.join(__dirname, '..', 'src', projectId, 'manifest.json');
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+}
+
+function updateTaskStatus(projectId, taskId, status, extra = {}) {
+    const manifest = getManifest(projectId);
+    const task = manifest.tasks.find(t => t.task_id === taskId);
+    if (task) {
+        task.status = status;
+        Object.assign(task, extra);
+        saveManifest(projectId, manifest);
+        
+        // Dependency Trigger: Check if any pending tasks can now start
+        if (status === 'DONE') {
+            dispatchNextTasks(projectId);
+        }
+    }
+}
+
+async function dispatchNextTasks(projectId) {
+    const manifest = getManifest(projectId);
+    const pendingTasks = manifest.tasks.filter(t => t.status === 'PENDING');
+    
+    for (const task of pendingTasks) {
+        const dependenciesMet = !task.depends_on || task.depends_on.every(depId => {
+            const dep = manifest.tasks.find(t => t.task_id === depId);
+            return dep && dep.status === 'DONE';
+        });
+
+        if (dependenciesMet) {
+            log(`🎯 [${projectId}] Bağımlılıklar tamam, görev başlatılıyor: ${task.title}`);
+            updateTaskStatus(projectId, task.task_id, 'IN_PROGRESS');
+            sendMessage('CODER', 'WRITE_CODE', { 
+                ...task, 
+                project_id: projectId, 
+                project_manifest: manifest // Coder'a tüm resmi ver
+            });
+        }
+    }
+}
+
+/**
  * Ajanlar arası mesaj trafiği yönetimi
  */
 async function handleMessage(msg) {
@@ -17,12 +72,22 @@ async function handleMessage(msg) {
 
     switch (type) {
         case 'TASK_READY':
-            log(`${prefix} Görev dağıtılıyor: ${title}`);
-            sendMessage('CODER', 'WRITE_CODE', msg);
+            // Yeni görev geldiğinde manifest'e ekle (zaten yoksa)
+            const manifest = getManifest(project_id);
+            if (!manifest.tasks.find(t => t.task_id === task_id)) {
+                manifest.tasks.push({
+                    task_id, title, desc: msg.desc, file_path, 
+                    depends_on: msg.depends_on || [], 
+                    status: 'PENDING'
+                });
+                saveManifest(project_id, manifest);
+            }
+            dispatchNextTasks(project_id);
             break;
 
         case 'CODE_FINISHED':
             log(`${prefix} Kod yazımı bitti. Test ajanı devralıyor: ${task_id}`);
+            updateTaskStatus(project_id, task_id, 'TESTING');
             sendMessage('TESTER', 'RUN_TEST', msg);
             break;
 
@@ -35,43 +100,39 @@ async function handleMessage(msg) {
                 await pushToGithub(project_id, file_path, content, `Otonom Onaylı Commit: ${title}`);
                 log(`${prefix} 📦 GitHub mühürleme başarılı.`);
                 
+                updateTaskStatus(project_id, task_id, 'DONE');
+                delete retryCounts[task_id];
+                
                 // Dokümantasyon aşamasına geç
                 sendMessage('DOCS', 'WRITE_DOCS', msg);
-                delete retryCounts[task_id];
             } catch (e) {
                 log(`${prefix} ❌ GitHub Kritik Hata: ${e.message}`);
+                updateTaskStatus(project_id, task_id, 'ERROR', { error: e.message });
             }
             break;
 
         case 'BUG_REPORT':
             retryCounts[task_id] = (retryCounts[task_id] || 0) + 1;
             
-            // Kritik hata kontrolü (Severity: HIGH varsa direkt escalate)
-            const hasHighSeverity = Array.isArray(bugs) && bugs.some(b => b.severity === 'HIGH');
-            
-            if (hasHighSeverity || retryCounts[task_id] > MAX_RETRIES) {
-                const reason = hasHighSeverity ? "KRİTİK HATA (HIGH SEVERITY)" : "MAX RETRY (3) AŞILDI";
-                log(`${prefix} ⛔ ${reason}. Görev durduruldu. RCA üretiliyor.`);
+            if (retryCounts[task_id] > MAX_RETRIES) {
+                log(`${prefix} ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.`);
+                updateTaskStatus(project_id, task_id, 'FAILED');
                 
+                // RE-PLANNING: Architect'e görevi revize etmesi için mesaj gönder
+                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}
+                HATA: ${description}
+                3 kez denendi ama düzelmedi. Lütfen bu görevi analiz et ve yapılması gereken mimari değişikliği veya yeni bir yaklaşımı açıkla. 
+                Gerekirse görevi daha küçük parçalara böl veya file_path değiştir.`;
+                
+                const rca = await ask('ARCHITECT', planPrompt, __dirname);
+                log(`${prefix} 📋 Re-planning Yanıtı: ${rca}`);
+                
+                // Eskalasyon raporu
                 const rcaPath = path.join(__dirname, '..', 'queue', 'error', `${task_id}_RCA.md`);
-                const errorDetail = bugs ? (Array.isArray(bugs) ? JSON.stringify(bugs, null, 2) : bugs) : (description || 'Bilinmeyen hata');
-                
-                const rcaContent = `# ROOT CAUSE ANALYSIS: ${task_id}
-PROJE: ${project_id}
-GÖREV: ${title}
-SEBEP: ${reason}
-HATA DETAYI:
-${errorDetail}
-ZAMAN: ${new Date().toISOString()}
-
-Bu görev ${retryCounts[task_id]} deneme sonrası durduruldu. Manuel müdahale gerekiyor.`;
-                
-                if (!fs.existsSync(path.dirname(rcaPath))) fs.mkdirSync(path.dirname(rcaPath), { recursive: true });
-                fs.writeFileSync(rcaPath, rcaContent);
-                
-                sendMessage('DOCS', 'WRITE_ERROR_REPORT', msg);
+                fs.writeFileSync(rcaPath, `# RE-PLANNING REPORT: ${task_id}\n\n${rca}`);
             } else {
                 log(`${prefix} 🔄 SELF-HEALING: Hata düzeltme isteği (${retryCounts[task_id]}/${MAX_RETRIES})`);
+                updateTaskStatus(project_id, task_id, 'FIXING');
                 sendMessage('CODER', 'FIX_CODE', msg);
             }
             break;
@@ -79,7 +140,7 @@ Bu görev ${retryCounts[task_id]} deneme sonrası durduruldu. Manuel müdahale g
 }
 
 /**
- * Otonom Proje Keşfi (docs/reference taraması)
+ * Otonom Proje Keşfi
  */
 async function discoverNewProjects() {
     if (isDiscovering) return;
@@ -101,46 +162,20 @@ async function discoverNewProjects() {
                     const fullPath = path.join(projectPath, file);
                     const content = fs.readFileSync(fullPath, 'utf-8');
                     
-                    const planPrompt = `Sen bir Baş Mimarsın. Aşağıdaki teknik dökümanı analiz et ve uygulanabilir, atomik yazılım görevlerine böl. 
-                    Her görev için ilgili programlama dilinin standartlarına uygun (örneğin Node.js için src/utils/...), profesyonel bir dosya yolu belirle.
-
-                    DÖKÜMAN:
-                    ${content}
+                    const planPrompt = `Sen bir Baş Mimarsın. Teknik dökümanı atomik görevlere böl. 
+                    BAĞIMLILIKLARI BELİRLE (depends_on listesi oluştur).
+                    Dosya yollarını MUTLAK SURETLE proje root'una göre ver (örn: src/components/...).
                     
-                    Yanıtı SADECE şu JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "..."}]`;
+                    Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
                     
                     try {
-                        log(`🧠 [${project_id}] İçin iş planı DeepSeek-R1 ile hesaplanıyor...`);
                         const res = await ask('ARCHITECT', planPrompt, __dirname);
                         const match = res.match(/\[[\s\S]*\]/);
-                        if (!match) throw new Error("Geçerli bir görev listesi (JSON) üretilemedi.");
+                        if (!match) throw new Error("JSON üretilemedi.");
                         
-                        const projectConfigPath = path.join(__dirname, '..', 'src', project_id, 'config.json');
-                        let projectDocs = "";
-                        if (fs.existsSync(projectConfigPath)) {
-                            try {
-                                const pConfig = JSON.parse(fs.readFileSync(projectConfigPath, 'utf8'));
-                                if (pConfig.documentation_links) {
-                                    projectDocs = Array.isArray(pConfig.documentation_links) 
-                                        ? pConfig.documentation_links.join('\n') 
-                                        : pConfig.documentation_links;
-                                }
-                            } catch (err) {
-                                log(`⚠️ [${project_id}] Konfigürasyon okuma hatası: ${err.message}`);
-                            }
-                        }
-
                         const tasks = JSON.parse(match[0]);
-                        tasks.forEach(t => {
-                            handleMessage({ 
-                                type: 'TASK_READY', 
-                                project_id, 
-                                doc_context: projectDocs,
-                                ...t 
-                            });
-                        });
+                        tasks.forEach(t => handleMessage({ type: 'TASK_READY', project_id, ...t }));
 
-                        // Dökümanı mühürle (tekrar okunmasın)
                         fs.renameSync(fullPath, path.join(projectPath, `_${file}`));
                         log(`✅ [${project_id}] Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);
                     } catch (e) {
@@ -154,7 +189,6 @@ async function discoverNewProjects() {
     }
 }
 
-// Otonom döngüleri başlat
 setInterval(discoverNewProjects, 60000);
 discoverNewProjects();
 
