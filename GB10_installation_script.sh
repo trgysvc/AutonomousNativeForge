@@ -10,10 +10,27 @@ set -e
 echo "🚀 BLACKWELL AUTONOMOUS FORGE v3.9.3 — KURULUM BAŞLIYOR"
 echo "========================================================"
 
+# --- ADIM 0: ÖNCÜL DÜZELTMELER (KRİTİK SİSTEM YAMALARI) ---
+echo ">>> [0/11] Sistem kilitleri ve ortam değişkenleri mühürleniyor..."
+
+# 1. Externally Managed Environment & Packaging Hatası Çözümü
+# Sistem paketlerini kırmadan dökümandaki bağımlılıkları zorla günceller
+sudo pip install --upgrade --ignore-installed packaging jsonschema --break-system-packages
+
+# 2. Pip Önbellek İzin Düzeltmesi
+sudo chown -R nvidia:nvidia /home/nvidia/.cache 2>/dev/null || true
+
+# 3. CUDA Ortam Değişkenleri ve Blackwell SM121 Fix
+# Bu değişkenler lmcache ve vLLM derleme süreçleri için mühürlenmiştir
+export CUDA_HOME="/usr/local/cuda-13.0"
+export PATH="$CUDA_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
+# Blackwell ptxas hatasını (cvt .e2m1x2) kararlı mimarilere yönlendirerek çözer
+export TORCH_CUDA_ARCH_LIST="9.0 10.0 12.0"
+
 # --- SABİTLER (Dökümandaki Orijinal Yapı) ---
 VLLM_DIR="/home/nvidia/vllm"
 MODEL_DIR="/home/nvidia/.cache/models/deepseek-r1-32b"
-CUDA_HOME="/usr/local/cuda-13.0"
 PYTHON_VER="3.12"
 SITE_PACKAGES="/usr/local/lib/python${PYTHON_VER}/dist-packages"
 NCCL_PRELOAD="${SITE_PACKAGES}/nvidia/nccl/lib/libnccl.so.2"
