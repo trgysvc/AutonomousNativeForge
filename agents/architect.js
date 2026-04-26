@@ -8,6 +8,14 @@ const retryCounts = {};
 
 let isDiscovering = false;
 const PROMPT_MODE = 'FULL'; // Forge V3 Standard
+const TOKEN_LIMIT = 9000; // Updated per user request to accommodate ~8900 token docs
+
+/**
+ * Token Estimation: Heuristic for character-to-token count (approx 4 chars/token)
+ */
+function estimateTokens(text) {
+    return Math.ceil(text.length / 4);
+}
 
 /**
  * Manifest Management: Tracks project state and task dependencies
@@ -253,6 +261,13 @@ async function discoverNewProjects() {
             TEKNİK BAĞLAM: ${combinedContent}
 
             Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
+
+            const estimatedTokens = estimateTokens(combinedContent + planPrompt);
+            if (estimatedTokens > TOKEN_LIMIT) {
+                log(`⚠️ [${project_id}] Kritik Uyarı: Toplam döküman boyutu çok büyük (~${estimatedTokens} token).`);
+                log(`💡 Lütfen dökümanları parçalara bölün veya gereksiz detayları çıkarın. Limit: ${TOKEN_LIMIT}`);
+                continue; // Skip this project to avoid vLLM crash
+            }
 
             try {
                 // Phase 1: Initial Planning

@@ -33,6 +33,20 @@ const SECURITY_RULES = [
         severity: "MEDIUM",
         reason: "Direct shell execution detected.",
         steer: "Kabuk komutu (shell command) çalıştırmak risklidir. Mümkünse native kütüphaneleri kullan veya girdileri sanitize et."
+    },
+    {
+        id: "FORBIDDEN_NIM_SDK",
+        regex: /require\s*\(\s*['"]openai['"]\s*\)|from\s+['"]openai['"]/gi,
+        severity: "CRITICAL",
+        reason: "OpenAI/NIM SDK kullanımı tespit edildi. Native HTTP zorunludur.",
+        steer: "'openai' paketini kaldır. NIM ile iletişim için base-agent.js içindeki ask() fonksiyonunu kullan — bu fonksiyon zaten native node:https üzerinden NIM endpoint'ine bağlanıyor."
+    },
+    {
+        id: "FORBIDDEN_NVIDIA_SDK",
+        regex: /require\s*\(\s*['"]@nvidia\/[^'"]+['"]\s*\)|from\s+['"]@nvidia\//gi,
+        severity: "CRITICAL",
+        reason: "@nvidia/* SDK paketi tespit edildi. Native HTTP zorunludur.",
+        steer: "@nvidia/* paketini kaldır. NIM endpoint'ine doğrudan node:https ile bağlan. base-agent.js ask() fonksiyonu bu işi yapıyor."
     }
 ];
 

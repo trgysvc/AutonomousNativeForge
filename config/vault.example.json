@@ -1,0 +1,20 @@
+{
+  "global": {
+    "nim_host": "localhost",
+    "nim_port": 8000,
+    "nim_protocol": "http",
+    "nim_api_key": "YOUR_NGC_API_KEY_HERE",
+    "model_id": "deepseek-ai/deepseek-r1"
+  },
+  "example_project": {
+    "name": "My Project",
+    "github": {
+      "token": "ghp_...",
+      "repo": "https://github.com/user/repo.git"
+    },
+    "supabase": {
+      "url": "https://xyz.supabase.co",
+      "anon_key": "eyJ..."
+    }
+  }
+}

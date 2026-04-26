@@ -60,7 +60,7 @@ async function validateCode(filePath) {
         } else if (ext === '.ts' || ext === '.tsx') {
             try {
                 // Not: Hızlı kontrol için npx -y typescript kullanıyoruz
-                await execAsync(`npx -y typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck "${filePath}"`);
+                await execAsync(`npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck "${filePath}"`);
                 return { valid: true };
             } catch (err) {
                 // Eğer tsc bulunamazsa veya npx hata verirse uyarı dön
@@ -138,3 +138,5 @@ async function handleMessage(msg) {
 }
 
 start('TESTER', handleMessage);
+
+module.exports = { validateCode, execAsync };

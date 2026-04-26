@@ -26,7 +26,17 @@ function loadVault() {
     }
 }
 
-const PROJECTS_VAULT = loadVault();
+const VAULT = loadVault();
+const PROJECTS_VAULT = Object.fromEntries(
+    Object.entries(VAULT).filter(([k]) => k !== 'global')
+);
+const NIM_CONFIG = VAULT.global || {};
+
+// NIM config validation
+if (!NIM_CONFIG.nim_host) {
+    console.error('❌ HATA: vault.json içinde global.nim_host eksik!');
+    process.exit(1);
+}
 
 const { exec, spawn } = require('node:child_process');
 
@@ -136,32 +146,70 @@ function checkCoreAgents() {
 }
 
 function spawnAgents() {
-    log("🚀 Ajanlar otonom olarak başlatılıyor...");
+    log("🚀 Ajanlar başlatılıyor...");
     const agents = [
         { name: 'ARCHITECT', script: 'architect.js' },
-        { name: 'CODER', script: 'coder.js' },
-        { name: 'TESTER', script: 'tester.js' },
-        { name: 'DOCS', script: 'docs.js' }
+        { name: 'CODER',     script: 'coder.js'     },
+        { name: 'TESTER',    script: 'tester.js'    },
+        { name: 'DOCS',      script: 'docs.js'      }
     ];
 
     const isMac = process.platform === 'darwin';
-    
-    agents.forEach(agent => {
-        const scriptPath = path.join(BASE_DIR, 'agents', agent.script);
-        const agentLog = path.join(LOGS_DIR, `${agent.name.toLowerCase()}.log`);
-        
-        if (isMac) {
-            // macOS için AppleScript
+
+    if (isMac) {
+        agents.forEach(agent => {
+            const agentLog = path.join(LOGS_DIR, `${agent.name.toLowerCase()}.log`);
             const cmd = `osascript -e 'tell app "Terminal" to do script "cd \\"${BASE_DIR}\\" && node agents/${agent.script} 2>&1 | tee \\"${agentLog}\\""'`;
             exec(cmd);
-        } else {
-            // Linux için terminal emülatörü kontrolü
-            const linuxCmd = `gnome-terminal --title="${agent.name}" -- bash -c "node ${scriptPath} 2>&1 | tee ${agentLog}; exec bash" || \
-                              x-terminal-emulator -e "node ${scriptPath} 2>&1 | tee ${agentLog}" || \
-                              nohup node ${scriptPath} > ${agentLog} 2>&1 &`;
-            exec(linuxCmd);
-        }
-        log(`   + [${agent.name}] Başlatıldı (Terminal/Background).`);
+            log(`   + [${agent.name}] macOS Terminal başlatıldı.`);
+        });
+        return;
+    }
+
+    // Linux: systemd user-mode (sudo gerektirmez)
+    const systemdUserDir = path.join(process.env.HOME || '/home/nvidia', '.config', 'systemd', 'user');
+    if (!fs.existsSync(systemdUserDir)) fs.mkdirSync(systemdUserDir, { recursive: true });
+
+    const nodeBin = process.execPath; // Çalışan Node.js binary'sinin tam yolu
+
+    agents.forEach(agent => {
+        const agentLog  = path.join(LOGS_DIR, `${agent.name.toLowerCase()}.log`);
+        const unitName  = `anf-${agent.name.toLowerCase()}.service`;
+        const unitPath  = path.join(systemdUserDir, unitName);
+        const unitContent = `[Unit]
+Description=ANF Agent — ${agent.name}
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=${BASE_DIR}
+ExecStart=${nodeBin} ${path.join(BASE_DIR, 'agents', agent.script)}
+StandardOutput=append:${agentLog}
+StandardError=append:${agentLog}
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
+`;
+        fs.writeFileSync(unitPath, unitContent);
+        log(`   + [${agent.name}] systemd unit yazıldı: ${unitPath}`);
+
+        // daemon-reload + start (--user flag ile sudo gerekmez)
+        exec(`systemctl --user daemon-reload && systemctl --user enable ${unitName} && systemctl --user start ${unitName}`, (err) => {
+            if (err) {
+                log(`   ⚠️ [${agent.name}] systemd başlatılamadı, nohup fallback devreye giriyor...`);
+                const out = fs.openSync(agentLog, 'a');
+                spawn(nodeBin, [path.join(BASE_DIR, 'agents', agent.script)], {
+                    detached: true,
+                    stdio: ['ignore', out, out],
+                    cwd: BASE_DIR
+                }).unref();
+                log(`   + [${agent.name}] nohup fallback başlatıldı.`);
+            } else {
+                log(`   ✅ [${agent.name}] systemd --user servisi aktif.`);
+            }
+        });
     });
 }
 

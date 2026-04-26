@@ -4,8 +4,24 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const http = require('node:http');
-const https = require('node:https');
+
+// Vault'tan NIM config'i yükle
+const VAULT_PATH = path.join(__dirname, '..', 'config', 'vault.json');
+function loadNimConfig() {
+    try {
+        const vault = JSON.parse(fs.readFileSync(VAULT_PATH, 'utf8'));
+        return vault.global || {};
+    } catch (e) {
+        console.error('❌ vault.json okunamadı:', e.message);
+        return {};
+    }
+}
+const NIM_CONFIG = loadNimConfig();
+
+// http veya https — nim_protocol vault'tan
+const httpModule = (NIM_CONFIG.nim_protocol === 'https') 
+    ? require('node:https') 
+    : require('node:http');
 
 const QUEUE = path.join(__dirname, '..', 'queue');
 const INBOX = path.join(QUEUE, 'inbox');
@@ -42,18 +58,26 @@ function log(msg) {
 function cleanResponse(content) {
     if (!content) return "";
 
-    // 1. Thinking Stripper (Handles DeepSeek & GLM patterns, even unclosed tags)
-    let clean = content.replace(/<(think|\|thinking\|)>[\s\S]*?(?:<\/\1>|$)/gi, '').trim();
-    
-    // 2. Multi-block Extraction (Join multiple markdown blocks if present)
+    let clean = content;
+    // Format 1: <think>...</think> — DeepSeek R1
+    clean = clean.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    // Format 2: <|thinking|>...</|thinking|> — GLM-4
+    clean = clean.replace(/<\|thinking\|>[\s\S]*?<\/\|thinking\|>/gi, '');
+    // Format 3: <|begin_of_thought|>...<|end_of_thought|> — DeepSeek V4 distill
+    clean = clean.replace(/<\|begin_of_thought\|>[\s\S]*?<\|end_of_thought\|>/gi, '');
+    // Format 4: <|thought|>...</|thought|> — alternatif V4 format
+    clean = clean.replace(/<\|thought\|>[\s\S]*?<\/\|thought\|>/gi, '');
+    // Format 5: Kapanmamış tag — satır sonuna kadar temizle
+    clean = clean.replace(/<(think|thinking)[^>]*>[\s\S]*/gi, '');
+    clean = clean.trim();
+
+    // Kod bloğu extraction
     const codeBlockRegex = /```(?:[a-z]*)\n([\s\S]*?)```/gi;
     const matches = [...clean.matchAll(codeBlockRegex)];
-    
     if (matches.length > 0) {
         return matches.map(m => m[1]).join('\n\n').trim();
     }
 
-    // 3. Fallback: Strip single-line or incomplete blocks
     return clean.replace(/^```|```$/g, '').trim();
 }
 
@@ -102,52 +126,58 @@ function safeWriteFile(filePath, content) {
 async function ask(agentName, prompt, agentDir = __dirname) {
     const skillPath = path.join(agentDir, `${agentName.toLowerCase()}.md`);
     let skillContent = '';
-    
     if (fs.existsSync(skillPath)) {
         skillContent = fs.readFileSync(skillPath, 'utf8');
         log(`📖 [${agentName}] Skill mühürü okundu.`);
     }
-    
     const finalPrompt = `SYSTEM RULES (MANDATORY):\n${skillContent}\n\nUSER TASK:\n${prompt}`;
 
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({
-            model: 'deepseek-r1-32b',
+            model: NIM_CONFIG.model_id || 'deepseek-r1-32b',
             messages: [{ role: 'user', content: finalPrompt }],
             temperature: 0.1
         });
 
+        // Authorization header — boşsa ekleme
+        const headers = {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(data)
+        };
+        if (NIM_CONFIG.nim_api_key) {
+            headers['Authorization'] = `Bearer ${NIM_CONFIG.nim_api_key}`;
+        }
+
         const options = {
-            hostname: 'localhost',
-            port: 8000,
+            hostname: NIM_CONFIG.nim_host || 'localhost',
+            port: NIM_CONFIG.nim_port || 8000,
             path: '/v1/chat/completions',
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(data)
-            },
-            timeout: 2700000 // 45 Dakika
+            headers,
+            timeout: 2700000 // 45 dakika — CoT için sabit
         };
 
-        const req = http.request(options, (res) => {
+        const req = httpModule.request(options, (res) => {
             let body = '';
             res.on('data', chunk => body += chunk);
             res.on('end', () => {
                 try {
                     const parsed = JSON.parse(body);
-                    const content = parsed.choices[0].message.content;
-                    const clean = cleanResponse(content);
-                    
-                    if (!clean || clean.length < 5) {
-                        reject(new Error("Hatalı Format: Kod bloğu bulunamadı veya yanit boş."));
+                    if (!parsed.choices || !parsed.choices[0]) {
+                        reject(new Error(`NIM yanıt formatı hatalı: ${body.substring(0, 200)}`));
                         return;
                     }
-                    
+                    const content = parsed.choices[0].message.content;
+                    const clean = cleanResponse(content);
+                    if (!clean || clean.length < 5) {
+                        reject(new Error("Yanıt boş veya çok kısa."));
+                        return;
+                    }
                     resolve(clean);
                 } catch (e) { reject(e); }
             });
         });
-        req.on('timeout', () => { req.destroy(); reject(new Error("vLLM Timeout")); });
+        req.on('timeout', () => { req.destroy(); reject(new Error("NIM Timeout (45dk)")); });
         req.on('error', reject);
         req.write(data);
         req.end();
