@@ -705,4 +705,59 @@ ANF V4 is operational. The factory is now self-learning, security-hardened, and 
 
 ---
 
+### SESSION-016 | [MILESTONE] | V4.3 — Harici Referans, Kurulum Düzeltmeleri ve Skill Güncellemesi
+**Tarih:** 2026-05-10
+**Süre:** ~2 saat
+**Operatör:** Claude Code & Turgay Savacı
+
+#### Amaç
+1. ANF'ı AuraPOS proje dökümanlarının bulunduğu harici dizinden okuyacak şekilde yapılandırmak.
+2. `GB10_installation_script.sh`'deki kritik hataları tespit edip düzeltmek.
+3. Tüm agent skill (`.md`) dosyalarını gerçek sistem davranışıyla senkronize etmek.
+
+#### Yapılanlar
+
+**1. Harici `reference_dir` Desteği:**
+- `base-agent.js`: `NIM_CONFIG` export edildi — diğer ajanlar vault ayarlarına doğrudan erişebilir.
+- `architect.js`: Sabit `docs/reference/` yolu kaldırıldı. `NIM_CONFIG.reference_dir` okunuyor (fallback: varsayılan yol).
+- Harici dizin tespiti: `isExternal` flag'i ile `_` prefix filtresi ve dosya yeniden adlandırma devre dışı bırakılıyor. Yeniden işleme `manifest.tasks.length > 0` kontrolüyle engelleniyor.
+- `coder.js`: `SRC` sabiti `NIM_CONFIG.workspace_dir` ile yapılandırılabilir hale getirildi.
+- `vault.json`: `reference_dir` eklendi → `/Users/trgysvc/Developer Files/1/ANF/MAS - Proje/AI Software Engineer Agents/docs/reference`
+- `vault.example.json`: `reference_dir` ve `workspace_dir` alanları dökümante edildi.
+
+**2. `GB10_installation_script.sh` v4.2.0 → v4.3.0 (8 kritik düzeltme):**
+
+| # | Hata | Düzeltme |
+|---|---|---|
+| 1 | `MODEL_ID` base model'e işaret ediyordu | `nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` olarak düzeltildi |
+| 2 | `--include "*UD-Q4_K_XL*"` GGUF filtresi (llama.cpp formatı) | Filtre kaldırıldı — vLLM SafeTensors okur |
+| 3 | Systemd: `--quantization nvfp4` eksikti | Eklendi |
+| 4 | Systemd: `--kv-cache-dtype fp8` eksikti | Eklendi — 68GB KV cache açılır |
+| 5 | Systemd: `--reasoning-parser nemotron_v3` eksikti | Eklendi — thinking izole edilir |
+| 6 | Systemd: `--enable-auto-tool-choice` eksikti | Eklendi |
+| 7 | Systemd: `--served-model-name` eksikti | Eklendi — yoksa ajanlar 404 alır (FAIL-012) |
+| 8 | Adım 6, `TORCH_CUDA_ARCH_LIST`'i `"12.1"` ile eziyordu | Adım 0'daki `"9.0 10.0 12.0 12.1"` korunur hale getirildi |
+| 9 | `--enforce-eager` throughput'u 2-3x düşürüyordu | Kaldırıldı |
+| 10 | `VLLM_USE_V1=0` legacy engine'i zorluyordu | Kaldırıldı — V1 engine artık varsayılan ve daha hızlı |
+| 11 | `VLLM_VERSION_OVERRIDE` eski sürümü hardcode ediyordu | Kaldırıldı |
+
+**3. Agent Skill Dosyaları (6 dosya güncellendi):**
+
+- **`reviewer_perf.md`** [KRİTİK]: `VLLM_USE_V1=0 must remain enforced` satırı kaldırıldı. Bu kural, kurulum scriptinde düzeltilen V0 pinlemesini LLM aracılığıyla geri getirecekti. Hardcoded timeout referansı da kaldırıldı.
+- **`base-agent.md`**: Thinking formatı listesi 5 formata genişletildi (DeepSeek R1, GLM-4/Z1, DeepSeek V4 distill, alternatif, kapanmamış tag fallback). Per-agent `reasoning_budget`, `nim_enable_thinking`, vault konfigürasyon alanları (`reference_dir`, `workspace_dir`, `NIM_CONFIG` export) eklendi.
+- **`coder.md`**: "STRICT NO-MIDDLEWARE" kuralı yumuşatıldı → "PRD-APPROVED STACK ONLY". Yalnızca Tailwind + Supabase'e izin veren kural, Next.js/Fastify/React Native kullanan AuraPOS gibi tüm framework projelerini reddedecekti. TypeScript strict kuralları eklendi.
+- **`tester.md`**: "Non-native import → otomatik başarısız" kuralı proje bazlı hale getirildi. PRD-approved stack içindeki importları artık reddetmiyor. Security scan ve TypeScript tip güvenliği bölümleri eklendi.
+- **`docs.md`**: "Native Node.js vurgusu zorunlu" kuralı yumuşatıldı — framework tabanlı projelerde de çalışacak şekilde "PRD kararlarına atıfla tech stack vurgusu" haline getirildi.
+- **`agents_analiz.md`**: "DeepSeek-R1" referansları Nemotron'a güncellendi. `logs/system.log` yolu `sys.log` (proje kökü) olarak düzeltildi. `reference_dir` yapılandırılabilirliği, Consensus Planlama ve Harici Dizin davranışı eklendi.
+
+#### Öğrenilen
+1. **Skill dosyaları yaşayan belgelerdir.** Sistemde her değişiklik yapıldığında skill dosyaları da güncellenmeli — aksi halde LLM eski kuralları uygulayarak yeni kodu bozar. `VLLM_USE_V1=0` örneği bunu doğrudan gösteriyor.
+2. **Kurulum scriptindeki GGUF filtresi:** `--include "*UD-Q4_K_XL*"` llama.cpp dünyasından taşınmış bir alışkanlık. vLLM için safetensors şart; filtre olmadan tüm repo indirilmeli.
+3. **`--enforce-eager` tuzağı:** GB10 gibi güçlü donanımda bu flag throughput'u yarıya indiriyor. Production serviste asla kullanılmamalı. Sadece debug/OOM debugging için kullanılan bir flag.
+
+#### Oturum Sonrası Durum
+ANF V4.3 operasyonel. Harici dizin desteği (AuraPOS) hazır. Kurulum scripti production-grade. Tüm skill dosyaları güncel sistem davranışıyla senkron. vLLM servisi ayaklandırıldığında AuraPOS pipeline'ı otomatik başlayacak.
+
+---
+
 *This log is written by a human-guided AI. Entries reflect real technical breakthroughs and the absolute victory over the Blackwell setup entropy.*

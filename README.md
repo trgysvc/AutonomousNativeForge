@@ -1,283 +1,425 @@
-# ⚒️ ANF — Autonomous Native Forge
+# ANF — Autonomous Native Forge
 
-> *"We don't promise a perfect product. We promise an autonomous architecture that learns from its mistakes — and shares every single one of them."*
+> *PRD dosyası bırak. Çalışan yazılım al. Arada ne olduğunu da göster.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js v22+](https://img.shields.io/badge/Node.js-v22%2B-green)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Hardware](https://img.shields.io/badge/Hardware-GB10%20Blackwell%20%7C%20ASUS%20Ascent-76B900)](https://www.nvidia.com)
+[![Status](https://img.shields.io/badge/Status-V4.3%20Active-orange)]()
 
-> [!IMPORTANT]
-> This is a **purely native** implementation. No Express, no Axios, no high-level SDKs. Direct Node.js `http`/`https` modules only.
+**Autonomous Native Forge**, teknik dökümanları (PRD, Sprint, Spec) okuyup çalışan yazılım üreten, **tamamen yerel çalışan**, **sıfır npm bağımlılığı** olan 4-agent bir yazılım fabrikasıdır.
 
-[![Hardware](https://img.shields.io/badge/Hardware-NVIDIA%20Blackwell%20GB10-76B900)](https://www.nvidia.com)
-[![Model](https://img.shields.io/badge/Model-DeepSeek--R1--Distill--32B-blue)](https://huggingface.co/deepseek-ai)
-[![Framework](https://img.shields.io/badge/Framework-Native%20Node.js-green)](https://nodejs.org)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-orange)]()
-
----
-
-## What Is This?
-
-**Autonomous Native Forge** is a **cloud-free, fully local, 4-agent autonomous software production factory** built entirely on Node.js native capabilities — no middleware, no heavy frameworks, no vendor lock-in.
-
-Runs on local hardware: **NVIDIA GPU (Blackwell)**, **Apple Silicon (Unified Memory)**, and **NPU-accelerated devices**. Local LLM inference only.
-
-| Agent | Role | Responsibility |
-|---|---|---|
-| 🏗️ **Architect** | Generalissimo | Multi-Doc Synthesis, Consensus Mechanism & Steering Protocol |
-| ⚙️ **Coder** | Specialist | Atomic Task Implementation & Active Recall (Learning) |
-| 🛡️ **Tester** | Guardrail | Shadow Tester (Security Scan) & Governance Auditor |
-| 📚 **Docs** | Archivist | Autonomous DEVLOG & System State (Technical Debt) Management |
+- Bulut yok. Vendor lock-in yok. API anahtarı zorunluluğu yok.
+- Saf Node.js. Sadece `node:http`, `node:fs`, `node:path`, `node:events`.
+- Her LLM hatası, her retry, her steering kararı DEVLOG.md'ye yazılır.
 
 ---
 
-## The Honest Part (Why This README Is Different)
-
-Most open-source projects show you the finish line. We show you **the entire race** — including the falls.
-
-This project started with **4 days of continuous failure** on NVIDIA Blackwell GB10:
-- vLLM wouldn't compile against CUDA 13.0
-- PyTorch binaries were incompatible with SM_100 architecture
-- 70B model caused OOM Killer to terminate the process at 132GB > 120GB VRAM
-- `pyproject.toml` metadata format broke the entire build pipeline
-
-Every single one of these failures is **documented, timestamped, and publicly available** in this repository. Because the next developer who hits the same wall deserves a door, not another wall.
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                   USER REQUEST                      │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│              ARCHITECT (Doc Synthesis)              │
-│    Scans docs/reference/ → DeepSeek-R1 reasoning    │
-│         Produces file structure + task plan         │
-└─────────────────────────────────────────────────────┘
-                        │ EventEmitter Bus
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│             CODER AGENT (Production)                │
-│   Native Node.js only • Zero external dependencies  │
-│      45min deep reasoning via vLLM endpoint         │
-└───────────────────────┬─────────────────────────────┘
-                        │
-              ┌─────────┴─────────┐
-              │                   │
-              ▼                   ▼
-        TEST PASSED           TEST FAILED (Steering)
-              │                   │
-              ▼                   ▼
-    GitHub Auto-Push        ARCHITECT STEERING
-    (Native HTTPS)          (Self-Healing Loop)
-```
-
----
-
-## ⚒️ Universal Forge: Project Discovery
-
-ANF V3 operates as a **document-driven** factory. It doesn't wait for manual tasks; it discovers them from your technical specifications.
-
-### How to Build Any Project:
-1. **Drop your PRD/Spec**: Create a folder in `docs/reference/[YOUR_PROJECT_ID]`
-2. **Add .md files**: Put your PRDs, Sprint Tasks, or Technical References there.
-3. **Ignite**: Run `node agents/architect.js [YOUR_PROJECT_ID]` or start the full bootstrap.
-
-The **Architect** will synthesize all documents, build a dynamic `manifest.json`, and coordinate with the **Coder** and **Tester** to realize the architecture — autonomously.
-
----
-
-**Communication:** Native `EventEmitter` — no message brokers, no Redis, no Kafka.  
-**State Management:** In-memory `MemoryState` object per session — no external databases.  
-**Security:** Credential isolation via `bootstrap.js` — agents never touch raw tokens.
-
----
-
-## The "Native Only" Philosophy
-
-This project enforces a strict rule: **if Node.js can do it natively, we don't install a package for it.**
-
-```javascript
-// ❌ What we DON'T do
-const axios = require('axios');
-const express = require('express');
-const _ = require('lodash');
-
-// ✅ What we DO
-const https = require('https');
-const fs = require('fs/promises');
-const { EventEmitter } = require('events');
-```
-
-This isn't dogma — it's a deliberate architectural choice:
-- **Zero supply-chain attack surface** from third-party packages
-- **Maximum performance** — no abstraction layer overhead
-- **Portability** — runs on any Node.js v22+ environment, no `npm install` required
-- **Forced understanding** — if you write it native, you understand what it actually does
-
----
-
-## 🚀 V4 Strategic Layer: The Intelligence Upgrade
-
-ANF V4 introduces the **Strategic Layer**, moving from simple task execution to autonomous cognitive governance.
-
-### 1. 🧠 Active Recall (Context-Aware Learning)
-The factory now learns from its failures. If a task fails (e.g., due to a banned library), the **Architect** extracts a "Lesson Learned". This lesson is injected into the **Coder's** prompt only when relevant to the current task's context, preventing context-window bloat while ensuring the same mistake is never repeated.
-
-### 2. 🕵️ Shadow Tester (Security-First Static Analysis)
-A dedicated `security_guardrail.js` module performs real-time static analysis:
-- **Secret Detection**: Catches hardcoded API keys and tokens.
-- **Dangerous Patterns**: Flags `eval()`, insecure `regex` (ReDoS), and direct shell execution.
-- **Remediation Steer**: Instead of just failing, the Tester provides a specific "Steer Instruction" to guide the Coder to a secure implementation (e.g., using `.env`).
-
-### 3. ⚖️ Peer-Review Consensus
-For critical architectural tasks (S0) and Database Schema changes, ANF invokes a **Consensus Mechanism**:
-- **Dialectic Review**: "Cost-Oriented" vs "Performance-Oriented" agent personas evaluate the plan.
-- **Synthesis**: The Architect synthesizes a final plan, weighting **Performance** (PRD V4 Compliance) above all else.
-
-### 4. 📋 Self-Doc (State & Technical Debt)
-The `SYSTEM_STATE.md` file tracks the physical reality of the project:
-- **Feature Map**: Real-time summary of implemented components.
-- **Technical Debt**: Explicitly tracks workarounds and temporary fixes, allowing the Architect to schedule "Refactor Sprints" autonomously.
-
----
-
-## Hardware & Infrastructure
-
-### Hardware Support
-- **NVIDIA GPU**: Optimized for Blackwell GB10 (120GB VRAM). Requires **CUDA 13.0** and **cu130 nightly** PyTorch builds for `aarch64`.
-- **Apple Silicon**: Fully compatible with M-series chips utilizing **Unified Memory** for large context windows.
-- **NPU Engines**: Support for local AI accelerators (NPU) in modern mobile/desktop workstations.
-- **Model**: DeepSeek-R1-Distill-Qwen-32B (bfloat16 — ~64GB VRAM).
-
-### TEST SYSTEM
-Server:  vLLM OpenAI-compatible API (port 8000)
-Runtime: Node.js v22+
-OS:      Ubuntu 22.04+ (aarch64 / Blackwell)
-Deps:    `libnuma-dev`, `python3-dev`, `build-essential`
-
-### Why 32B and Not 70B?
-Simple math: 70B in bfloat16 requires ~132GB VRAM. GB10 has 120GB. The OOM Killer doesn't negotiate.  
-32B at ~64GB leaves 56GB for KV Cache — which actually makes the system **faster** for long reasoning chains.
-
-### Target Hardware (Roadmap)
-- **Apple Silicon** — M4 Ultra (192GB Unified Memory) for macOS-native agent deployment
-- **ASUS Ascend** — NPU-accelerated edge inference for sub-100ms agent response times
-
----
-
-## Project Structure
-
-```
-/AutonomousNativeForge/
-├── agents/
-│   ├── architect.js      # Document scanner + task decomposer
-│   ├── coder.js          # Native code producer
-│   ├── tester.js         # Security + dependency auditor
-│   └── docs.js           # DEVLOG writer + archivist
-├── core/
-│   └── agentBus.js       # EventEmitter communication layer
-├── config/
-│   └── vault.json        # Multi-tenant credential store (gitignored)
-├── docs/
-│   └── reference/        # Drop .md files here → Architect auto-discovers
-├── workspace/            # Agent-generated code output
-├── queue/
-│   └── inbox/            # Inter-agent JSON task files
-├── logs/
-│   └── system.log        # Unified timestamped log
-├── bootstrap.js          # Factory ignition — starts all 4 agents
-├── DEVLOG.md             # Autonomous development journal
-└── main.js               # Orchestration entry point
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js v22+
-- Blackwell GB10 or compatible GPU/NPU
-- GitHub Personal Access Token (for agent interaction)
-
-### Automatic Setup (Blackwell Dedicated)
-The most reliable way to get ANF running on a Blackwell system is our automated setup script:
+## Hızlı Başlangıç
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/trgysvc/AutonomousNativeForge.git
-cd AutonomousNativeForge
+# 1. NIM/LLM bağlantısını doğrula
+npm run test-nim
 
-# 2. Run the Blackwell setup script
-# This handles: GPU Dependencies -> CUDA -> vLLM Environment
-./GB10_installation_script.sh
+# 2. Fabrikayı başlat (tüm 4 agent spawn edilir)
+npm run forge
 
-# 3. Configure your projects
-# Drop your PRD/Spec files into:
-docs/reference/[PROJE_ID]/
+# 3. Başka terminalde durumu izle
+npm run watch
 
-# 4. Start the factory
-node agents/bootstrap.js
+# 4. Projenin PRD'sini bırak → Architect otomatik keşfeder
+mkdir -p docs/reference/PROJE_ADINIZ
+# prd.md dosyasını oraya koyun
+
+# Alternatif: Harici dizinden okuma (vault.json > reference_dir)
+# "reference_dir": "/harici/yol/docs/reference"  ← bu satırı vault.json'a ekleyin
 ```
-
-The factory wakes up. Architect discovers your spec. The pipeline runs.
 
 ---
 
-## The Transparency Manifesto
+## Hangi LLM Çalışır?
 
-This repository is not just code — it's a **public engineering journal**.
+ANF, **OpenAI-uyumlu** `/v1/chat/completions` API'sini kullanır. Thinking formatları otomatik temizlenir.
 
-Every session produces entries in three places:
+### GB10 (128GB) — Neden Nemotron?
 
-**`DEVLOG.md`** — What was attempted, what broke, what was learned.  
-**GitHub Issues** — Real failure reports: *"Session #4 — CoT <think> blocks polluting output, solved with regex strip"*  
-**GitHub Discussions** — Architecture decisions, trade-off debates, community questions.
+| Metrik | Nemotron-3-Super-120B | GLM-4-32B | Llama-Nemotron-49B |
+|---|---|---|---|
+| **PinchBench** (agentic kodlama) | **%85.6** | — | — |
+| SWE-bench | %60.5 | çok güçlü | güçlü |
+| Hız | **~329 tok/s** | ~200 tok/s | ~150 tok/s |
+| Aktif parametre (MoE) | **12B** | 32B (dense) | 49B (dense) |
+| Context window | **1M token** | 32K | 128K |
+| Reasoning budget kontrolü | **✅ per-call** | ✅ | ❌ |
+| 128GB kullanımı | ~60GB ağırlık + 68GB KV | ~64GB + 64GB | ~98GB + 30GB |
 
-We specifically track:
-- 🔴 **Prompt failures** — Which prompt caused hallucination and why
-- 🟡 **Hardware bottlenecks** — Where the GPU/NPU stalled and for how long  
-- 🟢 **Self-healing events** — How many retries it took and what the fix was
+> **PinchBench vs SWE-bench farkı:** SWE-bench tek seferlik kod üretimini ölçer. PinchBench bir agent olarak oturup gerçek projeyi çözmeyi ölçer — ANF tam olarak bu ikincisini yapıyor.
+
+> **Reasoning budget:** Her agent çağrısında LLM'e kaç token "düşünmesi" gerektiğini söylüyoruz. Architect 16384, Coder 4096, Tester sadece 256. Hem kalite hem hız optimize edilmiş oluyor.
+
+### Diğer Platformlar
+
+| Platform | Model | Port | Timeout |
+|---|---|---|---|
+| Ollama (macOS/Linux) | `deepseek-r1:7b`, `llama3.2`, `qwen2.5-coder:7b` | 11434 | 2dk |
+| LM Studio | herhangi | 1234 | 5dk |
+| NVIDIA NIM Cloud | `nvidia/nemotron-3-super-120b-a12b` | 443 (https) | 2dk |
+| OpenAI API | `gpt-4o` | 443 (https) | 2dk |
+
+### Yapılandırma — `config/vault.json`
+
+```json
+{
+  "global": {
+    "nim_host": "localhost",
+    "nim_port": 8000,
+    "nim_protocol": "http",
+    "nim_api_key": "",
+    "model_id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+    "nim_timeout_ms": 300000,
+    "nim_enable_thinking": true,
+    "nim_reasoning_budgets": {
+      "ARCHITECT": 16384,
+      "REVIEWER_COST": 2048,
+      "REVIEWER_PERF": 2048,
+      "CODER": 4096,
+      "TESTER": 256,
+      "DOCS": 1024
+    },
+    "reference_dir": "/opsiyonel/harici/docs/reference",
+    "workspace_dir": "/opsiyonel/harici/src"
+  }
+}
+```
+
+- `nim_enable_thinking: false` → Thinking kapatılır (hızlı JSON modellerde kullanın).
+- `reference_dir` → PRD'lerin okunacağı kök dizin. Belirtilmezse `docs/reference/` kullanılır. Harici yol verilirse dosyalar salt okunur (rename yapılmaz), manifest ile takip edilir.
+- `workspace_dir` → Üretilen kodun yazılacağı kök. Belirtilmezse `src/` kullanılır.
+
+### vLLM Serve Komutları
+
+**Nemotron-3-Super-120B-NVFP4 (önerilen):**
+```bash
+# GB10 128GB — NVFP4 (~60GB) + FP8 KV cache + 65K context
+vllm serve nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 \
+  --quantization nvfp4 \
+  --kv-cache-dtype fp8 \
+  --max-model-len 65536 \
+  --gpu-memory-utilization 0.95 \
+  --reasoning-parser nemotron_v3 \
+  --enable-auto-tool-choice \
+  --port 8000
+
+# 1M context için (deneysel, daha fazla KV cache gerekir):
+# VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 vllm serve ... --max-model-len 1048576
+```
+
+**GLM-4-32B-0414 (alternatif, en hızlı küçük model):**
+```bash
+vllm serve THUDM/GLM-4-32B-0414 \
+  --dtype bfloat16 \
+  --max-model-len 32768 \
+  --gpu-memory-utilization 0.55 \
+  --enable-auto-tool-choice \
+  --port 8000
+```
+
+Tüm seçenekler için `config/vault.example.json` dosyasına bakın.
+
+---
+
+## Pipeline — Ne Olur Adım Adım?
+
+```
+docs/reference/{proje_id}/prd.md
+          │
+          │  [Her 60 saniyede bir Architect tarar]
+          ▼
+┌─────────────────────────────────────────────────────┐
+│  ARCHITECT  —  Multi-Doc Synthesis                  │
+│  1. Tüm .md dosyaları birleştirir (<50000 token)    │
+│  2. NIM'e gönderir → Task listesi JSON üretir       │
+│  3. Peer Review: Cost-Reviewer × Perf-Reviewer      │
+│  4. Synthesis: Performance-weighted final plan       │
+│  5. manifest.json oluşturur → Sprint sırasına koyar │
+└──────────────────────────┬──────────────────────────┘
+                           │ WRITE_CODE (JSON queue)
+                           ▼
+┌─────────────────────────────────────────────────────┐
+│  CODER  —  Kod Üretici                              │
+│  1. coder.md skill dosyasını okur (kurallar)        │
+│  2. Active Recall: geçmiş hatalardan ders yükler    │
+│  3. NIM'e gönderir → Kod üretir                     │
+│  4. src/{proje_id}/{file_path} konumuna yazar       │
+└──────────────────────────┬──────────────────────────┘
+                           │ CODE_FINISHED
+                           ▼
+┌─────────────────────────────────────────────────────┐
+│  TESTER  —  Kalite Kapısı                           │
+│  1. Syntax check (node --check / tsc)               │
+│  2. Guardrail: yasak kütüphane taraması             │
+│  3. Shadow Tester: hardcoded secret / eval() / ReDoS│
+│  4. AI Review: PRD uyumluluk denetimi               │
+└──────────────────────────┬──────────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │ TEST_PASSED             │ BUG_REPORT
+              ▼                         ▼
+  ┌──────────────────┐       ┌───────────────────────┐
+  │  GitHub Push     │       │  ARCHITECT Steering   │
+  │  (opsiyonel)     │       │  Retry ≤ 3            │
+  │  DONE → DOCS     │       │  3+ → FAILED + RCA.md │
+  └──────────┬───────┘       └───────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────┐
+│  DOCS  —  Arşivci                                   │
+│  1. Modül için Türkçe teknik döküman üretir         │
+│  2. DEVLOG.md'ye timestamped entry ekler            │
+│  3. SYSTEM_STATE.md günceller (technical debt)      │
+└─────────────────────────────────────────────────────┘
+```
+
+**Mesajlaşma:** Her agent, `queue/inbox/{agent}/` klasöründe JSON dosyalarını 5 saniyede bir okur. Crash-safe: yetim görevler bootstrap ile kurtarılır.
+
+---
+
+## Agent Dosyaları ve Ne Yaptıklarını Biliyorlar mı?
+
+| Agent | Kod Dosyası | Skill/Prompt | Bildiği |
+|---|---|---|---|
+| **Architect** | `agents/architect.js` | `agents/architect.md` | Proje izolasyonu, sprint kapısı, hata analizi, delegasyon kuralları |
+| **Coder** | `agents/coder.js` | `agents/coder.md` | Native manifesto, dosya yolu disiplini, self-healing protokolü |
+| **Tester** | `agents/tester.js` | `agents/tester.md` | Bağımlılık taraması, logic audit, output formatı (JSON) |
+| **Docs** | `agents/docs.js` | `agents/docs.md` | DEVLOG formatı, proje damgalama, native vurgusu |
+| **Reviewer Cost** | *(architect içi)* | `agents/reviewer_cost.md` | Gereksiz adım tespiti, sadelik savunuculuğu |
+| **Reviewer Perf** | *(architect içi)* | `agents/reviewer_perf.md` | Bottleneck tespiti, <2s yanıt kuralı, KV cache |
+| **Security Guard** | `agents/security_guardrail.js` | *(kodlanmış kurallar)* | Secret, eval(), ReDoS, SDK yasağı |
+
+Her agent başlangıçta kendi `.md` skill dosyasını okur ve NIM'e system prompt olarak gönderir. Bu sayede LLM'in "kim olduğunu" ve "ne yapması gerektiğini" her call'da biliyor.
+
+---
+
+## Çalışma Zamanında Optimizasyon Gerekiyor mu?
+
+### Hayır gerekmeyenler
+- Agent koordinasyonu otomatik (manifest + sprint gate)
+- Retry mantığı (max 3) hazır ve çalışıyor
+- Security guardrail statik regex, sıfır gecikme
+- Crash recovery (orphan tasks) bootstrap'ta
+
+### Evet, bunlara dikkat edin
+
+**Token Limiti** — `agents/architect.js:TOKEN_LIMIT = 50000`
+
+Nemotron'un 1M context'i ve vLLM'in `--max-model-len 65536` ayarı ile 50K token güvenle işlenir. Limiti aşan projeler `_overlimit_` prefix ile işaretlenip sonsuz döngü korunur.
+
+```js
+// agents/architect.js, satır 13
+const TOKEN_LIMIT = 50000; // Nemotron NVFP4 için güvenli sınır
+```
+
+**Timeout** — `config/vault.json:nim_timeout_ms`
+
+| Model | Önerilen Timeout |
+|---|---|
+| Nemotron-3-Super-120B-NVFP4 (GB10) | 300000 (5dk) — MoE, 12B aktif param |
+| GLM-4-32B (GB10) | 120000 (2dk) |
+| DeepSeek-R1-7B (Ollama) | 300000 (5dk) |
+| GPT-4o (OpenAI) | 120000 (2dk) |
+
+**vLLM Ayarları (GB10) — Nemotron NVFP4**
+
+```bash
+vllm serve nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 \
+  --quantization nvfp4 \
+  --kv-cache-dtype fp8 \
+  --max-model-len 65536 \
+  --gpu-memory-utilization 0.92 \
+  --reasoning-parser nemotron_v3 \
+  --enable-auto-tool-choice \
+  --port 8000
+```
+
+- `--quantization nvfp4` + `--kv-cache-dtype fp8` → ~60GB model, 68GB KV cache
+- `--reasoning-parser nemotron_v3` → thinking `reasoning_content`'a ayrılır, `content` temiz
+- `--enforce-eager` KULLANMAYIN — CUDA graph'ları kapatır, 2-3x throughput kaybı
+
+---
+
+## Proje Yapısı
+
+```
+AutonomousNativeForge/
+│
+├── agents/                    # Tüm agent kodları
+│   ├── bootstrap.js           # Fabrika ignition — başlatma noktası
+│   ├── base-agent.js          # NIM API, dosya queue, security, utils
+│   ├── architect.js           # Orchestrator: doc synthesis + task dispatch
+│   ├── coder.js               # Kod üretici + active recall
+│   ├── tester.js              # QA + guardrail + security scan
+│   ├── docs.js                # DEVLOG + SYSTEM_STATE arşivci
+│   ├── security_guardrail.js  # Statik regex tabanlı güvenlik tarayıcı
+│   │
+│   ├── architect.md           # Architect system prompt (skill)
+│   ├── coder.md               # Coder system prompt (skill)
+│   ├── tester.md              # Tester system prompt (skill)
+│   ├── docs.md                # Docs system prompt (skill)
+│   ├── reviewer_cost.md       # Cost reviewer prompt (consensus)
+│   └── reviewer_perf.md       # Perf reviewer prompt (consensus)
+│
+├── core/
+│   └── agentBus.js            # EventEmitter altyapısı (gelecek geliştirme)
+│
+├── config/
+│   ├── vault.json             # LLM endpoint + proje credential'ları [gitignored]
+│   └── vault.example.json     # Referans şablonu
+│
+├── docs/
+│   └── reference/             # ← PRD'lerinizi buraya bırakın
+│       └── {proje_id}/
+│           └── *.md
+│
+├── src/                       # Agent çıktıları — üretilen kodlar
+│   └── {proje_id}/
+│       ├── manifest.json      # Görev durumu (pipeline state)
+│       ├── SYSTEM_STATE.md    # Teknik borç + özellik haritası
+│       └── {üretilen kodlar}
+│
+├── queue/                     # Agent mesajlaşma sistemi
+│   ├── inbox/{agent}/         # Gelen görevler (JSON)
+│   ├── processing/            # İşlenmekte olanlar
+│   ├── done/                  # Tamamlananlar
+│   └── error/                 # Başarısız olanlar
+│
+├── workspace/                 # Manuel geliştirme alanı
+├── logs/                      # Her agent'ın log dosyası
+├── common_lessons.json        # Global active recall (tüm projeler için)
+│
+└── scripts/
+    ├── status.js              # Pipeline durum monitörü
+    └── test-nim-connection.js # LLM bağlantı + inference testi
+```
+
+---
+
+## Komutlar
+
+```bash
+npm run forge       # Fabrikayı başlat (tüm ajanlar)
+npm run architect   # Sadece architect'i başlat (tekil proje testi)
+npm run status      # Pipeline durumu — anlık fotoğraf
+npm run watch       # Pipeline durumu — 3s'de bir güncellenir
+npm run test-nim    # LLM bağlantı + tek-token inference testi
+```
+
+---
+
+## PRD Format Rehberi
+
+Architect şunları arar:
+
+```markdown
+# Proje Başlığı
+
+## Sprint Planı
+
+### S0-1: Modül Adı
+**Dosya:** `apps/server/index.js`
+
+Burada ne yapılacağını açıkla...
+
+**Bağımlılıklar:** Yok  ← veya S0-2 gibi task_id
+```
+
+**Kurallar:**
+- Task ID'leri `S0-1`, `S0-1.1`, `S1-2` formatında olsun (Sprint-No.Alt-No)
+- `file_path` uzantılı olsun: `.js`, `.ts`, `.tsx`, `.sql`, `.md`, `.yml`
+- Dosya yolu `apps/` veya `packages/` ile başlasın (monorepo standardı)
+- Toplam token < 50000 olsun (Nemotron için güvenli sınır; aşılırsa bölün)
+
+---
+
+## Sistem Başladığında Ne Olur?
+
+`npm run forge` → `node agents/bootstrap.js` çalışır:
+
+```
+[BOOTSTRAP] Klasör hiyerarşisi inşa ediliyor...
+[BOOTSTRAP] Yetim görevler kurtarılıyor (Recovery)...
+[BOOTSTRAP] Proje credential'ları mühürleniyor...
+[BOOTSTRAP] Ajan dosyaları kontrol ediliyor...
+[BOOTSTRAP] vLLM (http://localhost:8000) bekleniyor...
+[BOOTSTRAP] ✅ vLLM Hazır!
+[BOOTSTRAP] 🚀 Ajanlar başlatılıyor...
+  + [ARCHITECT] macOS Terminal başlatıldı.
+  + [CODER]     macOS Terminal başlatıldı.
+  + [TESTER]    macOS Terminal başlatıldı.
+  + [DOCS]      macOS Terminal başlatıldı.
+```
+
+Sonra:
+1. Her agent kendi Terminal penceresinde (macOS) veya systemd service (Linux/GB10) olarak başlar
+2. Architect her 60 saniyede `docs/reference/` tarar
+3. Yeni PRD bulunca → Synthesis → Manifest → İlk görevi Coder'a gönderir
+4. Pipeline otomatik akar: Coder → Tester → [Retry veya GitHub Push] → Docs
+5. `npm run watch` ile gerçek zamanlı izleyebilirsiniz
+
+**Not:** bootstrap.js vLLM hazır olmadan agent'ları başlatmaz. Sonsuz döngüyle bekler. GB10 soğuk başlatmada vLLM'nin yüklenmesi 2-5 dakika alabilir.
+
+---
+
+## Donanım Desteği
+
+| Platform | Durum | Model | Notlar |
+|---|---|---|---|
+| **NVIDIA GB10 Blackwell** | ✅ Aktif | Nemotron-3-Super-120B-NVFP4 | vLLM + CUDA 13.2 + cu132 nightly PyTorch |
+| **ASUS Ascent GX10** | ✅ Aynı hw | Aynı | GB10 Superchip, 128GB unified mem |
+| **Apple Silicon** | ✅ Çalışır | Ollama (llama3, deepseek-r1:7b) | MLX backend roadmap |
+| **Herhangi Linux x86** | ✅ Çalışır | Ollama veya vLLM | GPU opsiyonel |
+
+GB10 kurulum scripti: `./GB10_installation_script.sh` (v4.3.0 — NVFP4 + FP8 KV + Marlin)
+
+GB10 detaylı rehber: `docs/GB10 system installation procedures/`
+
+---
+
+## Güvenlik Kuralları
+
+`security_guardrail.js` şunları otomatik engeller:
+
+| Kural | Şiddet | Örnek |
+|---|---|---|
+| Hardcoded secret | CRITICAL | `apiKey = "sk-abc..."` |
+| eval() kullanımı | CRITICAL | `eval(userInput)` |
+| ReDoS regex | HIGH | `/.*/+/` |
+| Doğrudan shell exec | MEDIUM | `child_process.exec(...)` |
+| openai SDK | CRITICAL | `require('openai')` |
+| @nvidia/* SDK | CRITICAL | `require('@nvidia/nim')` |
 
 ---
 
 ## Roadmap
 
-- [x] vLLM + DeepSeek-R1 32B stable on Blackwell GB10
-- [x] 4-agent pipeline with EventEmitter bus
-- [x] Multi-tenant credential isolation
-- [x] Self-healing loop (3 retries → ERROR_REPORT)
-- [x] Autonomous GitHub push via native HTTPS
-- [x] **V4 Strategic Layer**: Active Recall, Shadow Tester, Consensus
-- [x] **Self-Doc**: SYSTEM_STATE.md with Technical Debt tracking
-- [ ] Apple Silicon port (MLX backend)
-- [ ] ASUS Ascend NPU inference integration
-- [ ] Web UI for real-time agent monitoring
-- [ ] Autonomous Refactoring Sprints (Debt Clearance)
-- [ ] Community plugin system for custom agents
+- [x] 4-agent pipeline (Architect, Coder, Tester, Docs)
+- [x] Dosya tabanlı crash-safe mesaj kuyruğu
+- [x] Active Recall — hata derslerini bağlamsal enjekte etme
+- [x] Shadow Tester — statik güvenlik taraması
+- [x] Peer Review Consensus — Cost × Performance diyalektiği
+- [x] SYSTEM_STATE.md — teknik borç takibi
+- [x] vLLM + Nemotron-3-Super-120B-NVFP4 GB10 kararlı (CUDA 13.2, Marlin FP4, FP8 KV)
+- [x] Harici `reference_dir` desteği (AuraPOS ilk canlı proje)
+- [x] Agent skill dosyaları (6 dosya) gözden geçirildi ve güncellendi
+- [ ] ASUS Ascent NPU inference adaptörü (Mayıs 2026 driver bekleniyor)
+- [ ] Apple Silicon MLX backend
+- [ ] Web UI (gerçek zamanlı agent izleme)
+- [ ] Otonom Refactoring Sprint (teknik borç silme)
+- [ ] Multi-project paralel pipeline
 
 ---
 
-## Contributing
+## Yazar
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a PR. The one hard rule: **no middleware dependencies**. If you're adding a feature that requires an npm package, open a Discussion first and make the case.
+**Turgay Savacı** — Yazılım Geliştirici, 15+ yıl IT, son 5 yılı yazılım mühendisliğinde.
 
-Bug reports are especially welcome — the more specific, the better. *"It broke"* is not a bug report. *"Coder agent produced CommonJS require() instead of ESM import on Node.js v22.3.0, here's the exact prompt and output"* is a bug report.
-
----
-
-## License
-
-MIT — Use it, fork it, build on it. If you do something interesting, open a Discussion and tell us about it.
-
----
-
-## Author
-
-**Turgay Savacı** — Software Developer, 15+ years in IT, last 5 years deep in software engineering.  
-Building things that shouldn't exist yet, documenting every failure along the way.
-
-*The cloud is convenient. Local is sovereign.*
+*Bulut kullanışlıdır. Yerel olan özgürdür.*

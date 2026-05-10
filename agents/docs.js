@@ -7,6 +7,11 @@ const DOCS_BASE = path.join(__dirname, '..', 'docs');
 
 async function processTask(task) {
     log(`📄 Dokümantasyon: [${task.project_id}] ${task.title}`);
+    if (!task.file_path || !fs.existsSync(task.file_path)) {
+        log(`⚠️ DOCS: Dosya bulunamadı, task atlanıyor: ${task.file_path}`);
+        sendMessage('ARCHITECT', 'DOCS_COMPLETE', task);
+        return;
+    }
     const code = fs.readFileSync(task.file_path, 'utf8');
 
     const prompt = `

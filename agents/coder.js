@@ -1,9 +1,9 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-const { ask, start, log, sendMessage, getAuthorizedPath, safeWriteFile } = require('./base-agent');
+const { ask, start, log, sendMessage, getAuthorizedPath, safeWriteFile, NIM_CONFIG } = require('./base-agent');
 const PROMPT_MODE = 'MINIMAL'; // Forge V3 Standard
-const SRC = path.join(__dirname, '..', 'src');
+const SRC = NIM_CONFIG.workspace_dir || path.join(__dirname, '..', 'src');
 
 /**
  * Project Tree: Generates a simple directory map for the agent context

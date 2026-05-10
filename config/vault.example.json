@@ -1,16 +1,100 @@
 {
+  "_readme": "vault.json şablonu. Kopyalayıp vault.json yapın. vault.json gitignored'dır.",
+
   "global": {
     "nim_host": "localhost",
     "nim_port": 8000,
     "nim_protocol": "http",
-    "nim_api_key": "YOUR_NGC_API_KEY_HERE",
-    "model_id": "deepseek-ai/deepseek-r1"
+    "nim_api_key": "",
+
+    "model_id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+
+    "nim_timeout_ms": 300000,
+
+    "nim_enable_thinking": true,
+
+    "_comment_budgets": "Per-agent reasoning token limiti. Nemotron ve GLM destekler. Kaldırırsanız model default davranışı kullanır.",
+    "nim_reasoning_budgets": {
+      "ARCHITECT":      16384,
+      "REVIEWER_COST":  2048,
+      "REVIEWER_PERF":  2048,
+      "CODER":          4096,
+      "TESTER":         256,
+      "DOCS":           1024
+    },
+
+    "_comment_dirs": "Opsiyonel. Belirtilmezse ANF kendi içindeki docs/reference/ ve src/ dizinlerini kullanır.",
+    "reference_dir": "/Users/trgysvc/Developer Files/1/ANF/MAS - Proje/AI Software Engineer Agents/docs/reference",
+    "workspace_dir": "/Users/trgysvc/Developer Files/1/ANF/MAS - Proje/AI Software Engineer Agents/src",
+
+    "_model_options": {
+      "GB10_BIRINCIL_NEMOTRON120B_NVFP4": {
+        "model_id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
+        "nim_timeout_ms": 300000,
+        "nim_enable_thinking": true,
+        "vllm_serve": "vllm serve nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --quantization nvfp4 --kv-cache-dtype fp8 --max-model-len 65536 --gpu-memory-utilization 0.95 --reasoning-parser nemotron_v3 --enable-auto-tool-choice --port 8000",
+        "not": "MoE: 120B toplam / 12B aktif per token. ~329 tok/s. SWE-bench %60.47. DeepSeek-R1'den 10x hızlı."
+      },
+      "GB10_ALTERNATIF_NEMOTRON49B": {
+        "model_id": "nvidia/Llama-3_3-Nemotron-Super-49B-v1",
+        "nim_timeout_ms": 300000,
+        "nim_enable_thinking": false,
+        "vllm_serve": "vllm serve nvidia/Llama-3_3-Nemotron-Super-49B-v1 --dtype bfloat16 --max-model-len 65536 --gpu-memory-utilization 0.82 --port 8000",
+        "not": "49B BF16 = ~98GB. 30GB KV cache. 128K context. Güçlü kodlama ve instruction following."
+      },
+      "GB10_ALTERNATIF_GLM4_32B": {
+        "model_id": "THUDM/GLM-4-32B-0414",
+        "nim_timeout_ms": 120000,
+        "nim_enable_thinking": false,
+        "vllm_serve": "vllm serve THUDM/GLM-4-32B-0414 --dtype bfloat16 --max-model-len 32768 --gpu-memory-utilization 0.55 --enable-auto-tool-choice --port 8000",
+        "not": "32B BF16 = ~64GB. 64GB KV cache. En hızlı seçenek. Güçlü agent ve kodlama."
+      },
+      "GB10_ALTERNATIF_GLM_Z1_32B": {
+        "model_id": "THUDM/GLM-Z1-32B-0414",
+        "nim_timeout_ms": 240000,
+        "nim_enable_thinking": true,
+        "vllm_serve": "vllm serve THUDM/GLM-Z1-32B-0414 --dtype bfloat16 --max-model-len 32768 --gpu-memory-utilization 0.55 --port 8000",
+        "not": "GLM-4-32B'nin thinking/reasoning varyantı. R1'den hızlı, daha derin anlık düşünme."
+      },
+      "MACOS_OLLAMA": {
+        "nim_host": "localhost",
+        "nim_port": 11434,
+        "nim_protocol": "http",
+        "nim_api_key": "",
+        "model_id": "deepseek-r1:7b",
+        "nim_timeout_ms": 120000,
+        "nim_enable_thinking": true,
+        "not": "Ollama ile lokal Mac. Alternatif: llama3.2, qwen2.5-coder:7b, mistral"
+      },
+      "NVIDIA_NIM_CLOUD": {
+        "nim_host": "integrate.api.nvidia.com",
+        "nim_port": 443,
+        "nim_protocol": "https",
+        "nim_api_key": "nvapi-...",
+        "model_id": "nvidia/nemotron-3-super-120b-a12b",
+        "nim_timeout_ms": 120000,
+        "nim_enable_thinking": true,
+        "not": "NVIDIA NIM Cloud API — GB10 olmadan Nemotron test için."
+      },
+      "OPENAI": {
+        "nim_host": "api.openai.com",
+        "nim_port": 443,
+        "nim_protocol": "https",
+        "nim_api_key": "sk-...",
+        "model_id": "gpt-4o",
+        "nim_timeout_ms": 120000,
+        "nim_enable_thinking": false,
+        "not": "OpenAI API. Geliştirme ve test için. Üretimde yerel kullanın."
+      }
+    }
   },
-  "example_project": {
-    "name": "My Project",
+
+  "_comment_project": "Opsiyonel. Proje credential'ları. GitHub veya Supabase olmadan da çalışır.",
+  "ornek_proje": {
+    "name": "Örnek Proje",
     "github": {
       "token": "ghp_...",
-      "repo": "https://github.com/user/repo.git"
+      "repo": "https://github.com/kullanici/repo.git"
     },
     "supabase": {
       "url": "https://xyz.supabase.co",

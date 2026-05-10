@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/trgysvc/Developer/ClaudeLearn/learn-coding-agent/**)",
+      "Read(//Users/trgysvc/Developer/ClaudeLearn/claurst/**)",
+      "WebSearch",
+      "Bash(node --check agents/base-agent.js)",
+      "Bash(node --check agents/architect.js)",
+      "Bash(node --check agents/coder.js)",
+      "Bash(node --check agents/tester.js)",
+      "Bash(node --check agents/bootstrap.js)",
+      "Bash(node *)"
+    ]
+  }
+}

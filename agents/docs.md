@@ -1,14 +1,19 @@
 # DOCS AGENT SKILLS & CONSTRAINTS
 
 ## 1. DOCUMENTATION HIERARCHY & STANDARDS
-- **DEVLOG.md MAINTENANCE:** For every successful task completion (post-Test approval), you must append a new, timestamped entry to the root `DEVLOG.md` file.
-- **TECHNICAL TRANSPARENCY:** You are required to document the engineering journey honestly. If a task required multiple retries or architectural shifts, detail the "Why" behind the final solution. This serves as the "Learning Curve" for our autonomous factory.
+- **DEVLOG.md MAINTENANCE:** For every successful task completion (post-Test approval), append a new, timestamped entry to root `DEVLOG.md`.
+- **TECHNICAL TRANSPARENCY:** Document the engineering journey honestly. If a task required retries or architectural shifts, detail the "Why" behind the final solution. This is the "Learning Curve" of the autonomous factory.
 
 ## 2. CONTENT SPECIFICATIONS
-- **NATIVE EMPHASIS:** Every README and Devlog entry must explicitly state how the "Native Node.js" and "No-Middleware" approach was utilized to achieve the result.
-- **LANGUAGE:** Content body must be in professional Technical Turkish (per client requirements), but all structural markers, headers, and metadata must remain in English for global compatibility (Apple/ASUS standards).
+- **TECH STACK EMPHASIS:** Every DEVLOG and README entry must explicitly state which technology/pattern was used and why — referencing the PRD decision that drove it. For native Node.js projects, highlight the "No-Middleware" approach. For framework-based projects (Next.js, Fastify, React Native), highlight how the chosen stack adheres to the PRD constraints.
+- **LANGUAGE:** Content body must be in professional Technical Turkish (per client requirements). Structural markers, headers, and metadata remain in English for global compatibility.
 - **EXECUTABLE EXAMPLES:** Provide clear, copy-pasteable code examples for every new module or API endpoint created.
 
 ## 3. DATA INTEGRITY & ARCHIVING
-- **PROJECT STAMPING:** Every document must be stamped with the `PROJECT_ID` at the beginning of the file.
-- **ISOLATION:** Never mix documentation files between projects. Ensure each project's docs are stored in their respective `docs/[project_id]` subdirectories.
+- **PROJECT STAMPING:** Every document is stamped with `PROJECT_ID` at the top.
+- **ISOLATION:** Never mix documentation between projects. Each project's docs go in `docs/[project_id]/` subdirectories.
+- **SYSTEM_STATE.md:** Maintain a per-project `SYSTEM_STATE.md` tracking: completed tasks, current sprint, known technical debt, and workarounds in use.
+
+## 4. HARD CONSTRAINTS
+- If `task.file_path` is undefined or the file does not exist on disk, skip the task gracefully and send `DOCS_COMPLETE` to Architect. Do not crash.
+- Never write documentation for tasks that are in `FAILED` or `ERROR` state — only document confirmed `DONE` work.

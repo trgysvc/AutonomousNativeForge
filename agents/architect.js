@@ -1,14 +1,16 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-const { log, start, sendMessage, ask, pushToGithub } = require('./base-agent');
+const { log, start, sendMessage, ask, pushToGithub, NIM_CONFIG } = require('./base-agent');
 
 const MAX_RETRIES = 3;
 const retryCounts = {};
 
 let isDiscovering = false;
 const PROMPT_MODE = 'FULL'; // Forge V3 Standard
-const TOKEN_LIMIT = 9000; // Updated per user request to accommodate ~8900 token docs
+// TOKEN_LIMIT: Nemotron native 1M context destekler. 50K pratik sınır (vLLM max-model-len 65536 ile).
+// DeepSeek-R1 veya 32K context modeli kullanıyorsanız 9000'e düşürün.
+const TOKEN_LIMIT = 50000;
 
 /**
  * Token Estimation: Heuristic for character-to-token count (approx 4 chars/token)
@@ -224,32 +226,51 @@ async function handleMessage(msg) {
 
 /**
  * Otonom Proje Keşfi
+ *
+ * Dahili dizin (ANF içindeki docs/reference/): İşlendikten sonra dosyalar `_` prefix ile mühürlenir.
+ * Harici dizin (vault.json > reference_dir): Dosyalar salt okunur. Manifest varlığı ile tekrar işleme engellenir.
  */
 async function discoverNewProjects() {
     if (isDiscovering) return;
     isDiscovering = true;
-    
+
     try {
-        const refDir = path.join(__dirname, '..', 'docs', 'reference');
-        if (!fs.existsSync(refDir)) return;
+        const defaultRefDir = path.join(__dirname, '..', 'docs', 'reference');
+        const refDir = NIM_CONFIG.reference_dir || defaultRefDir;
+        const isExternal = refDir !== defaultRefDir;
+
+        if (!fs.existsSync(refDir)) {
+            log(`⚠️ Referans dizini bulunamadı: ${refDir}`);
+            return;
+        }
 
         const projects = fs.readdirSync(refDir);
         for (const project_id of projects) {
             const projectPath = path.join(refDir, project_id);
             if (!fs.lstatSync(projectPath).isDirectory()) continue;
 
-            const files = fs.readdirSync(projectPath).filter(f => f.endsWith('.md') && !f.startsWith('_'));
-            if (files.length === 0) continue;
+            let files;
+            if (isExternal) {
+                // Harici dizin: `_` filtresi yok, manifest tabanlı tekrar işleme engeli
+                files = fs.readdirSync(projectPath).filter(f => f.endsWith('.md'));
+                if (files.length === 0) continue;
+                const existingManifest = getManifest(project_id);
+                if (existingManifest.tasks.length > 0) continue; // Zaten planlandı
+            } else {
+                // Dahili dizin: `_` ile başlayanlar zaten işlenmiş sayılır
+                files = fs.readdirSync(projectPath).filter(f => f.endsWith('.md') && !f.startsWith('_'));
+                if (files.length === 0) continue;
+            }
 
-            log(`🔍 [${project_id}] Multi-Doc Synthesis başlatılıyor (${files.length} dosya)...`);
-            
+            log(`🔍 [${project_id}] Multi-Doc Synthesis başlatılıyor (${files.length} dosya)${isExternal ? ' [Harici]' : ''}...`);
+
             // Tüm dökümanları tek bir bağlamda birleştir
             let combinedContent = "";
             files.forEach(file => {
                 combinedContent += `\n\n--- FILE: ${file} ---\n\n` + fs.readFileSync(path.join(projectPath, file), 'utf-8');
             });
 
-            const planPrompt = `Sen bir Baş Mimarsın (Forge V3 - Mode: ${PROMPT_MODE}). 
+            const planPrompt = `Sen bir Baş Mimarsın (Forge V3 - Mode: ${PROMPT_MODE}).
             Aşağıdaki bağlantılı teknik dökümanları (PRD, Sprints, Ref) analiz et ve EKSİKSİZ bir iş listesi çıkar.
 
             KRİTİK KURALLAR:
@@ -257,16 +278,29 @@ async function discoverNewProjects() {
             2. MONOREPO AUTHORITY: file_path 'apps/' veya 'packages/' ile başlamak zorundadır.
             3. ATOMIC FLOW: Her kod yazma görevi için bir 'read_skill' adımı zorunludur. Coder önce dökümanı okumalı.
             4. STRICT FAIL: Dosya uzantısı olmayan (.ts, .js vb.) her yol REDDEDİLECEKTİR.
-            
+
             TEKNİK BAĞLAM: ${combinedContent}
 
             Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
 
             const estimatedTokens = estimateTokens(combinedContent + planPrompt);
             if (estimatedTokens > TOKEN_LIMIT) {
-                log(`⚠️ [${project_id}] Kritik Uyarı: Toplam döküman boyutu çok büyük (~${estimatedTokens} token).`);
-                log(`💡 Lütfen dökümanları parçalara bölün veya gereksiz detayları çıkarın. Limit: ${TOKEN_LIMIT}`);
-                continue; // Skip this project to avoid vLLM crash
+                log(`⚠️ [${project_id}] Kritik Uyarı: Toplam döküman boyutu çok büyük (~${estimatedTokens} token). Limit: ${TOKEN_LIMIT}`);
+                log(`💡 Dökümanları parçalara bölün.`);
+                if (!isExternal) {
+                    // Sonsuz retry döngüsünü önlemek için dahili dosyaları işaretliyoruz
+                    files.forEach(file => {
+                        const src = path.join(projectPath, file);
+                        const dst = path.join(projectPath, `_overlimit_${file}`);
+                        if (fs.existsSync(src)) fs.renameSync(src, dst);
+                    });
+                } else {
+                    // Harici dizin: manifest'e marker ekle
+                    const manifest = getManifest(project_id);
+                    manifest._overlimit = true;
+                    saveManifest(project_id, manifest);
+                }
+                continue;
             }
 
             try {
@@ -278,10 +312,10 @@ async function discoverNewProjects() {
 
                 // Phase 2: Peer Review (Consensus)
                 log(`⚖️ CONSENSUS: [${project_id}] Peer Review başlatılıyor...`);
-                
+
                 const costPrompt = `Aşağıdaki planı "Maliyet ve Verimlilik" (Cost-Oriented) açısından eleştir. Nereden tasarruf edilebilir? Gereksiz adımlar var mı?\nPLAN: ${JSON.stringify(tasks)}`;
                 const perfPrompt = `Aşağıdaki planı "Yüksek Performans ve Ölçeklenebilirlik" (Performance-Oriented) açısından eleştir. Nerede darboğaz olabilir? Daha native/hızlı bir yol var mı?\nPLAN: ${JSON.stringify(tasks)}`;
-                
+
                 const [costReview, perfReview] = await Promise.all([
                     ask('REVIEWER_COST', costPrompt, __dirname),
                     ask('REVIEWER_PERF', perfPrompt, __dirname)
@@ -294,15 +328,15 @@ async function discoverNewProjects() {
                 COST REVIEW: ${costReview}
                 PERF REVIEW: ${perfReview}
                 ORIGINAL PLAN: ${JSON.stringify(tasks)}
-                
+
                 Final planı SADECE JSON array olarak döndür.`;
-                
+
                 const finalPlanRaw = await ask('ARCHITECT', synthesisPrompt, __dirname);
                 const finalMatch = finalPlanRaw.match(/\[[\s\S]*\]/);
                 if (finalMatch) tasks = JSON.parse(finalMatch[0]);
 
                 const manifest = getManifest(project_id);
-                
+
                 tasks.forEach(t => {
                     const isValidPath = /\.(js|ts|tsx|json|sql|md|yml|sh)$/.test(t.file_path);
                     if (isValidPath && !manifest.tasks.find(mt => mt.task_id === t.task_id)) {
@@ -310,8 +344,10 @@ async function discoverNewProjects() {
                     }
                 });
 
-                // İşlenen dosyaları mühürle
-                files.forEach(file => fs.renameSync(path.join(projectPath, file), path.join(projectPath, `_${file}`)));
+                // Dahili dizinlerde işlenen dosyaları mühürle
+                if (!isExternal) {
+                    files.forEach(file => fs.renameSync(path.join(projectPath, file), path.join(projectPath, `_${file}`)));
+                }
                 log(`✅ [${project_id}] Consensus Planlama tamamlandı. ${tasks.length} görev kuyruğa girdi.`);
             } catch (e) {
                 log(`❌ [${project_id}] Planlama Hatası: ${e.message}`);

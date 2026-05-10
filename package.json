@@ -1,28 +1,27 @@
 {
   "name": "autonomous-native-forge",
-  "version": "3.0.0",
-  "description": "Universal Autonomous Software Factory (Forge V3)",
-  "main": "index.js",
+  "version": "4.0.0",
+  "description": "Autonomous Software Factory — PRD to Code Pipeline (GB10 / ASUS Ascent)",
+  "main": "agents/bootstrap.js",
   "scripts": {
-    "start": "node agents/architect.js",
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "clean": "pnpm -r exec rm -rf node_modules dist"
+    "forge": "node agents/bootstrap.js",
+    "architect": "node agents/architect.js",
+    "status": "node scripts/status.js",
+    "watch": "node scripts/status.js --watch",
+    "test-nim": "node scripts/test-nim-connection.js"
   },
   "keywords": [
     "autonomous",
     "forge",
     "agentic",
     "software-factory",
-    "forge-v3"
+    "gb10",
+    "blackwell",
+    "prd-to-code"
   ],
-  "author": "DeepMind Advanced Agentic Coding",
+  "author": "Turgay Savacı",
   "license": "MIT",
-  "devDependencies": {
-    "turbo": "^2.0.0"
-  },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   }
 }

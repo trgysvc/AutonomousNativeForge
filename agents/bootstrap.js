@@ -124,8 +124,12 @@ function deployProjectCredentials() {
             if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
         });
 
-        const envContent = `PROJECT_NAME="${data.name}"\nSUPABASE_URL="${data.supabase.url}"\nSUPABASE_KEY="${data.supabase.anon_key}"\nGITHUB_TOKEN="${data.github.token}"\nGITHUB_REPO="${data.github.repo}"\n`;
-        fs.writeFileSync(path.join(projectSrcPath, '.env'), envContent);
+        const envLines = [`PROJECT_NAME="${data.name || id}"`];
+        if (data.supabase?.url)      envLines.push(`SUPABASE_URL="${data.supabase.url}"`);
+        if (data.supabase?.anon_key) envLines.push(`SUPABASE_KEY="${data.supabase.anon_key}"`);
+        if (data.github?.token)      envLines.push(`GITHUB_TOKEN="${data.github.token}"`);
+        if (data.github?.repo)       envLines.push(`GITHUB_REPO="${data.github.repo}"`);
+        fs.writeFileSync(path.join(projectSrcPath, '.env'), envLines.join('\n') + '\n');
 
         const configContent = JSON.stringify(data, null, 2);
         fs.writeFileSync(path.join(projectSrcPath, 'config.json'), configContent);

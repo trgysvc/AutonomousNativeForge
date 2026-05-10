@@ -19,9 +19,12 @@ function loadNimConfig() {
 const NIM_CONFIG = loadNimConfig();
 
 // http veya https — nim_protocol vault'tan
-const httpModule = (NIM_CONFIG.nim_protocol === 'https') 
-    ? require('node:https') 
+const httpModule = (NIM_CONFIG.nim_protocol === 'https')
+    ? require('node:https')
     : require('node:http');
+
+// GitHub API her zaman HTTPS kullanır
+const https = require('node:https');
 
 const QUEUE = path.join(__dirname, '..', 'queue');
 const INBOX = path.join(QUEUE, 'inbox');
@@ -53,25 +56,35 @@ function log(msg) {
 }
 
 /**
- * Extraction Pipe: Cleans LLM response from thinking tokens and markdown wrappers
+ * Extraction Pipe: Cleans LLM response from thinking tokens and markdown wrappers.
+ *
+ * Desteklenen modeller ve thinking formatları:
+ *   DeepSeek-R1        → <think>...</think>
+ *   Nemotron-3-Super   → <think>...</think>  (--reasoning-parser olmadan)
+ *   GLM-4 / GLM-Z1     → <|thinking|>...</|thinking|>
+ *   GLM-4.7            → <|thinking|>...</|thinking|>
+ *   DeepSeek V4 distill→ <|begin_of_thought|>...<|end_of_thought|>
+ *
+ * NOT: vLLM --reasoning-parser kullanılırsa thinking zaten ayrı alanda gelir,
+ *      content doğrudan temiz yanıt içerir → bu fonksiyon yine de zarar vermez.
  */
 function cleanResponse(content) {
     if (!content) return "";
 
     let clean = content;
-    // Format 1: <think>...</think> — DeepSeek R1
+    // Format 1: <think>...</think> — DeepSeek R1 & Nemotron-3-Super
     clean = clean.replace(/<think>[\s\S]*?<\/think>/gi, '');
-    // Format 2: <|thinking|>...</|thinking|> — GLM-4
+    // Format 2: <|thinking|>...</|thinking|> — GLM-4 / GLM-Z1 / GLM-4.7
     clean = clean.replace(/<\|thinking\|>[\s\S]*?<\/\|thinking\|>/gi, '');
     // Format 3: <|begin_of_thought|>...<|end_of_thought|> — DeepSeek V4 distill
     clean = clean.replace(/<\|begin_of_thought\|>[\s\S]*?<\|end_of_thought\|>/gi, '');
-    // Format 4: <|thought|>...</|thought|> — alternatif V4 format
+    // Format 4: <|thought|>...</|thought|> — alternatif format
     clean = clean.replace(/<\|thought\|>[\s\S]*?<\/\|thought\|>/gi, '');
-    // Format 5: Kapanmamış tag — satır sonuna kadar temizle
+    // Format 5: Kapanmamış thinking tag — geri kalan her şeyi temizle
     clean = clean.replace(/<(think|thinking)[^>]*>[\s\S]*/gi, '');
     clean = clean.trim();
 
-    // Kod bloğu extraction
+    // Kod bloğu extraction (Coder çıktısı için)
     const codeBlockRegex = /```(?:[a-z]*)\n([\s\S]*?)```/gi;
     const matches = [...clean.matchAll(codeBlockRegex)];
     if (matches.length > 0) {
@@ -79,6 +92,18 @@ function cleanResponse(content) {
     }
 
     return clean.replace(/^```|```$/g, '').trim();
+}
+
+/**
+ * API yanıtından content'i çıkarır.
+ * vLLM --reasoning-parser kullanılırsa: content temiz, reasoning_content thinking'i içerir.
+ * --reasoning-parser olmadan: content thinking taglarıyla birlikte gelir → cleanResponse halleder.
+ */
+function extractContent(parsed) {
+    const choice = parsed.choices?.[0];
+    if (!choice) return null;
+    // reasoning-parser aktifse content zaten temiz gelir
+    return choice.message?.content || null;
 }
 
 /**
@@ -133,11 +158,33 @@ async function ask(agentName, prompt, agentDir = __dirname) {
     const finalPrompt = `SYSTEM RULES (MANDATORY):\n${skillContent}\n\nUSER TASK:\n${prompt}`;
 
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify({
-            model: NIM_CONFIG.model_id || 'deepseek-r1-32b',
+        // Temel istek gövdesi
+        const requestBody = {
+            model: NIM_CONFIG.model_id || 'nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4',
             messages: [{ role: 'user', content: finalPrompt }],
             temperature: 0.1
-        });
+        };
+
+        // Thinking & reasoning_budget kontrolü
+        // - nim_enable_thinking: false → düşünme kapalı (Tester gibi hızlı JSON görevleri için)
+        // - nim_reasoning_budgets: { ARCHITECT: 16384, CODER: 4096, ... } → per-agent derinlik
+        // Nemotron: chat_template_kwargs yöntemi | GLM: aynı yöntem
+        const budgets = NIM_CONFIG.nim_reasoning_budgets || {};
+        const agentBudget = budgets[agentName.toUpperCase()];
+
+        if (NIM_CONFIG.nim_enable_thinking === false) {
+            requestBody.chat_template_kwargs = { enable_thinking: false };
+        } else if (agentBudget !== undefined) {
+            requestBody.chat_template_kwargs = {
+                enable_thinking: true,
+                ...(agentBudget === 'low_effort'
+                    ? { low_effort: true }
+                    : { reasoning_budget: agentBudget })
+            };
+            log(`🧠 [${agentName}] Reasoning budget: ${agentBudget} token`);
+        }
+
+        const data = JSON.stringify(requestBody);
 
         // Authorization header — boşsa ekleme
         const headers = {
@@ -154,7 +201,7 @@ async function ask(agentName, prompt, agentDir = __dirname) {
             path: '/v1/chat/completions',
             method: 'POST',
             headers,
-            timeout: 2700000 // 45 dakika — CoT için sabit
+            timeout: NIM_CONFIG.nim_timeout_ms || 2700000 // vault'tan veya default 45dk (CoT modeller)
         };
 
         const req = httpModule.request(options, (res) => {
@@ -163,11 +210,11 @@ async function ask(agentName, prompt, agentDir = __dirname) {
             res.on('end', () => {
                 try {
                     const parsed = JSON.parse(body);
-                    if (!parsed.choices || !parsed.choices[0]) {
+                    const content = extractContent(parsed);
+                    if (!content) {
                         reject(new Error(`NIM yanıt formatı hatalı: ${body.substring(0, 200)}`));
                         return;
                     }
-                    const content = parsed.choices[0].message.content;
                     const clean = cleanResponse(content);
                     if (!clean || clean.length < 5) {
                         reject(new Error("Yanıt boş veya çok kısa."));
@@ -177,7 +224,7 @@ async function ask(agentName, prompt, agentDir = __dirname) {
                 } catch (e) { reject(e); }
             });
         });
-        req.on('timeout', () => { req.destroy(); reject(new Error("NIM Timeout (45dk)")); });
+        req.on('timeout', () => { req.destroy(); reject(new Error(`NIM Timeout (${Math.round((NIM_CONFIG.nim_timeout_ms || 2700000)/60000)}dk)`)); });
         req.on('error', reject);
         req.write(data);
         req.end();
@@ -328,4 +375,4 @@ async function start(agentName, processTask) {
     }
 }
 
-module.exports = { ask, start, log, sendMessage, pushToGithub, safeWriteFile, getAuthorizedPath, cleanResponse };
+module.exports = { ask, start, log, sendMessage, pushToGithub, safeWriteFile, getAuthorizedPath, cleanResponse, NIM_CONFIG };

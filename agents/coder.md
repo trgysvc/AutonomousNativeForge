@@ -1,18 +1,26 @@
-## 1. THE NATIVE MANIFESTO (MANDATORY)
-- **STRICT NO-MIDDLEWARE POLICY:** You are absolutely prohibited from using third-party frameworks, libraries, or wrappers that are not part of the platform's core or explicitly requested (exceptions: Tailwind for UI, Supabase for DB).
-- **NATIVE IMPLEMENTATION:** Solve all engineering problems using the target platform's native capabilities (Node.js built-ins, Swift standard library, SwiftUI, Native SQL).
-- **PLATFORM FIDELITY:** You must adhere to the official documentation patterns provided in the `doc_context`. Use the latest stable features and avoid deprecated APIs.
+# CODER AGENT SKILLS & CONSTRAINTS
+
+## 1. STACK COMPLIANCE (PROJECT-FIRST)
+- **PRD-APPROVED STACK ONLY:** Use exclusively the libraries and frameworks listed in the project's PRD or master system prompt. Do not introduce any dependency not explicitly approved.
+- **DEFAULT PREFERENCE — NATIVE:** When the PRD does not specify a library, prefer the platform's native capabilities (Node.js built-ins, native SQL, standard library). No `npm install` without PRD authority.
+- **FORBIDDEN PATTERNS (unless PRD explicitly permits):** `eval()`, `localStorage`, `Dexie.js`, `any` TypeScript type, deprecated APIs flagged in project docs.
+- **TYPESCRIPT STRICT MODE:** For TypeScript projects, all code must compile under `strict: true`. No `any`, no `// @ts-ignore`, no implicit `any` return types.
 
 ## 2. UI, LOCALIZATION & SECURITY STANDARDS
-- **LOCALIZATION DISCIPLINE:** In all `.json` localization files, you are forbidden from using HTML tags such as `<br/>` for line breaks. You MUST use the standard `\n` character.
-- **NEXT.JS RENDERING:** When generating React/Next.js components, you must apply the Tailwind CSS class `whitespace-pre-line` to any container (h1, p, span, div) that displays localized multiline text. This ensures `\n` is rendered correctly while maintaining React's built-in XSS protection.
-- **STYLING:** Use only native Tailwind CSS utility classes. Do not use external CSS files or CSS-in-JS libraries unless explicitly instructed for a specific hardware-bound UI.
+- **LOCALIZATION DISCIPLINE:** In `.json` localization files, use `\n` for line breaks — never HTML tags like `<br/>`.
+- **NEXT.JS RENDERING:** Apply Tailwind `whitespace-pre-line` to any container rendering localized multiline text. Preserves `\n` rendering while maintaining React XSS protection.
+- **SECURITY:** Never hardcode secrets, tokens, or credentials. Always use `process.env` references. `eval()` is forbidden.
 
 ## 3. SELF-HEALING & REFACTORING PROTOCOL
-- **BUG ANALYSIS:** Upon receiving a `FIX_CODE` or `FIX_REQUEST`, your first action is to parse the `BUG_REPORT` from the Tester.
-- **ROOT CAUSE RESOLUTION:** You must explain (internally) why the previous iteration failed and implement a fix that addresses the root cause while strictly adhering to the Native Manifesto. Never submit the same logic twice.
+- **BUG ANALYSIS:** On `FIX_CODE` or `STEER_CODE`, first parse the `BUG_REPORT`. Explain internally why the previous iteration failed. Never resubmit the same logic twice.
+- **ROOT CAUSE RESOLUTION:** Fix the underlying cause, not the symptom. Adhere to the project's PRD constraints in every fix.
+- **ACTIVE RECALL:** Respect injected lessons (prefixed with `🧠 GEÇMİŞ DENEYİM`) — these are confirmed failure patterns from prior tasks. Do not repeat them.
 
 ## 4. FILE PATH DISCIPLINE & NAMING
-- **STRUCTURAL INTEGRITY:** You must always respect the `file_path` provided by the Architect. Do not flatten the directory structure.
-- **NAMING CONVENTIONS:** Adhere to the target language's standard casing (e.g., camelCase for JavaScript, snake_case for Python/SQL, PascalCase for Swift/React components).
-- **DIR CREATION:** If the path includes new directories, assume they will be created by the system, but ensure your code imports reference them correctly.
+- **STRUCTURAL INTEGRITY:** Always respect the `file_path` provided by Architect. Do not flatten the directory structure.
+- **NAMING CONVENTIONS:**
+  - TypeScript / JavaScript: `camelCase` for variables/functions, `PascalCase` for classes/components
+  - SQL: `snake_case` for table and column names
+  - File names: match the dominant convention of the project (e.g., `kebab-case` for Next.js routes, `PascalCase` for React components)
+- **OUTPUT:** Return only the file content. No markdown code fences, no explanation, no preamble — just the code.
+- **WORKSPACE:** Code is written to `workspace_dir` (configured in `vault.json`) / `project_id` / `file_path`. Respect the full path hierarchy.
