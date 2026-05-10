@@ -80,6 +80,21 @@ function initializeFolders() {
     });
 }
 
+// Her mesaj tipinin hangi agent'ın inbox'ına gideceğini tanımlar.
+const TYPE_TO_AGENT = {
+    'WRITE_CODE':   'coder',
+    'STEER_CODE':   'coder',
+    'FIX_CODE':     'coder',
+    'RUN_TEST':     'tester',
+    'WRITE_DOCS':   'docs',
+    'UPDATE_STATE': 'docs',
+    'CODE_FINISHED':'architect',
+    'TEST_PASSED':  'architect',
+    'BUG_REPORT':   'architect',
+    'DOCS_COMPLETE':'architect',
+    'TASK_READY':   'architect',
+};
+
 function recoverStuckTasks() {
     log("🔄 Yetim görevler kurtarılıyor (Recovery)...");
     const PROCESSING = path.join(BASE_DIR, 'queue', 'processing');
@@ -92,21 +107,23 @@ function recoverStuckTasks() {
         try {
             const source = path.join(PROCESSING, f);
             const content = JSON.parse(fs.readFileSync(source, 'utf8'));
-            
-            // Metadata güncelleme: recovery_count artır ve ismi işaretle
+
             content.recovery_count = (content.recovery_count || 0) + 1;
-            const targetAgent = content.type ? content.type.split('_')[0].toLowerCase() : 'architect'; // Basit tahmin veya default
-            
-            // Eğer dosya adında zaten _recovered_ yoksa ekle
-            const newFileName = f.includes('_recovered_') ? f : f.replace('.json', `_recovered_${Date.now()}.json`);
+
+            // Tip → agent eşlemesi: WRITE_CODE → coder, RUN_TEST → tester, vb.
+            const targetAgent = TYPE_TO_AGENT[content.type] || 'architect';
+
+            const newFileName = f.includes('_recovered_')
+                ? f
+                : f.replace('.json', `_recovered_${Date.now()}.json`);
             const targetDir = path.join(INBOX, targetAgent);
-            
+
             if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-            
+
             fs.writeFileSync(path.join(targetDir, newFileName), JSON.stringify(content, null, 2));
             fs.unlinkSync(source);
-            
-            log(`   + [RECOVERED] ${f} -> ${targetAgent} (Count: ${content.recovery_count})`);
+
+            log(`   + [RECOVERED] ${f} → ${targetAgent} (Count: ${content.recovery_count})`);
         } catch (err) {
             log(`   ❌ [RECOVERY HATASI] ${f}: ${err.message}`);
         }
