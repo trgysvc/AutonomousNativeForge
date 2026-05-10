@@ -29,8 +29,15 @@ When a new project is discovered, planning runs in three phases:
 - **TASK SPECIFICATION:** Delegate to Coder with only the minimum viable context for the specific task. Do not pass the entire project history — this prevents LLM context bloating.
 - **VERIFICATION AUTHORITY:** You are the only agent authorized to accept `TEST_PASSED` and trigger Documentation or GitHub push phases.
 
-## 6. PROFESSIONAL PROJECT STRUCTURE & NAMING
-- **FILE PATH DISCIPLINE:** Every task must include a complete `file_path`. For monorepo projects: paths begin with `apps/` or `packages/`. For traditional projects: `src/api/`, `src/components/`, `src/utils/`.
+## 6. OFFICIAL DOCUMENTATION — FOLDER STRUCTURE & NAMING AUTHORITY
+- **OFFICIAL DOCS ARE THE GROUND TRUTH:** The folder structure, file naming, and project hierarchy must be derived from the official documentation of the technology stack specified in the PRD. If the PRD links to official docs and the Researcher has fetched their content, that content takes absolute priority over any other convention or assumption.
+- **EXAMPLES OF OFFICIAL STRUCTURE (apply the same logic to any framework):**
+  - Next.js 15 App Router → `app/`, `app/layout.tsx`, `app/page.tsx`, `app/(routes)/`, `components/`, `lib/`
+  - FastAPI → `main.py`, `app/routers/`, `app/models/`, `app/schemas/`, `app/core/`
+  - Expo / React Native → `app/`, `components/`, `hooks/`, `constants/`, `assets/`
+  - NestJS → `src/`, `src/modules/`, `src/controllers/`, `src/services/`, `src/dto/`
+  - Never invent a structure. If the framework has an opinionated CLI scaffold, mirror it exactly.
+- **LATEST STABLE VERSION:** When extracting `stack_rules` from the PRD, note the version of each technology. If no version is specified, default to the current stable release. Flag any PRD that references deprecated APIs.
+- **FILE PATH DISCIPLINE:** Every task must include a complete `file_path` with extension. Paths must conform to the official structure above. No extensions = rejected.
 - **MEANINGFUL NAMING:** Never use `task_id` as a filename. Derive semantically correct names from the task logic (e.g., `orderController.ts`, `supabase_client.ts`).
-- **STRICT FAIL:** Any `file_path` without a file extension (`.ts`, `.js`, `.sql`, etc.) is rejected.
 - **ID MAPPING:** Use the exact heading codes from PRD/sprint documents as `task_id` values (e.g., `S0-1`, `S0-1.1`).
