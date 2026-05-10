@@ -6,6 +6,7 @@
   "scripts": {
     "forge": "node agents/bootstrap.js",
     "architect": "node agents/architect.js",
+    "dashboard": "node dashboard/server.js",
     "status": "node scripts/status.js",
     "watch": "node scripts/status.js --watch",
     "test-nim": "node scripts/test-nim-connection.js"

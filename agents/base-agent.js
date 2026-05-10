@@ -231,95 +231,134 @@ async function ask(agentName, prompt, agentDir = __dirname) {
     });
 }
 
-async function pushToGithub(projectId, filePath, content, commitMessage) {
+/**
+ * Proje GitHub konfigürasyonunu yükler.
+ * Config yoksa veya github alanı eksikse null döner — çağıranlar graceful skip uygular.
+ */
+function loadProjectGitConfig(projectId) {
+    try {
+        const configPath = path.join(__dirname, '..', 'src', projectId, 'config.json');
+        if (!fs.existsSync(configPath)) return null;
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        if (!config.github?.token || !config.github?.repo) return null;
+        const repoPath = new URL(config.github.repo).pathname;
+        const ownerRepo = repoPath.replace('.git', '').substring(1);
+        return { token: config.github.token, ownerRepo };
+    } catch (e) { return null; }
+}
+
+/** GitHub API için basit HTTPS yardımcısı */
+function githubRequest(method, apiPath, token, body = null) {
+    return new Promise((resolve, reject) => {
+        const data = body ? JSON.stringify(body) : null;
+        const options = {
+            hostname: 'api.github.com',
+            path: apiPath,
+            method,
+            headers: {
+                'Authorization': `token ${token}`,
+                'User-Agent': 'Autonomous-Native-Forge',
+                'Accept': 'application/vnd.github.v3+json',
+                ...(data ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } : {})
+            }
+        };
+        const req = https.request(options, (res) => {
+            let buf = '';
+            res.on('data', chunk => buf += chunk);
+            res.on('end', () => resolve({ status: res.statusCode, body: buf }));
+        });
+        req.on('error', reject);
+        if (data) req.write(data);
+        req.end();
+    });
+}
+
+/**
+ * Sprint branch'ını oluşturur (yoksa). Varsa sessizce geçer.
+ * Branch adı: feature/sprint-s0, feature/sprint-s1, ...
+ */
+async function ensureBranch(projectId, branchName) {
+    const git = loadProjectGitConfig(projectId);
+    if (!git) { log(`⚠️ ensureBranch: GitHub config eksik, atlanıyor.`); return; }
+
+    // Branch var mı?
+    const check = await githubRequest('GET', `/repos/${git.ownerRepo}/git/ref/heads/${branchName}`, git.token);
+    if (check.status === 200) return; // Zaten var
+
+    // main'in SHA'sını al
+    const mainRef = await githubRequest('GET', `/repos/${git.ownerRepo}/git/ref/heads/main`, git.token);
+    if (mainRef.status !== 200) throw new Error(`main branch SHA alınamadı [${mainRef.status}]`);
+    const sha = JSON.parse(mainRef.body).object?.sha;
+    if (!sha) throw new Error('main SHA boş');
+
+    // Branch oluştur
+    const create = await githubRequest('POST', `/repos/${git.ownerRepo}/git/refs`, git.token,
+        { ref: `refs/heads/${branchName}`, sha });
+    if (create.status !== 201) throw new Error(`Branch oluşturulamadı [${create.status}]: ${create.body}`);
+    log(`🌿 Branch oluşturuldu: ${branchName}`);
+}
+
+/**
+ * Sprint tamamlandığında feature branch'tan main'e PR açar.
+ * PR zaten açıksa (422 Unprocessable) sessizce geçer.
+ */
+async function createPullRequest(projectId, branchName, title, body) {
+    const git = loadProjectGitConfig(projectId);
+    if (!git) { log(`⚠️ createPullRequest: GitHub config eksik, atlanıyor.`); return null; }
+
+    const res = await githubRequest('POST', `/repos/${git.ownerRepo}/pulls`, git.token,
+        { title, body, head: branchName, base: 'main' });
+
+    if (res.status === 201) {
+        const pr = JSON.parse(res.body);
+        return pr.html_url;
+    }
+    if (res.status === 422) {
+        log(`ℹ️ PR zaten açık veya merge edilmiş: ${branchName}`);
+        return null;
+    }
+    throw new Error(`PR oluşturulamadı [${res.status}]: ${res.body}`);
+}
+
+/**
+ * Dosyayı belirtilen branch'a push eder. Branch belirtilmezse 'main' kullanılır.
+ * GitHub config yoksa false döner (non-fatal).
+ */
+async function pushToGithub(projectId, filePath, content, commitMessage, branch = 'main') {
     const fileName = path.basename(filePath);
-    
+
     // Security Check: Blacklist filter
     if (SECRET_BLACKLIST.some(blocked => fileName.includes(blocked) || filePath.includes(blocked))) {
-        log(`🛡️ GÜVENLİK: ${fileName} hassas veri içerdiği için GitHub'a gönderilmedi.`);
+        log(`🛡️ GÜVENLİK: ${fileName} hassas veri — GitHub'a gönderilmedi.`);
         return false;
     }
 
-    const configPath = path.join(__dirname, '..', 'src', projectId, 'config.json');
-    if (!fs.existsSync(configPath)) throw new Error(`Config eksik: ${projectId}`);
-    
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const token = config.github.token;
-    const repoPath = new URL(config.github.repo).pathname;
-    const ownerRepo = repoPath.replace('.git', '').substring(1);
-    
-    // Path Normalization for Relative Path
+    const git = loadProjectGitConfig(projectId);
+    if (!git) throw new Error(`GitHub config eksik: ${projectId}`);
+
     const projectRoot = path.join(__dirname, '..', 'src', projectId);
     const relativeFilePath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
 
-    // 1. Mevcut SHA'yı al (Eğer dosya varsa)
+    // Mevcut SHA (dosya varsa güncelleme, yoksa yeni dosya)
     let currentSha = null;
-    try {
-        currentSha = await new Promise((resolve, reject) => {
-            const options = {
-                hostname: 'api.github.com',
-                path: `/repos/${ownerRepo}/contents/${relativeFilePath}`,
-                method: 'GET',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'User-Agent': 'Autonomous-Native-Forge',
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            };
-            const req = https.request(options, (res) => {
-                let body = '';
-                res.on('data', chunk => body += chunk);
-                res.on('end', () => {
-                    if (res.statusCode === 200) {
-                        try {
-                            const parsed = JSON.parse(body);
-                            resolve(parsed.sha);
-                        } catch (e) { resolve(null); }
-                    } else resolve(null);
-                });
-            });
-            req.on('error', () => resolve(null));
-            req.end();
-        });
-    } catch (e) {
-        log(`⚠️ SHA alınamadı (Yeni dosya olabilir): ${e.message}`);
+    const shaRes = await githubRequest('GET',
+        `/repos/${git.ownerRepo}/contents/${relativeFilePath}?ref=${branch}`, git.token);
+    if (shaRes.status === 200) {
+        try { currentSha = JSON.parse(shaRes.body).sha; } catch (e) { /* yeni dosya */ }
     }
 
     const payload = {
         message: commitMessage,
         content: Buffer.from(content).toString('base64'),
-        branch: "main"
+        branch
     };
     if (currentSha) payload.sha = currentSha;
 
-    const data = JSON.stringify(payload);
+    const pushRes = await githubRequest('PUT',
+        `/repos/${git.ownerRepo}/contents/${relativeFilePath}`, git.token, payload);
 
-    return new Promise((resolve, reject) => {
-        const options = {
-            hostname: 'api.github.com',
-            path: `/repos/${ownerRepo}/contents/${relativeFilePath}`,
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'User-Agent': 'Autonomous-Native-Forge',
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(data)
-            }
-        };
-
-        const req = https.request(options, (res) => {
-            let body = '';
-            res.on('data', chunk => body += chunk);
-            res.on('end', () => {
-                if (res.statusCode === 201 || res.statusCode === 200) resolve(true);
-                else reject(new Error(`GitHub Hatası [${res.statusCode}]: ${body}`));
-            });
-        });
-        req.on('error', reject);
-        req.write(data);
-        req.end();
-    });
+    if (pushRes.status === 201 || pushRes.status === 200) return true;
+    throw new Error(`GitHub Push Hatası [${pushRes.status}]: ${pushRes.body}`);
 }
 
 function sendMessage(target, type, data) {
@@ -334,45 +373,73 @@ async function start(agentName, processTask) {
     const agentInbox = path.join(INBOX, agentName.toLowerCase());
     if (!fs.existsSync(agentInbox)) fs.mkdirSync(agentInbox, { recursive: true });
 
-    // Orphan Recovery
+    // Per-agent concurrency limit from vault. ARCHITECT stays at 1 (shared manifest state).
+    const concurrencyMap = NIM_CONFIG.concurrency || {};
+    const MAX_CONCURRENT = Math.max(1, concurrencyMap[agentName.toUpperCase()] || 1);
+    if (MAX_CONCURRENT > 1) log(`⚡ [${agentName}] Paralel mod: ${MAX_CONCURRENT} eş zamanlı görev.`);
+
+    // Orphan Recovery: PROCESSING dosyaları "{agentName}-{originalFile}" formatında.
+    // Prefix olmadan filter yazılmış eski kod hiçbir zaman eşleşmiyordu — düzeltildi.
     if (fs.existsSync(PROCESSING)) {
-        const existingProcessing = fs.readdirSync(PROCESSING).filter(f => f.startsWith(agentName.toLowerCase()));
-        for (const f of existingProcessing) {
+        const prefix = `${agentName.toLowerCase()}-`;
+        const orphans = fs.readdirSync(PROCESSING)
+            .filter(f => f.startsWith(prefix) && f.endsWith('.json'));
+        for (const f of orphans) {
             log(`♻️ Orphan task kurtarıldı: ${f}`);
             const source = path.join(PROCESSING, f);
             try {
                 const task = JSON.parse(fs.readFileSync(source, 'utf-8'));
                 await processTask(task);
+                if (!fs.existsSync(DONE)) fs.mkdirSync(DONE, { recursive: true });
                 fs.renameSync(source, path.join(DONE, f));
             } catch (err) {
                 log(`❌ Orphan Hata: ${err.message}`);
-                fs.renameSync(source, path.join(ERROR, f));
+                if (!fs.existsSync(ERROR)) fs.mkdirSync(ERROR, { recursive: true });
+                try { fs.renameSync(source, path.join(ERROR, f)); } catch (_) {}
             }
         }
     }
 
+    let activeCount = 0;
+
+    // runTask: claim → execute → archive. Not awaited in the main loop — runs concurrently.
+    const runTask = async (processingPath) => {
+        activeCount++;
+        const dest = path.basename(processingPath);
+        try {
+            const task = JSON.parse(fs.readFileSync(processingPath, 'utf-8'));
+            await processTask(task);
+            if (!fs.existsSync(DONE)) fs.mkdirSync(DONE, { recursive: true });
+            fs.renameSync(processingPath, path.join(DONE, dest));
+        } catch (err) {
+            log(`❌ Hata: ${err.message}`);
+            if (!fs.existsSync(ERROR)) fs.mkdirSync(ERROR, { recursive: true });
+            try { fs.renameSync(processingPath, path.join(ERROR, dest)); } catch (_) {}
+        } finally {
+            activeCount--;
+        }
+    };
+
     while (true) {
-        if (fs.existsSync(agentInbox)) {
-            const files = fs.readdirSync(agentInbox).filter(f => f.endsWith('.json'));
+        const available = MAX_CONCURRENT - activeCount;
+        if (available > 0 && fs.existsSync(agentInbox)) {
+            const files = fs.readdirSync(agentInbox)
+                .filter(f => f.endsWith('.json'))
+                .slice(0, available);
+
             for (const f of files) {
                 const source = path.join(agentInbox, f);
-                const target = path.join(PROCESSING, f);
+                const processingName = `${agentName.toLowerCase()}-${f}`;
+                const target = path.join(PROCESSING, processingName);
                 if (!fs.existsSync(PROCESSING)) fs.mkdirSync(PROCESSING, { recursive: true });
-                fs.renameSync(source, target);
                 try {
-                    const task = JSON.parse(fs.readFileSync(target, 'utf-8'));
-                    await processTask(task);
-                    if (!fs.existsSync(DONE)) fs.mkdirSync(DONE, { recursive: true });
-                    fs.renameSync(target, path.join(DONE, f));
-                } catch (err) {
-                    log(`❌ Hata: ${err.message}`);
-                    if (!fs.existsSync(ERROR)) fs.mkdirSync(ERROR, { recursive: true });
-                    fs.renameSync(target, path.join(ERROR, f));
-                }
+                    fs.renameSync(source, target); // atomic claim — safe across processes
+                    runTask(target);               // intentionally no await
+                } catch (_) { /* another process claimed this file first */ }
             }
         }
         await new Promise(r => setTimeout(r, 5000));
     }
 }
 
-module.exports = { ask, start, log, sendMessage, pushToGithub, safeWriteFile, getAuthorizedPath, cleanResponse, NIM_CONFIG };
+module.exports = { ask, start, log, sendMessage, pushToGithub, safeWriteFile, getAuthorizedPath, cleanResponse, NIM_CONFIG, ensureBranch, createPullRequest };

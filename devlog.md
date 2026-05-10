@@ -760,4 +760,506 @@ ANF V4.3 operasyonel. Harici dizin desteği (AuraPOS) hazır. Kurulum scripti pr
 
 ---
 
+### SESSION-017 | [MILESTONE] | V4.4 — Sprint Branch Git Entegrasyonu
+**Tarih:** 2026-05-10
+**Operatör:** Claude Code & Turgay Savacı
+
+#### Amaç
+Step 5: Her sprint kendi `feature/sprint-sN` branch'ında push edilsin. Sprint tamamlandığında otomatik PR açılsın.
+
+#### Yapılanlar
+
+**`agents/base-agent.js` — GitHub altyapısı:**
+- `loadProjectGitConfig(projectId)`: `src/{projectId}/config.json`'dan GitHub token ve repo URL'sini yükler. Eksikse null döner — tüm GitHub işlemleri config yoksa non-fatal olarak atlanır.
+- `githubRequest(method, apiPath, token, body)`: node:https tabanlı generic GitHub API helper. Dış bağımlılık yok.
+- `ensureBranch(projectId, branchName)`: Branch varsa sessizce geçer, yoksa main'in HEAD SHA'sından oluşturur.
+- `createPullRequest(projectId, branchName, title, body)`: PR açar. 422 (zaten açık/merge edilmiş) sessizce tolere edilir.
+- `pushToGithub`: `branch = 'main'` parametresi eklendi — artık istenen branch'a push eder.
+- `module.exports`: `ensureBranch` ve `createPullRequest` export edildi.
+
+**`agents/architect.js` — Sprint workflow:**
+- `checkSprintCompletion(projectId, sprintId, branchName)`: Tüm sprint görevleri DONE ise PR açar. Henüz bitmeyen sprint'ler için sessizce çıkar.
+- `TEST_PASSED` handler yeniden yazıldı:
+  - Sprint ID'yi `task_id`'den türetir (`S0-1` → `s0`)
+  - Branch adı: `feature/sprint-s0`, `feature/sprint-s1`, ...
+  - `ensureBranch` → `pushToGithub(branch)` → `updateTaskStatus DONE` → `WRITE_DOCS` → `checkSprintCompletion`
+  - GitHub işlemleri non-fatal: hata olursa sadece log yazar, pipeline devam eder.
+
+#### Mimari Karar
+GitHub config (`src/{projectId}/config.json`) opsiyoneldir. Config yoksa tüm GitHub operasyonları atlanır ve pipeline kesintisiz çalışmaya devam eder. Bu, GitHub kullanmayan projelerde ANF'ın aynı kod tabanıyla çalışmasını sağlar.
+
+#### Sonraki Adım
+Step 7: Webhook notification system.
+
+---
+
+### SESSION-017 (ek) | [MILESTONE] | Step 6 — Docker Sandbox
+**Tarih:** 2026-05-10
+
+#### Yapılanlar
+
+**Yeni dosya: `agents/docker_sandbox.js`**
+- `isDockerAvailable()`: `docker info` ile 5 saniye timeout'lu daemon kontrolü.
+- `runInSandbox(projectPath, filePath)`: Tek çıkış noktası. Asla fırlatmaz, her zaman `{ skipped?, passed?, output? }` döner.
+  - `.js` → `node:20-alpine` + `node --check` (ağ gerektirmez)
+  - `.ts`/`.tsx` → `node:20-alpine` + yerel `./node_modules/.bin/tsc --noEmit` (yerel tsc yoksa atlanır)
+  - `.py` → `python:3.12-alpine` + `python -m py_compile` (ağ gerektirmez)
+  - Diğer uzantılar → `skipped`
+- Docker flags: `--rm --network none --memory 512m --cpus 2 --volume {projectPath}:/app:ro`
+- Timeout: 120 saniye (uzun TS projeleri için yeterli).
+
+**`agents/tester.js` değişiklikleri:**
+- `require('./docker_sandbox')` import edildi.
+- `SRC` sabiti eklendi (`NIM_CONFIG.workspace_dir || ../src`).
+- Adım 1.5 (yeni): Native syntax check geçtikten sonra, governance başlamadan önce Docker sandbox çalışır.
+  - `skipped` → sadece log yaz, devam et.
+  - `!passed` → `BUG_REPORT` gönder, pipeline durur.
+  - `passed` → log yaz, devam et.
+
+#### Tasarım Kararları
+
+| Karar | Gerekçe |
+|---|---|
+| Dil desteği önce kontrol edilir, sonra Docker available | Desteklenmeyen uzantılarda gereksiz 5s timeout önlenir |
+| TS: yerel tsc şart, --network none ile npx çalışmaz | npx paket indiremez; ve native check (adım 1) zaten syntax'ı yakaladı |
+| read-only volume | Sandbox kod tabanını değiştiremez |
+| --network none | Test sırasında dış API çağrısı yapılamaz; üretim ortamı koşullarını simüle eder |
+| Asla fırlatmaz | Sandbox hatası pipeline'ı kesmemeli; atlanır ve devam edilir |
+
+#### Pipeline Sırası (güncel)
+1. Native Syntax Check (hızlı ön filtre — Docker olmadan)
+2. **Docker Sandbox** (izole çalıştırma — yeni)
+3. Governance Guardrails (forbidden_libs, monorepo_roots)
+4. Shadow Tester / Security Scan
+5. AI Review (PRD uyumluluk)
+
+---
+
+### SESSION-017 (ek) | [MILESTONE] | Step 7 — Webhook Notification System
+**Tarih:** 2026-05-10
+
+#### Yapılanlar
+
+**Yeni dosya: `agents/notifier.js`**
+- `getWebhookConfig()`: vault.json'dan `webhooks.{ urls, events }` okur. Hata veya eksik field'da güvenli fallback.
+- `sendWebhook(url, payload)`: Tek bir URL'ye POST atar. `new URL()` parse hatası, network error ve 10s timeout dahil asla fırlatmaz — her zaman resolve eder.
+- `notify(event, data)`: Tüm URL'lere paralel atar. Başarısız URL'leri `console.warn` ile loglar, pipeline'ı asla durdurmaz.
+- Header: `X-ANF-Event: {event}` — webhook alıcı tarafında event routing için kullanılabilir.
+
+**`config/vault.json` — webhooks config:**
+```json
+"webhooks": {
+  "urls": [],
+  "events": ["TASK_FAILED", "SPRINT_COMPLETE", "PR_OPENED"]
+}
+```
+- `urls` boşsa tüm webhook işlemleri anında atlanır (sıfır I/O).
+- `TASK_DONE` varsayılan listede yok — büyük projelerde çok gürültülü. İsteyenler ekler.
+
+**`agents/architect.js` — 4 notify call site:**
+
+| Konum | Event | Tetikleyici |
+|---|---|---|
+| `TEST_PASSED` handler | `TASK_DONE` | Task başarıyla DONE'a geçtiğinde |
+| `BUG_REPORT` MAX_RETRIES bloğu | `TASK_FAILED` | Task kalıcı olarak FAILED'a geçtiğinde |
+| `checkSprintCompletion` — sprint tamamlandığında | `SPRINT_COMPLETE` | Tüm sprint task'ları DONE olduğunda |
+| `checkSprintCompletion` — PR oluşturulduktan sonra | `PR_OPENED` | GitHub PR URL alındığında |
+
+#### Webhook Payload Şeması
+```json
+{
+  "event": "SPRINT_COMPLETE",
+  "timestamp": "2026-05-10T...",
+  "project_id": "aurapos",
+  "sprint_id": "S0",
+  "task_count": 7,
+  "branch": "feature/sprint-s0"
+}
+```
+
+#### Tasarım Kararı
+`notifier.js` vault.json'ı doğrudan okur (`require('./base-agent')` değil). Bu, base-agent'ın notifier'a, notifier'ın da base-agent'a bağımlı olmasını önler. Dairesel bağımlılık sıfır.
+
+#### Sonraki Adım
+Step 8: Parallel Coder support — birden fazla bağımsız görevi eş zamanlı Coder instance'larına dağıt.
+
+---
+
+### SESSION-017 (ek) | [MILESTONE] | Step 8 — Parallel Coder Support
+**Tarih:** 2026-05-10
+
+#### Yapılanlar
+
+**`agents/base-agent.js` — `start()` yeniden yazıldı:**
+
+Önceki davranış: `for...of` döngüsü + `await processTask()` → tam sıralı, bir görev bitmeden diğeri başlamaz.
+
+Yeni davranış: `activeCount` sayacı + `runTask()` (no await) → slot dolmadıkça yeni görevler anında başlar.
+
+```
+activeCount = 0, MAX_CONCURRENT = 3
+─────────────────────────────────────
+Poll 1: 5 görev var, available = 3 → 3'ü claim et, 3 runTask() fırlat (no await)
+         5s sonra Poll 2: activeCount=2 (biri bitti), available=1 → 1 görev daha başlar
+         5s sonra Poll 3: activeCount=1, available=2 → kalan 1 görev + yeni gelenler
+```
+
+**Düzeltilen bug — Orphan Recovery:**
+- Eski filtre: `f.startsWith(agentName.toLowerCase())` → `'coder'` ile başlayan dosya aranır
+- PROCESSING'deki dosya adı: `WRITE_CODE-1234567890.json` → hiçbir zaman eşleşmez, orphan'lar sonsuza kadar kayıp kalır
+- Düzeltme: PROCESSING dosyaları artık `{agentName}-{originalFile}` formatında (`coder-WRITE_CODE-1234567890.json`)
+- Orphan filtre: `f.startsWith('coder-')` → doğru eşleşme
+
+**`config/vault.json` — `concurrency` config:**
+```json
+"concurrency": {
+  "ARCHITECT": 1,
+  "CODER": 3,
+  "TESTER": 2,
+  "DOCS": 2
+}
+```
+
+| Ajan | Limit | Neden |
+|---|---|---|
+| ARCHITECT | 1 | manifest.json'a yazar — concurrent erişim race condition üretir |
+| CODER | 3 | NIM I/O bound; GB10 128GB tek chip'te 3 paralel inference sorunsuz |
+| TESTER | 2 | NIM + Docker; Docker container başlatma overhead'i var |
+| DOCS | 2 | NIM I/O bound, dosya yazma lightweight |
+
+#### Tasarım Kararı: async concurrency, process fork değil
+NIM API çağrıları I/O bound (network wait). Node.js event loop bu tür beklemeyi zaten verimli yönetir — aynı process içinde `Promise` bazlı paralel görevler, yeni process fork etmekten çok daha az overhead üretir. Ayrıca manifest state paylaşımı process sınırını geçmeden güvenli kalır.
+
+#### Sonraki Adım
+Step 9: Researcher agent — NIM'den bağımsız bir web arama ajanı; PRD yazarken teknoloji kararlarını destekler.
+
+---
+
+### SESSION-017 (ek) | [MILESTONE] | Step 9 — Researcher Agent
+**Tarih:** 2026-05-10
+
+#### Yapılanlar
+
+**Yeni dosya: `agents/researcher.js`**
+
+- `extractUrls(text)`: Markdown veya düz metinden `https://` URL'lerini çıkarır. Binary dosyaları (png, pdf, zip, woff...) filtreler. Maks 5 URL döner.
+- `stripHtml(html)`: Script, style, HTML tag ve entity'leri temizler. Dış bağımlılık yok.
+- `fetchUrl(url, depth)`: `https` veya `http`, 15s timeout, bir seviye redirect takibi. Asla fırlatmaz. Binary `content-type` atlanır.
+- `research(prdContent)`: Yukarıdaki fonksiyonları birleştirir — URL çıkar, paralel fetch, başarılı sonuçları formatlı bir bağlam bloğu olarak döner. Başarısız URL'ler loglanır ama pipeline'ı durdurmaz. Hiç URL yoksa `''` döner.
+
+**`agents/architect.js` değişiklikleri:**
+- `require('./researcher')` import edildi.
+- `discoverNewProjects()` içinde, `combinedContent` oluşturulduktan SONRA, `planPrompt` oluşturulmadan ÖNCE `research(combinedContent)` çağrılır.
+- `researchContext` → `planPrompt`'un `TEKNİK BAĞLAM` bölümüne eklenir.
+- Token hesabı: `estimateTokens(combinedContent + researchContext + planPrompt)` — research içeriği token limitine dahil.
+
+**`config/vault.json`:**
+- `"researcher_enabled": true` — `false` yapılırsa tüm fetch işlemleri atlanır (offline ortamlar için).
+
+#### Pipeline'daki Yeri
+
+```
+PRD dosyaları okunur
+        ↓
+researcher.js → URL'ler çıkarılır → paralel fetch
+        ↓
+research context → planPrompt'a eklenir
+        ↓
+Phase 1: İlk plan (Architect NIM)
+        ↓
+Phase 2: Peer Review (Cost + Perf)
+        ↓
+Phase 3: Synthesis
+        ↓
+Phase 4: Stack Rules
+        ↓
+Görevler kuyruğa girer
+```
+
+#### Tasarım Kararı
+Researcher harici bir API anahtarı gerektirmez — PRD'deki URL'leri doğrudan fetch eder. DuckDuckGo, Serper gibi arama servisleri eklenmedi; PRD zaten teknik URL'leri içerir (GitHub repo, docs sayfası, API referansı). Bu kaynaklar planlamada kullanılabilecek en doğrudan bilgiyi sağlar.
+
+#### Sonraki Adım
+Step 10: Web dashboard — sistem durumunu gerçek zamanlı izlemek için basit bir HTTP arayüzü.
+
+---
+
+### SESSION-017 (ek) | [MILESTONE] | Step 10 — Web Dashboard
+**Tarih:** 2026-05-10
+
+#### Yapılanlar
+
+**Yeni dosya: `dashboard/server.js`** — sıfır dış bağımlılık, native `node:http`
+
+- `GET /` → HTML dashboard (inline CSS + vanilla JS, 5 saniyede bir auto-refresh)
+- `GET /api/status` → `{ projects: [{ project_id, tasks: [{task_id, title, status, file_path}] }] }`
+- `GET /api/logs` → `{ lines: [...] }` (son 60 satır, verimli tail: son 64KB okunur)
+- `127.0.0.1`'e bağlanır — dışarıya açık değil.
+- Port `EADDRINUSE` hatasında açıklayıcı mesaj + process.exit(1).
+
+**Dashboard UI özellikleri:**
+- Dark theme (GitHub monochrome palette)
+- Her proje için: sprint progress bar (`done/total %`), task tablosu
+- Status renkleri: DONE=yeşil, IN_PROGRESS=mavi, TESTING=sarı, FAILED=kırmızı, PENDING=gri
+- Canlı sayaçlar: "3 running", "1 failed" sprint header'da görünür
+- Log paneli: son 60 satır, yeni satır gelince otomatik scroll-to-bottom
+- Tüm kullanıcı verisi XSS'e karşı HTML escape edilir
+
+**`config/vault.json`:** `"dashboard_port": 3000` eklendi.
+
+**`package.json`:** `"dashboard": "node dashboard/server.js"` script eklendi.
+
+#### Kullanım
+```bash
+# Pipeline'ı başlat (ayrı terminal)
+node agents/architect.js
+
+# Dashboard'u başlat (ayrı terminal)
+npm run dashboard
+# → http://localhost:3000
+```
+
+#### Tasarım Kararı
+Dashboard ayrı bir process olarak çalışır — pipeline agent'larına bağımlılığı yoktur. `manifest.json` ve `sys.log` dosyalarını doğrudan okur. Bu sayede herhangi bir agent çökmüş olsa bile dashboard çalışmaya devam eder ve hata görünür.
+
+#### Sonraki Adım
+Step 11–13: Stratejik adımlar — multi-file task desteği, diff/patch tabanlı güncelleme, knowledge graph.
+
+---
+
+---
+
+## SESSION-017 MASTER SUMMARY | V4.5 — Production-Ready Autonomous Factory
+**Tarih:** 2026-05-10
+**Operatör:** Claude Code & Turgay Savacı
+**Kapsam:** 10 adımlık kapsamlı geliştirme planının tamamı
+
+---
+
+### Neden Bu Geliştirmeler Yapıldı
+
+ANF V4.0 → V4.3 arasında temel 4-agent pipeline çalışıyordu. Ancak şu eksiklikler vardı:
+- GitHub entegrasyonu yoktu (kod sadece diske yazılıyordu)
+- Tüm görevler seri çalışıyordu (Coder bir tane bitirmeden diğerine geçmiyordu)
+- Tester ortam izolasyonu olmadan çalışıyordu
+- Sistem bildirimleri yoktu
+- Görsel izleme aracı yoktu
+- Planlama sırasında PRD'deki dış kaynaklar okunmuyordu
+
+Bu 10 adım bu boşlukları kapattı. Sonuç: ANF artık tam özerk bir yazılım fabrikası.
+
+---
+
+### Tamamlanan 10 Adım
+
+#### Step 1 — Tester Bug Fixes (Kritik Güvenilirlik)
+**Değişen dosya:** `agents/tester.js`
+
+İki sessiz hata düzeltildi:
+1. `catch` bloğu hata durumunda `TEST_PASSED` gönderiyordu → `BUG_REPORT`'a çevrildi
+2. AI Review JSON parse hatası `{ status: 'PASSED' }` ile fallback yapıyordu → JSON yoksa `BUG_REPORT` gönder, return
+
+**Önem:** Bu iki hata, çalışmayan kodun testleri geçmesine yol açıyordu. Sistemin temel kalite garantisi bozuktu.
+
+---
+
+#### Step 2 — Manifest-Driven Guardrails (Generic Stack Support)
+**Değişen dosyalar:** `agents/tester.js`, `config/vault.json`
+
+- `loadStackRules(projectId)`: PRD → manifest.stack_rules → vault.global → boş fallback hiyerarşisi
+- `checkArchitectureGuardrails()`: Hardcoded AuraPOS kuralları kaldırıldı. `forbidden_libs` ve `monorepo_roots` artık manifest'ten gelir
+- Boş liste → kısıtlama yok (Python, Go, Swift projeleri reddedilmez)
+- vault.json: `forbidden_libs: []`, `monorepo_roots: []` eklendi
+
+---
+
+#### Step 3 — Generic PRD Support (Genericization)
+**Değişen dosyalar:** `agents/tester.js`, `agents/architect.js`
+
+- Tester AI Review prompt: `"native"`, `"offline-first"`, `"monorepo"` hardcoded terimler kaldırıldı → `rulesContext` dinamik olarak manifest'ten enjekte edilir
+- Architect planPrompt: `MONOREPO AUTHORITY: apps/ veya packages/ ile başlamak zorundadır` kuralı kaldırıldı → `file_path PRD'deki dizin yapısından türetilir`
+- Phase 4 eklendi: Planlama sonrası LLM ile `stack_rules` PRD'den çıkarılıp manifest'e yazılır, Tester ilk görevi aldığında kurallar hazır olur
+
+**Sonuç:** ANF artık herhangi bir PRD dökümanını (Node.js, Python, Rust, Swift, .NET) işleyebilir.
+
+---
+
+#### Step 4 — Context File Injection (Coder Awareness)
+**Değişen dosyalar:** `agents/coder.js`, `agents/architect.js`
+
+- `buildContextInjection(contextFiles, projectPath)`: Bağımlı dosyaları okur, 3000 karakter/dosya limiti ile prompt'a ekler
+- `context_files` iki kaynaktan gelir: planlama sırasında Architect'in belirlediği paylaşılan dosyalar + tamamlanan bağımlılıkların `file_path`'leri
+- Coder artık önceki adımların çıktısını görüyor → interface'ler, tipler ve API sözleşmeleriyle uyumlu kod yazıyor
+
+---
+
+#### Step 5 — Sprint Branch Git Integration (Autonomous Push & PR)
+**Değişen dosyalar:** `agents/base-agent.js`, `agents/architect.js`
+
+base-agent.js'e eklenen fonksiyonlar:
+- `loadProjectGitConfig(projectId)`: `src/{projectId}/config.json`'dan GitHub token ve repo URL'si okur
+- `githubRequest(method, apiPath, token, body)`: node:https tabanlı generic GitHub API helper
+- `ensureBranch(projectId, branchName)`: Branch yoksa main'in HEAD SHA'sından oluşturur
+- `createPullRequest(projectId, branchName, title, body)`: PR açar, 422 (zaten açık) tolere eder
+- `pushToGithub()`: `branch = 'main'` parametresi eklendi — sprint branch'ına push eder
+
+architect.js TEST_PASSED akışı:
+```
+TEST_PASSED → ensureBranch(feature/sprint-s0) → pushToGithub(sprint branch)
+           → updateTaskStatus DONE → WRITE_DOCS → checkSprintCompletion
+```
+
+`checkSprintCompletion`: Sprint'teki tüm görevler DONE olduğunda otomatik PR açar.
+
+**Config:** GitHub opsiyonel (`config.json` yoksa tüm Git işlemleri sessizce atlanır).
+
+---
+
+#### Step 6 — Docker Sandbox (Isolated Test Execution)
+**Yeni dosya:** `agents/docker_sandbox.js`
+**Değişen dosya:** `agents/tester.js`
+
+`runInSandbox(projectPath, filePath)`:
+- `.js` → `node:20-alpine` + `node --check`
+- `.ts/.tsx` → `node:20-alpine` + yerel `./node_modules/.bin/tsc --noEmit` (yerel tsc yoksa atlanır)
+- `.py` → `python:3.12-alpine` + `python -m py_compile`
+- Docker flags: `--rm --network none --memory 512m --cpus 2 --volume :ro`
+
+Tester pipeline'ına Step 1.5 olarak eklendi (native syntax check sonrası, governance öncesi).
+Docker yoksa veya dil desteklenmiyorsa atlanır — pipeline durdurmaz.
+
+---
+
+#### Step 7 — Webhook Notification System (Event Dispatch)
+**Yeni dosya:** `agents/notifier.js`
+**Değişen dosyalar:** `agents/architect.js`, `config/vault.json`
+
+`notify(event, data)`: vault.json'dan URL'leri okur, tüm endpoint'lere paralel POST atar. Asla fırlatmaz.
+
+4 event tipi:
+| Event | Tetikleyici |
+|---|---|
+| `TASK_DONE` | Görev DONE'a geçtiğinde (varsayılan: devre dışı — gürültülü) |
+| `TASK_FAILED` | MAX_RETRIES aşıldığında |
+| `SPRINT_COMPLETE` | Sprint'teki tüm görevler DONE olduğunda |
+| `PR_OPENED` | GitHub PR URL alındığında |
+
+Payload şeması: `{ event, timestamp, project_id, [sprint_id, pr_url, task_count, ...] }`
+
+vault.json: `webhooks: { urls: [], events: ["TASK_FAILED", "SPRINT_COMPLETE", "PR_OPENED"] }`
+
+---
+
+#### Step 8 — Parallel Coder Support (Concurrent Task Processing)
+**Değişen dosyalar:** `agents/base-agent.js`, `config/vault.json`
+
+`start()` fonksiyonu yeniden yazıldı:
+- `MAX_CONCURRENT = vault.concurrency[agentName]` (default: 1)
+- `activeCount` sayacı ile slot takibi
+- `runTask()` `await` olmadan çağrılır → görevler eş zamanlı çalışır
+- `fs.renameSync` atomic claim — iki process aynı dosyayı alamaz
+
+vault.json: `concurrency: { ARCHITECT: 1, CODER: 3, TESTER: 2, DOCS: 2 }`
+
+Aynı zamanda **orphan recovery bug** düzeltildi:
+- PROCESSING dosyaları artık `{agentName}-{file}` formatında
+- Eski filter `startsWith('coder')` vs `WRITE_CODE-...` hiç eşleşmiyordu — düzeltildi
+
+---
+
+#### Step 9 — Researcher Agent (External Source Enrichment)
+**Yeni dosya:** `agents/researcher.js`
+**Değişen dosyalar:** `agents/architect.js`, `config/vault.json`
+
+`research(prdContent)`:
+1. PRD içindeki `https://` URL'lerini çıkarır (binary asset'ler hariç, max 5 URL)
+2. Hepsini paralel fetch eder (15s timeout, 1 redirect, binary content-type skip)
+3. HTML'i strip eder (script, style, tag, entity — sıfır dış bağımlılık)
+4. Başarılı sonuçları formatlı bağlam bloğu olarak döner
+
+Architect'in planlama promptuna `${combinedContent}${researchContext}` olarak eklenir. Token limiti hesabına dahil.
+
+vault.json: `researcher_enabled: true` (offline ortamlar için `false`)
+
+**Pratik değer:** PRD'de `https://supabase.com/docs/reference/javascript` varsa, Architect planı hazırlarken güncel API imzalarını görür.
+
+---
+
+#### Step 10 — Web Dashboard (Real-Time Monitoring)
+**Yeni dosya:** `dashboard/server.js`
+**Değişen dosyalar:** `config/vault.json`, `package.json`
+
+Sıfır dış bağımlılık, native `node:http`:
+- `GET /` → Dark theme HTML dashboard (inline CSS + vanilla JS, 5s auto-refresh)
+- `GET /api/status` → Tüm `src/*/manifest.json` dosyalarından görev durumları
+- `GET /api/logs` → `sys.log`'un son 60 satırı (64KB tail — verimli)
+
+UI özellikleri:
+- Her sprint için progress bar (`done/total %`)
+- Renk kodlu durum: DONE=yeşil, IN_PROGRESS=mavi, TESTING=sarı, FAILED=kırmızı
+- Canlı sayaçlar: "3 running · 1 failed"
+- Log paneli otomatik scroll-to-bottom
+- XSS: tüm kullanıcı verisi HTML escape edilir
+- `127.0.0.1`'e bağlanır — dışarıya açık değil
+
+`npm run dashboard` → `http://localhost:3000`
+
+---
+
+### V4.5 Sonrası Sistem Durumu
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                    ANF V4.5 — Pipeline                            │
+│                                                                    │
+│  PRD → [Researcher] → Architect (Consensus) → manifest.json       │
+│                              │                                     │
+│                    ┌─────────┴──────────┐                         │
+│                    │  (paralel, max 3)  │                         │
+│                    ▼                    ▼                         │
+│                  Coder               Coder                        │
+│                    │                    │                         │
+│                    ▼                    ▼                         │
+│  ┌─── Tester ──────────────────────────────────────────────────┐  │
+│  │  1. Native Syntax Check                                     │  │
+│  │  2. Docker Sandbox (--network none, ro mount)               │  │
+│  │  3. Governance Guardrails (manifest.stack_rules)            │  │
+│  │  4. Shadow Tester (secret/eval/ReDoS scan)                  │  │
+│  │  5. AI Review (PRD uyumluluk)                               │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│            │ PASS                    │ FAIL                        │
+│            ▼                         ▼                            │
+│  ensureBranch(feature/sprint-sN)  STEER → Retry (max 3)          │
+│  pushToGithub(sprint branch)      MAX_RETRIES → FAILED            │
+│  DOCS                             notify(TASK_FAILED) → webhook   │
+│  checkSprintCompletion                                            │
+│    → PR açıldı → notify(PR_OPENED)                               │
+│                                                                    │
+│  Dashboard: http://localhost:3000 (ayrı process, 5s refresh)      │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+### Değişen Dosyalar — Özet
+
+| Dosya | Durum | Ana Değişiklik |
+|---|---|---|
+| `agents/base-agent.js` | Güncellendi | `ensureBranch`, `createPullRequest`, `pushToGithub(branch)`, `start()` paralel rewrite, orphan fix |
+| `agents/architect.js` | Güncellendi | Phase 4 (stack_rules), context_files dispatch, sprint branch flow, `notify` calls, `research` call |
+| `agents/coder.js` | Güncellendi | `LANG_MAP`, `buildContextInjection`, `context_files` parametresi |
+| `agents/tester.js` | Güncellendi | 2 kritik bug fix, manifest guardrails, Docker sandbox step |
+| `agents/docker_sandbox.js` | Yeni | İzole test ortamı (node:20-alpine, python:3.12-alpine) |
+| `agents/notifier.js` | Yeni | Webhook dispatcher (4 event tipi, parallel POST, non-fatal) |
+| `agents/researcher.js` | Yeni | PRD URL fetch + HTML strip + bağlam enjeksiyonu |
+| `dashboard/server.js` | Yeni | Web dashboard (native http, dark UI, /api/status, /api/logs) |
+| `config/vault.json` | Güncellendi | `webhooks`, `concurrency`, `dashboard_port`, `researcher_enabled` eklendi |
+| `package.json` | Güncellendi | `"dashboard"` script eklendi |
+
+### Kalan Stratejik Adımlar (Step 11–13)
+
+- **Step 11**: Multi-file task — tek görev birden fazla dosya üretebilsin
+- **Step 12**: Diff/patch update — STEER sırasında tüm dosya yerine sadece değişen satırlar üret
+- **Step 13**: Knowledge graph — cross-project lesson linkage, keyword matching yerine semantik eşleştirme
+
+---
+
 *This log is written by a human-guided AI. Entries reflect real technical breakthroughs and the absolute victory over the Blackwell setup entropy.*

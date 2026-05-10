@@ -1,7 +1,9 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-const { log, start, sendMessage, ask, pushToGithub, NIM_CONFIG } = require('./base-agent');
+const { log, start, sendMessage, ask, pushToGithub, NIM_CONFIG, ensureBranch, createPullRequest } = require('./base-agent');
+const { notify } = require('./notifier');
+const { research } = require('./researcher');
 
 const MAX_RETRIES = 3;
 const retryCounts = {};
@@ -126,12 +128,49 @@ async function dispatchNextTasks(projectId) {
         if (dependenciesMet) {
             log(`🎯 [${projectId}] Bağımlılıklar tamam, görev başlatılıyor: ${task.title}`);
             updateTaskStatus(projectId, task.task_id, 'IN_PROGRESS');
-            sendMessage('CODER', 'WRITE_CODE', { 
-                ...task, 
-                project_id: projectId, 
-                project_manifest: manifest 
+
+            // Context Files: Planlamada belirtilen + tamamlanan bağımlılıkların çıktı dosyaları
+            // Coder bu dosyaların içeriğini okuyarak mevcut kod tabanıyla uyumlu yazar.
+            const depContextFiles = (task.depends_on || [])
+                .map(depId => manifest.tasks.find(t => t.task_id === depId))
+                .filter(dep => dep && dep.file_path && fs.existsSync(dep.file_path))
+                .map(dep => dep.file_path);
+            const plannedContextFiles = task.context_files || [];
+            const contextFiles = [...new Set([...plannedContextFiles, ...depContextFiles])];
+
+            sendMessage('CODER', 'WRITE_CODE', {
+                ...task,
+                project_id: projectId,
+                project_manifest: manifest,
+                context_files: contextFiles
             });
         }
+    }
+}
+
+/**
+ * Sprint tamamlandığında feature branch'tan main'e PR açar.
+ * Tüm sprint görevleri DONE değilse sessizce çıkar.
+ */
+async function checkSprintCompletion(projectId, sprintId, branchName) {
+    const manifest = getManifest(projectId);
+    const sprintTasks = manifest.tasks.filter(t => t.task_id.split('-')[0] === sprintId);
+    if (sprintTasks.length === 0 || !sprintTasks.every(t => t.status === 'DONE')) return;
+
+    log(`🏁 [${projectId}] Sprint ${sprintId} TAMAMLANDI! PR açılıyor: ${branchName} → main`);
+    await notify('SPRINT_COMPLETE', { project_id: projectId, sprint_id: sprintId, task_count: sprintTasks.length, branch: branchName });
+
+    const taskList = sprintTasks.map(t => `- ${t.task_id}: ${t.title}`).join('\n');
+    const prBody = `## Sprint ${sprintId} Tamamlandı\n\nANF tarafından özerk olarak üretilen, test geçmiş dosyalar.\n\n### Görevler:\n${taskList}\n\n> 🤖 Bu PR Autonomous Native Forge tarafından otomatik açılmıştır.`;
+
+    try {
+        const prUrl = await createPullRequest(projectId, branchName, `[ANF] Sprint ${sprintId} Tamamlandı`, prBody);
+        if (prUrl) {
+            log(`✅ [${projectId}] PR açıldı: ${prUrl}`);
+            await notify('PR_OPENED', { project_id: projectId, sprint_id: sprintId, pr_url: prUrl, branch: branchName });
+        }
+    } catch (e) {
+        log(`⚠️ [${projectId}] PR açılamadı: ${e.message}`);
     }
 }
 
@@ -164,21 +203,28 @@ async function handleMessage(msg) {
             break;
 
         case 'TEST_PASSED':
-            log(`${prefix} ✅ TEST GEÇİLDİ. GitHub'a otonom push başlatılıyor...`);
+            log(`${prefix} ✅ TEST GEÇİLDİ.`);
             try {
                 if (!file_path || !fs.existsSync(file_path)) throw new Error("Dosya yolu bulunamadı.");
                 const content = fs.readFileSync(file_path, 'utf8');
-                
-                await pushToGithub(project_id, file_path, content, `Otonom Onaylı Commit: ${title}`);
-                log(`${prefix} 📦 GitHub mühürleme başarılı.`);
-                
+                const sprintId = task_id.split('-')[0];
+                const branchName = `feature/sprint-${sprintId.toLowerCase()}`;
+
+                try {
+                    await ensureBranch(project_id, branchName);
+                    await pushToGithub(project_id, file_path, content, `[${task_id}] ${title}`, branchName);
+                    log(`${prefix} 📦 ${branchName} branch'ına push edildi.`);
+                } catch (gitErr) {
+                    log(`${prefix} ⚠️ GitHub push atlandı: ${gitErr.message}`);
+                }
+
                 updateTaskStatus(project_id, task_id, 'DONE');
                 delete retryCounts[task_id];
-                
-                // Dokümantasyon aşamasına geç
+                await notify('TASK_DONE', { project_id, task_id, title, file_path });
                 sendMessage('DOCS', 'WRITE_DOCS', msg);
+                await checkSprintCompletion(project_id, sprintId, branchName);
             } catch (e) {
-                log(`${prefix} ❌ GitHub Kritik Hata: ${e.message}`);
+                log(`${prefix} ❌ Kritik Hata: ${e.message}`);
                 updateTaskStatus(project_id, task_id, 'ERROR', { error: e.message });
             }
             break;
@@ -189,8 +235,9 @@ async function handleMessage(msg) {
             if (retryCounts[task_id] > MAX_RETRIES) {
                 log(`${prefix} ⛔ MAX RETRY (${MAX_RETRIES}) AŞILDI. Re-planning başlatılıyor.`);
                 updateTaskStatus(project_id, task_id, 'FAILED');
-                
-                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nHATA: ${description}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revize et.`;
+                await notify('TASK_FAILED', { project_id, task_id, title, description, retries: MAX_RETRIES });
+
+                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nHATA: ${description}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revise et.`;
                 const rca = await ask('ARCHITECT', planPrompt, __dirname);
                 const rcaPath = path.join(__dirname, '..', 'queue', 'error', `${task_id}_RCA.md`);
                 fs.writeFileSync(rcaPath, `# RE-PLANNING REPORT: ${task_id}\n\n${rca}`);
@@ -270,20 +317,32 @@ async function discoverNewProjects() {
                 combinedContent += `\n\n--- FILE: ${file} ---\n\n` + fs.readFileSync(path.join(projectPath, file), 'utf-8');
             });
 
+            // Researcher: PRD içindeki URL'leri tara ve planlama bağlamını zenginleştir.
+            // Devre dışı bırakmak için: vault.json > global.researcher_enabled = false
+            let researchContext = '';
+            if (NIM_CONFIG.researcher_enabled !== false) {
+                researchContext = await research(combinedContent);
+            }
+
             const planPrompt = `Sen bir Baş Mimarsın (Forge V3 - Mode: ${PROMPT_MODE}).
-            Aşağıdaki bağlantılı teknik dökümanları (PRD, Sprints, Ref) analiz et ve EKSİKSİZ bir iş listesi çıkar.
+            Aşağıdaki teknik dökümanları analiz et ve EKSİKSİZ bir görev listesi çıkar.
 
             KRİTİK KURALLAR:
-            1. ID MAPPING: task_id dökümandaki başlık kodlarını (S0-1, S0-1.1 vb.) KESİN anahtar olarak kullan.
-            2. MONOREPO AUTHORITY: file_path 'apps/' veya 'packages/' ile başlamak zorundadır.
-            3. ATOMIC FLOW: Her kod yazma görevi için bir 'read_skill' adımı zorunludur. Coder önce dökümanı okumalı.
-            4. STRICT FAIL: Dosya uzantısı olmayan (.ts, .js vb.) her yol REDDEDİLECEKTİR.
+            1. ID MAPPING: task_id olarak dökümandaki başlık kodlarını (S0-1, S0-1.1 vb.) AYNEN kullan. Yoksa S0-1, S0-2 şeklinde üret.
+            2. FILE PATH: file_path'i PRD'deki dizin yapısından türet. Monorepo ise apps/ veya packages/; tekil modül ise src/; döküman ne söylüyorsa onu uygula. ASLA tahmin etme.
+            3. ATOMICITY: Her görev tek bir dosya üretmeli veya güncellemeli.
+            4. STRICT FAIL: Dosya uzantısı olmayan her yol geçersizdir (.ts, .js, .py, .sql vb. zorunlu).
+            5. BAĞIMLILIK: depends_on alanı ile sprint sırasına sadık kal; bağımlı görev başlamadan önce bağımlılığı tamamlanmış olmalı.
 
-            TEKNİK BAĞLAM: ${combinedContent}
+            TEKNİK BAĞLAM:
+            ${combinedContent}${researchContext}
 
-            Yanıtı SADECE JSON formatında ver: [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"]}]`;
+            Yanıtı SADECE JSON array olarak ver:
+            [{"task_id": "...", "title": "...", "desc": "...", "file_path": "...", "depends_on": ["task_id_x"], "context_files": ["opsiyonel/paylasilan/types.ts"]}]
 
-            const estimatedTokens = estimateTokens(combinedContent + planPrompt);
+            context_files: Bu görevin yazılabilmesi için Coder'ın önceden okuması gereken mevcut dosyaların listesi (tip tanımları, interface'ler, paylaşılan yardımcı fonksiyonlar). Yalnızca planda daha önce yaratılacak dosyaları referans ver. Yoksa boş bırak.`;
+
+            const estimatedTokens = estimateTokens(combinedContent + researchContext + planPrompt);
             if (estimatedTokens > TOKEN_LIMIT) {
                 log(`⚠️ [${project_id}] Kritik Uyarı: Toplam döküman boyutu çok büyük (~${estimatedTokens} token). Limit: ${TOKEN_LIMIT}`);
                 log(`💡 Dökümanları parçalara bölün.`);
@@ -335,10 +394,38 @@ async function discoverNewProjects() {
                 const finalMatch = finalPlanRaw.match(/\[[\s\S]*\]/);
                 if (finalMatch) tasks = JSON.parse(finalMatch[0]);
 
+                // Phase 4: Stack Rules Extraction
+                // Görev dağıtımından ÖNCE manifest'e yazılır — Tester ilk görevi aldığında kurallar hazır olur.
+                log(`📋 STACK RULES: [${project_id}] PRD'den teknoloji kuralları çıkarılıyor...`);
+                const stackPrompt = `Aşağıdaki teknik PRD içeriğini analiz et ve proje teknoloji kurallarını çıkar.
+
+İÇERİK:
+${combinedContent.substring(0, 10000)}
+
+SADECE şu JSON formatında yanıt ver (başka hiçbir şey yazma):
+{
+  "forbidden_libs": ["yasaklı kütüphane/paket adlarının listesi — import veya require içinde görülmemeli"],
+  "monorepo_roots": ["geçerli dizin köklerinin listesi, örn. apps/, packages/, supabase/"]
+}`;
+                try {
+                    const stackRaw = await ask('ARCHITECT', stackPrompt, __dirname);
+                    const stackMatch = stackRaw.match(/\{[\s\S]*\}/);
+                    if (stackMatch) {
+                        const stackRules = JSON.parse(stackMatch[0]);
+                        const stackManifest = getManifest(project_id);
+                        stackManifest.stack_rules = stackRules;
+                        saveManifest(project_id, stackManifest);
+                        log(`📋 [${project_id}] Stack kuralları mühürlendi. Yasak: [${(stackRules.forbidden_libs || []).join(', ')}]`);
+                    }
+                } catch (stackErr) {
+                    log(`⚠️ [${project_id}] Stack rules çıkarılamadı, varsayılanlar kullanılacak: ${stackErr.message}`);
+                }
+
                 const manifest = getManifest(project_id);
 
                 tasks.forEach(t => {
-                    const isValidPath = /\.(js|ts|tsx|json|sql|md|yml|sh)$/.test(t.file_path);
+                    // Desteklenen uzantılar: Web, Backend, Mobile, DB, DevOps, Sistem dilleri
+                    const isValidPath = /\.(js|ts|tsx|jsx|json|sql|md|yml|yaml|sh|py|rs|go|swift|kt|rb|php|cs|cpp|c|h|toml|env\.example)$/.test(t.file_path);
                     if (isValidPath && !manifest.tasks.find(mt => mt.task_id === t.task_id)) {
                         handleMessage({ type: 'TASK_READY', project_id, ...t });
                     }

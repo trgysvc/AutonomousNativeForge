@@ -47,49 +47,90 @@ function getRelevantLessons(projectId, title, desc) {
     return lessonStr;
 }
 
+const LANG_MAP = {
+    '.js':    'Node.js',
+    '.ts':    'TypeScript',
+    '.tsx':   'React/Next.js (TypeScript)',
+    '.jsx':   'React (JavaScript)',
+    '.sql':   'SQL',
+    '.py':    'Python',
+    '.rs':    'Rust',
+    '.go':    'Go',
+    '.swift': 'Swift',
+    '.kt':    'Kotlin',
+    '.rb':    'Ruby',
+    '.php':   'PHP',
+    '.cs':    'C#',
+    '.cpp':   'C++',
+    '.sh':    'Bash',
+    '.toml':  'TOML',
+    '.yml':   'YAML',
+    '.yaml':  'YAML',
+};
+
+// Context dosyası başına maksimum karakter (≈750 token). Toplam cap: 10 dosya × 3000 = 30K char.
+const MAX_CONTEXT_CHARS_PER_FILE = 3000;
+
+/**
+ * Context File Injection: Bağımlı ve paylaşılan dosyaları okuyup prompt'a ekler.
+ * Coder bu sayede mevcut tipler, interface'ler ve fonksiyonları görerek yazar.
+ */
+function buildContextInjection(contextFiles, projectPath, logPrefix) {
+    if (!contextFiles || contextFiles.length === 0) return '';
+
+    const injections = [];
+    contextFiles.forEach(cf => {
+        if (!fs.existsSync(cf)) return;
+        try {
+            const content = fs.readFileSync(cf, 'utf8');
+            const relativePath = path.relative(projectPath, cf);
+            const snippet = content.length > MAX_CONTEXT_CHARS_PER_FILE
+                ? content.substring(0, MAX_CONTEXT_CHARS_PER_FILE) + '\n... (dosya kırpıldı)'
+                : content;
+            injections.push(`\n--- BAĞLAM: ${relativePath} ---\n${snippet}`);
+        } catch (e) { /* okunamayan dosyayı atla */ }
+    });
+
+    if (injections.length === 0) return '';
+    log(`📎 ${logPrefix} ${injections.length} bağlam dosyası enjekte edildi.`);
+    return '\n\nMEVCUT DOSYALAR (Bu dosyalarla uyumlu yaz — tipleri, import yollarını ve API sözleşmelerini koru):' + injections.join('\n');
+}
+
 async function handleMessage(msg) {
-    const { type, project_id, task_id, file_path, title, desc, steer_instruction, project_manifest } = msg;
+    const { type, project_id, task_id, file_path, title, desc, steer_instruction, context_files } = msg;
     const projectPath = path.join(SRC, project_id);
     if (!fs.existsSync(projectPath)) fs.mkdirSync(projectPath, { recursive: true });
 
-    // Dil algılama
     const ext = path.extname(file_path || (task_id + '.ts')).toLowerCase();
-    const langMap = { '.js': 'Node.js', '.ts': 'TypeScript', '.tsx': 'React/Next.js (TypeScript)', '.sql': 'PostgreSQL' };
-    const targetLang = langMap[ext] || 'Code';
+    const targetLang = LANG_MAP[ext] || 'Code';
 
     const projectTree = getProjectTree(projectPath);
-    const configPath = path.join(projectPath, 'config.json');
-    let configStr = '{}';
-    if (fs.existsSync(configPath)) {
-        try {
-            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            if (config.github) config.github.token = 'REDACTED';
-            configStr = JSON.stringify(config, null, 2);
-        } catch (e) {}
-    }
 
-    let prompt = `Sen bir Kod Yazma Uzmanısın (Forge V3 - Mode: ${PROMPT_MODE}). 
+    let prompt = `Sen bir Kod Yazma Uzmanısın (Forge V3 - Mode: ${PROMPT_MODE}).
     GÖREV: ${title}
     HEDEF DOSYA: ${file_path}
     DİL: ${targetLang}
-    
+
     KRİTİK TALİMAT: ${desc}
-    
+
     BAĞLAM:
     - Çalışma Dizini: ${projectPath}
-    - Proje Ağacı: ${projectTree}
+    - Proje Ağacı:\n${projectTree}
     - İzinli Kütüphaneler: Sadece PRD'de belirtilen en güncel sürümleri kullan.
-    
-    Kural 1: Architectural kararlar verme, sadece dökümandaki teknik spesifikasyonu uygula.
-    Kural 2: Markdown bloğu kullanmadan SADECE ${targetLang} kodu döndür.`;
+
+    Kural 1: Architectural kararlar verme, sadece görev tanımındaki teknik spesifikasyonu uygula.
+    Kural 2: SADECE ${targetLang} kodu döndür. Markdown bloğu, açıklama veya başlık yazma.`;
 
     // Active Recall Injection
     const lessons = getRelevantLessons(project_id, title, desc);
     if (lessons) prompt += lessons;
 
-    if (type === 'STEER_CODE' || msg.type === 'FIX_CODE') {
+    // Context File Injection (bağımlılık çıktıları + planlanan shared dosyalar)
+    prompt += buildContextInjection(context_files, projectPath, `CODER: [${project_id}] ${task_id} —`);
+
+    if (type === 'STEER_CODE' || type === 'FIX_CODE') {
         log(`🧭 STEERING: [${project_id}] ${task_id} yönlendirme ile düzeltiliyor...`);
-        const currentCode = fs.existsSync(file_path) ? fs.readFileSync(file_path, 'utf8') : "";
+        const currentCode = fs.existsSync(file_path) ? fs.readFileSync(file_path, 'utf8') : '';
         prompt += `\n\nMEVCUT KOD:\n${currentCode}\n\nYÖNLENDİRME (STEER): ${steer_instruction || msg.description}`;
     } else {
         log(`✍️ CODER: [${project_id}] ${task_id} yazılıyor...`);

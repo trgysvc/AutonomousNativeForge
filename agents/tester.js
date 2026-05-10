@@ -3,47 +3,83 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { exec } = require('node:child_process');
 const { promisify } = require('node:util');
-const { ask, start, log, sendMessage } = require('./base-agent');
+const { ask, start, log, sendMessage, NIM_CONFIG } = require('./base-agent');
 const { scanCode } = require('./security_guardrail');
+const { runInSandbox } = require('./docker_sandbox');
 const SILENT_REPLY_TOKEN = 'HEARTBEAT_OK'; // Forge V3 Standard
 const execAsync = promisify(exec);
+const SRC = NIM_CONFIG.workspace_dir || path.join(__dirname, '..', 'src');
 
 /**
- * Governance Tests: Mimari Barikatlar (Guardrails)
- * PRD'de izin verilmeyen kütüphaneleri ve monorepo dışı yapıları engeller.
+ * Stack kuralları yükleme hiyerarşisi:
+ *   1. manifest.stack_rules       — en yüksek öncelik (PRD'den çıkarılan proje kuralları)
+ *   2. vault.json > global        — ikinci seviye (tüm projeler için global default)
+ *   3. Boş liste                  — kural yok, kısıtlama yok (yanlış pozitif üretme)
+ *
+ * Neden boş fallback?
+ *   Her proje farklı bir stack kullanır. ANF bir proje tipi varsaymaz.
+ *   Kısıtlamalar PRD'den gelir; PRD yoksa kısıtlama da yoktur.
  */
-function checkArchitectureGuardrails(code, filePath) {
-    const forbidden = ['express', 'mongoose', 'axios', 'lodash', 'dotenv', 'nodemon', 'sequelize'];
-    const issues = [];
-
-    // Rule 1: Monorepo Path Authority
-    const normalizedPath = filePath.replace(/\\/g, '/');
-    if (!normalizedPath.includes('apps/') && !normalizedPath.includes('packages/')) {
-        issues.push(`🛡️ PROTOCOL VIOLATION: Dosya yolu monorepo standartlarına (apps/ veya packages/) aykırı: ${filePath}`);
-    }
-    
-    // Hallucination Protection Protocol (PRD Line 9-11 Logic)
-    const lines = code.split('\n');
-    lines.forEach((line, index) => {
-        const trimmed = line.trim();
-        const isImportOrRequire = (trimmed.startsWith('import') || trimmed.includes('require(')) && 
-                                   !trimmed.startsWith('//') && 
-                                   !trimmed.startsWith('/*');
-        
-        if (isImportOrRequire) {
-            forbidden.forEach(lib => {
-                const regex = new RegExp(`['"]${lib}['"]`, 'i');
-                if (regex.test(trimmed)) {
-                    issues.push(`🛡️ PROTOCOL VIOLATION: '${lib}' kullanımı PRD v4 uyarınca yasaktır. (L:${index + 1})`);
-                }
-            });
-
-            // Specific check for Express -> Fastify transition
-            if (trimmed.toLowerCase().includes('express')) {
-                issues.push(`⚠️ PRD İHLALİ: Express tespiti. Fastify kullanılması zorunludur. (L:${index + 1})`);
-            }
+function loadStackRules(projectId) {
+    try {
+        const manifestPath = path.join(__dirname, '..', 'src', projectId, 'manifest.json');
+        if (fs.existsSync(manifestPath)) {
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            if (manifest.stack_rules) return manifest.stack_rules;
         }
-    });
+    } catch (e) { /* manifest okunamazsa vault'a bak */ }
+
+    // Vault global default (opsiyonel — vault.json'da tanımlıysa kullan)
+    return {
+        forbidden_libs: NIM_CONFIG.forbidden_libs || [],
+        monorepo_roots: NIM_CONFIG.monorepo_roots || []
+    };
+}
+
+/**
+ * Governance Tests: PRD-tabanlı Mimari Guardrail
+ *
+ * Denetim kuralları manifest.stack_rules'dan gelir.
+ * - forbidden_libs boşsa: kütüphane kısıtlaması uygulanmaz
+ * - monorepo_roots boşsa: dosya yolu kısıtlaması uygulanmaz
+ *
+ * Bu sayede Node.js, Python, Rust, Swift, .NET — her proje tipi
+ * kendi PRD kurallarıyla denetlenir, AuraPOS varsayımları taşınmaz.
+ */
+function checkArchitectureGuardrails(code, filePath, projectId) {
+    const stackRules = loadStackRules(projectId);
+    const forbidden = stackRules.forbidden_libs || [];
+    const monorepoRoots = stackRules.monorepo_roots || [];
+
+    const issues = [];
+    const normalizedPath = filePath.replace(/\\/g, '/');
+
+    // Rule 1: Dosya Yolu Kısıtlaması — yalnızca monorepo_roots tanımlıysa uygulanır
+    if (monorepoRoots.length > 0) {
+        const inValidRoot = monorepoRoots.some(root => normalizedPath.includes(root));
+        if (!inValidRoot) {
+            issues.push(`🛡️ PATH VIOLATION: Dosya geçerli bir proje kökünde değil [${monorepoRoots.join(', ')}]: ${filePath}`);
+        }
+    }
+
+    // Rule 2: Yasak Kütüphane Kontrolü — yalnızca forbidden_libs tanımlıysa uygulanır
+    if (forbidden.length > 0) {
+        const lines = code.split('\n');
+        lines.forEach((line, index) => {
+            const trimmed = line.trim();
+            const isImportOrRequire = (trimmed.startsWith('import') || trimmed.includes('require(')) &&
+                                       !trimmed.startsWith('//') &&
+                                       !trimmed.startsWith('/*');
+            if (isImportOrRequire) {
+                forbidden.forEach(lib => {
+                    const regex = new RegExp(`['"]${lib}(/[^'"]*)?['"]`, 'i');
+                    if (regex.test(trimmed)) {
+                        issues.push(`🛡️ LIB VIOLATION: '${lib}' bu projenin PRD'sinde yasaklıdır. (L:${index + 1})`);
+                    }
+                });
+            }
+        });
+    }
 
     return issues;
 }
@@ -85,15 +121,28 @@ async function handleMessage(msg) {
 
     const code = fs.readFileSync(file_path, 'utf8');
 
-    // 1. ADIM: Native Syntax Check (TSC/Node)
+    // 1. ADIM: Native Syntax Check (TSC/Node) — hızlı ön filtre
     const syntax = await validateCode(file_path);
     if (!syntax.valid) {
         log(`❌ SYNC FAIL: ${path.basename(file_path)}`);
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `SENTAKS HATASI: ${syntax.error}` });
     }
 
-    // 2. ADIM: Governance (PRD Guardrails)
-    const guardrailIssues = checkArchitectureGuardrails(code, file_path);
+    // 1.5 ADIM: Docker Sandbox — izole ortamda çalıştırma kontrolü
+    const projectPath = path.join(SRC, project_id);
+    log(`🐳 SANDBOX: [${project_id}] ${task_id} izole test ortamında denetleniyor...`);
+    const sandbox = await runInSandbox(projectPath, file_path);
+    if (sandbox.skipped) {
+        log(`⏭️ SANDBOX ATLANDI: ${sandbox.reason}`);
+    } else if (!sandbox.passed) {
+        log(`❌ SANDBOX FAIL: ${path.basename(file_path)}`);
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `SANDBOX HATASI (İzole Ortam):\n${sandbox.output}` });
+    } else {
+        log(`🐳 SANDBOX GEÇTİ: ${path.basename(file_path)}`);
+    }
+
+    // 2. ADIM: Governance (PRD Guardrails — manifest.stack_rules tabanlı)
+    const guardrailIssues = checkArchitectureGuardrails(code, file_path, project_id);
     if (guardrailIssues.length > 0) {
         log(`🛡️ GUARDRAIL FAIL: [${project_id}] Mimari İhlal!`);
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: guardrailIssues.join('\n') });
@@ -109,21 +158,39 @@ async function handleMessage(msg) {
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: steerMsg });
     }
 
-    // 3. ADIM: Forge V3 AI Review (Compliance Check)
-    const prompt = `Sen bir Forge V3 Kıdemli QA Mühendisisin. 
-    KOD: ${code}
+    // 3. ADIM: AI Review (PRD Uyumluluk Denetimi)
+    const stackRules = loadStackRules(project_id);
+    const rulesContext = stackRules.forbidden_libs?.length > 0
+        ? `Yasak kütüphaneler: ${stackRules.forbidden_libs.join(', ')}.`
+        : 'Proje stack kuralları manifest\'te henüz tanımlı değil.';
+
+    const prompt = `Sen bir kıdemli QA Mühendisisin.
+    PROJE: ${project_id}
     GÖREV: ${title}
-    
-    YALNIZCA döküman uyumluluğu ve PRD kuralları açısından incele. 
-    Eğer kod PRD'deki "native", "offline-first" veya "monorepo" kurallarına aykırıysa FAILED dön.
-    
+    PRD KURALLARI: ${rulesContext}
+    KOD:
+    ${code}
+
+    Bu kodu yalnızca şu açılardan değerlendir:
+    1. Görev tanımına (GÖREV) uygun mu? Beklenen işlevi yerine getiriyor mu?
+    2. Proje PRD kurallarına aykırı bir kütüphane veya yaklaşım kullanıyor mu?
+    3. Belirgin mantık hatası veya güvenlik açığı var mı?
+
+    Genel kod kalitesi, stil veya "daha iyi yazılabilir" yorumları yapma — yalnızca PRD ihlali ve doğruluk denetle.
+
     Yanıt Formatı (SADECE JSON):
     {"status": "PASSED" | "FAILED", "reason": "...", "bugs": []}`;
 
     try {
         const res = await ask('TESTER', prompt, __dirname);
         const match = res.match(/\{[\s\S]*\}/);
-        const result = match ? JSON.parse(match[0]) : { status: 'PASSED' };
+
+        if (!match) {
+            log(`❌ AI Review: JSON parse edilemedi. Yanıt: ${res.substring(0, 100)}`);
+            return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `AI Review yanıtı geçersiz JSON: ${res.substring(0, 200)}` });
+        }
+
+        const result = JSON.parse(match[0]);
 
         if (result.status === 'PASSED') {
             log(`✅ [${project_id}] ${task_id} onaylandı. ${SILENT_REPLY_TOKEN}`);
@@ -132,8 +199,8 @@ async function handleMessage(msg) {
             sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `PRD UYUMSUZLUĞU: ${result.reason}` });
         }
     } catch (e) {
-        log(`⚠️ AI Review hatası, native onay ile devam ediliyor.`);
-        sendMessage('ARCHITECT', 'TEST_PASSED', msg);
+        log(`❌ AI Review başarısız: ${e.message}`);
+        sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `AI Review hatası (inceleme yapılamadı): ${e.message}` });
     }
 }
 
