@@ -11,7 +11,7 @@ echo "🚀 BLACKWELL AUTONOMOUS FORGE v4.3.0 — KURULUM BAŞLIYOR"
 echo "========================================================"
 
 # --- ADIM 0: ÖNCÜL DÜZELTMELER (KRİTİK SİSTEM YAMALARI) ---
-echo ">>> [0/11] Sistem kilitleri ve ortam değişkenleri mühürleniyor..."
+echo ">>> [0/12] Sistem kilitleri ve ortam değişkenleri mühürleniyor..."
 
 # 1. Externally Managed Environment & Packaging çakışma çözümü
 sudo pip install --upgrade --ignore-installed packaging jsonschema --break-system-packages
@@ -40,8 +40,53 @@ LD_LIB="${SITE_PACKAGES}/torch/lib:${SITE_PACKAGES}/nvidia/nccl/lib:${CUDA_HOME}
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/cuda-13.2/bin:$HOME/.local/bin:$PATH"
 
-# --- ADIM 1: SİSTEM BAĞIMLILIKLARI VE NODE.JS ---
-echo ">>> [1/11] OS paketleri ve Node.js v22..."
+# --- ADIM 1: CUDA 13.2 KURULUMU ---
+echo ">>> [1/12] CUDA 13.2 Blackwell kurulumu kontrol ediliyor..."
+
+# CUDA'nın yüklü olup olmadığını kontrol et
+CUDA_INSTALLED=false
+if command -v nvcc &> /dev/null; then
+    CUDA_VER=$(nvcc --version | grep "release" | sed -n 's/.*release \([0-9]\+\.[0-9]\+\).*/\1/p')
+    if [[ "$CUDA_VER" == "13.2" ]]; then
+        echo "✅ CUDA 13.2 zaten yüklü"
+        CUDA_INSTALLED=true
+    else
+        echo "⚠️ CUDA $CUDA_VER yüklü ama 13.2 gerekli. Yükseltiliyor..."
+    fi
+else
+    echo "❌ CUDA bulunamadı. CUDA 13.2 yükleniyor..."
+fi
+
+# CUDA 13.2 yükle (eğer gerekirse)
+if [ "$CUDA_INSTALLED" = false ]; then
+    echo "CUDA 13.2 Toolkit indiriliyor ve kuruluyor..."
+
+    # NVIDIA GPG anahtarını ekle
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.0-1_all.deb
+    sudo dpkg -i cuda-keyring_1.0-1_all.deb
+
+    # Repository'yi güncelle
+    sudo apt-get update
+
+    # CUDA 13.2 yükle
+    sudo apt-get install -y cuda-toolkit-13-2 cuda-drivers
+
+    # CUDA environment variables
+    export CUDA_HOME="/usr/local/cuda-13.2"
+    export PATH="$CUDA_HOME/bin:$PATH"
+    export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
+
+    # Profile'a kalıcı olarak ekle
+    echo 'export CUDA_HOME="/usr/local/cuda-13.2"' >> ~/.bashrc
+    echo 'export PATH="$CUDA_HOME/bin:$PATH"' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"' >> ~/.bashrc
+
+    echo "✅ CUDA 13.2 kurulumu tamamlandı"
+    echo "⚠️ Sistem yeniden başlatılması önerilir"
+fi
+
+# --- ADIM 2: SİSTEM BAĞIMLILIKLARI VE NODE.JS ---
+echo ">>> [2/12] OS paketleri ve Node.js v22..."
 while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
       ps aux | grep -v grep | grep -E "apt-get|dpkg" >/dev/null 2>&1; do
     echo "⏳ Paket yöneticisi meşgul, bekleniyor (5sn)..."
@@ -57,8 +102,8 @@ if ! node -v 2>/dev/null | grep -q "v22"; then
 fi
 echo "✅ Sistem paketleri ve Node.js hazır."
 
-# --- ADIM 2: vLLM KAYNAK KODUNUN ÇEKİLMESİ ---
-echo ">>> [2/11] vLLM kaynak kodu çekiliyor..."
+# --- ADIM 3: vLLM KAYNAK KODUNUN ÇEKİLMESİ ---
+echo ">>> [3/12] vLLM kaynak kodu çekiliyor..."
 if [ ! -d "$VLLM_DIR" ]; then
     git clone https://github.com/vllm-project/vllm.git "$VLLM_DIR"
     sudo chown -R nvidia:nvidia "$VLLM_DIR"
@@ -66,19 +111,40 @@ fi
 cd "$VLLM_DIR" && git checkout . && git checkout main && git pull origin main
 echo "✅ vLLM kaynak kodu hazır."
 
-# --- ADIM 3: MODEL OTOMATİK İNDİRME (NEMOTRON NVFP4 — SafeTensors) ---
-echo ">>> [3/11] Nemotron-3-Super-120B-A12B-NVFP4 indiriliyor (~60GB SafeTensors)..."
-# CUDA sürümüne göre uygun NCCL paketini dene
-if nvcc --version | grep -q "release 13.2"; then
-    sudo pip3 install --upgrade "huggingface_hub[cli]" nvidia-nccl-cu132 --break-system-packages || \
-    sudo pip3 install --upgrade "huggingface_hub[cli]" nvidia-nccl-cu121 --break-system-packages
-elif nvcc --version | grep -q "release 12.1"; then
-    sudo pip3 install --upgrade "huggingface_hub[cli]" nvidia-nccl-cu121 --break-system-packages
-elif nvcc --version | grep -q "release 12.0"; then
-    sudo pip3 install --upgrade "huggingface_hub[cli]" nvidia-nccl-cu121 --break-system-packages
+# --- ADIM 4: MODEL OTOMATİK İNDİRME (NEMOTRON NVFP4 — SafeTensors) ---
+echo ">>> [4/12] Nemotron-3-Super-120B-A12B-NVFP4 indiriliyor (~60GB SafeTensors)..."
+# CUDA'nın varlığını kontrol et ve uygun NCCL paketini seç
+echo "CUDA durumu kontrol ediliyor..."
+if [ -d "/usr/local/cuda" ]; then
+    export CUDA_HOME="/usr/local/cuda"
+    export PATH="$CUDA_HOME/bin:$PATH"
+    export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
+    echo "CUDA bulundu: $CUDA_HOME"
+fi
+
+# CUDA sürümünü kontrol et
+CUDA_VERSION=""
+if command -v nvcc &> /dev/null; then
+    CUDA_VERSION=$(nvcc --version | grep "release" | sed -n 's/.*release \([0-9]\+\.[0-9]\+\).*/\1/p')
+    echo "CUDA sürümü: $CUDA_VERSION"
 else
-    # Fallback to cu118
-    sudo pip3 install --upgrade "huggingface_hub[cli]" nvidia-nccl-cu118 --break-system-packages
+    echo "⚠️  nvcc bulunamadı, CUDA 12.1 varsayılıyor"
+    CUDA_VERSION="12.1"
+fi
+
+# NCCL paketini yükle
+echo "HuggingFace CLI ve NCCL yükleniyor..."
+if [[ "$CUDA_VERSION" == "13.2" ]]; then
+    sudo pip3 install --upgrade "huggingface_hub[cli]" --break-system-packages
+    echo "CUDA 13.2 için NCCL atlandı (sistem NCCL kullanılacak)"
+elif [[ "$CUDA_VERSION" == "12.1" ]] || [[ "$CUDA_VERSION" == "12.0" ]]; then
+    sudo pip3 install --upgrade "huggingface_hub[cli]" --break-system-packages
+    # NCCL'i pip yerine conda/sistem paketleri ile yüklemeye çalış
+    echo "CUDA $CUDA_VERSION için sistem NCCL kullanılacak"
+else
+    # Fallback - sadece huggingface_hub yükle
+    sudo pip3 install --upgrade "huggingface_hub[cli]" --break-system-packages
+    echo "NCCL sistem paketlerinden kullanılacak"
 fi
 
 if [ ! -d "$MODEL_DIR" ] || [ -z "$(ls -A "$MODEL_DIR" 2>/dev/null)" ]; then
@@ -93,16 +159,16 @@ else
     echo "✅ Model dizini mevcut ve dolu."
 fi
 
-# --- ADIM 4: TEMİZLİK ---
-echo ">>> [4/11] Eski derleme kalıntıları temizleniyor..."
+# --- ADIM 5: TEMİZLİK ---
+echo ">>> [5/12] Eski derleme kalıntıları temizleniyor..."
 cd "$VLLM_DIR"
 sudo rm -rf build/ vllm.egg-info/
 sudo find . -name "*.so" -delete
 sudo pip3 uninstall vllm torch torchvision torchaudio -y --break-system-packages 2>/dev/null || true
 sudo pip3 cache purge
 
-# --- ADIM 5: PYTORCH cu132 (BLACKWELL ULTRA) ---
-echo ">>> [5/11] PyTorch cu132 Nightly yükleniyor..."
+# --- ADIM 6: PYTORCH cu132 (BLACKWELL ULTRA) ---
+echo ">>> [6/12] PyTorch cu132 Nightly yükleniyor..."
 sudo pip3 install --pre torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/nightly/cu132 \
     --break-system-packages
@@ -127,8 +193,8 @@ echo ">>> FlashInfer (SM121 kernel yaması) derleniyor..."
 sudo pip3 install git+https://github.com/flashinfer-ai/flashinfer.git \
     -c /tmp/torch_constraints.txt --break-system-packages || echo "⚠️ FlashInfer atlandı."
 
-# --- ADIM 6: ÇEVRESEL DEĞİŞKENLER VE YAMA ---
-echo ">>> [6/11] pyproject.toml yaması ve performans flagleri..."
+# --- ADIM 7: ÇEVRESEL DEĞİŞKENLER VE YAMA ---
+echo ">>> [7/12] pyproject.toml yaması ve performans flagleri..."
 # UYARI: TORCH_CUDA_ARCH_LIST burada ÜZERINE YAZILMAZ.
 # Adım 0'da set edilen "9.0 10.0 12.0 12.1" korunur.
 export CUDA_HOME="$CUDA_HOME"
@@ -140,22 +206,22 @@ export LD_LIBRARY_PATH="$LD_LIB:$LD_LIBRARY_PATH"
 sed -i 's/license = "Apache-2.0"/license = {text = "Apache-2.0"}/g' pyproject.toml 2>/dev/null || true
 sed -i '/license-files =/d' pyproject.toml 2>/dev/null || true
 
-# --- ADIM 7: vLLM ABI FIX DERLEME ---
-echo ">>> [7/11] vLLM izolasyonsuz derleniyor (ABI Fix)..."
+# --- ADIM 8: vLLM ABI FIX DERLEME ---
+echo ">>> [8/12] vLLM izolasyonsuz derleniyor (ABI Fix)..."
 sudo -E env \
     LD_PRELOAD="$NCCL_PRELOAD" \
     LD_LIBRARY_PATH="$LD_LIB" \
     MAX_JOBS=8 \
     pip3 install -e . --no-deps --no-build-isolation --break-system-packages
 
-# --- ADIM 8: ABI DOĞRULAMASI ---
-echo ">>> [8/11] ABI doğrulanıyor..."
+# --- ADIM 9: ABI DOĞRULAMASI ---
+echo ">>> [9/12] ABI doğrulanıyor..."
 nm -D "$VLLM_DIR/vllm/_C.abi3.so" 2>/dev/null | grep MessageLogger && \
     echo "✅ ABI Tamam (SourceLocation imzası mevcut)." || \
     echo "❌ ABI uyuşmazlığı — kurulumu tekrar çalıştır."
 
-# --- ADIM 9: SYSTEMD SERVİSİ ---
-echo ">>> [9/11] Nemotron-Super NVFP4 servisi mühürleniyor..."
+# --- ADIM 10: SYSTEMD SERVİSİ ---
+echo ">>> [10/12] Nemotron-Super NVFP4 servisi mühürleniyor..."
 sudo bash -c "cat > /etc/systemd/system/vllm-nemotron.service << EOF
 [Unit]
 Description=vLLM Nemotron-Super-120B NVFP4 Blackwell Service
@@ -194,14 +260,14 @@ EOF"
 # Not: --max-model-len 65536 (128K VRAM'de NVFP4 + fp8 KV ile güvenli sınır).
 #      131072 denemek için VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 zaten mevcut.
 
-# --- ADIM 10: ATEŞLEME ---
-echo ">>> [10/11] Nemotron-Super servisi başlatılıyor..."
+# --- ADIM 11: ATEŞLEME ---
+echo ">>> [11/12] Nemotron-Super servisi başlatılıyor..."
 sudo systemctl daemon-reload
 sudo systemctl enable vllm-nemotron
 sudo systemctl restart vllm-nemotron
 
-# --- ADIM 11: HEALTH CHECK ---
-echo ">>> [11/11] API hazır olması bekleniyor (max 20dk)..."
+# --- ADIM 12: HEALTH CHECK ---
+echo ">>> [12/12] API hazır olması bekleniyor (max 20dk)..."
 READY=0
 for i in $(seq 1 120); do
     if curl -s http://localhost:8000/v1/models | \
