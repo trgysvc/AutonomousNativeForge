@@ -10,9 +10,9 @@ const retryCounts = {};
 
 let isDiscovering = false;
 const PROMPT_MODE = 'FULL'; // Forge V3 Standard
-// TOKEN_LIMIT: Nemotron native 1M context destekler. 50K pratik sınır (vLLM max-model-len 65536 ile).
-// DeepSeek-R1 veya 32K context modeli kullanıyorsanız 9000'e düşürün.
-const TOKEN_LIMIT = 50000;
+// TOKEN_LIMIT: vLLM max-model-len=32768. 28K limit ile ~4K çıktı tamponu korunur.
+// Sprint'leri ayrı ayrı işle — tüm dökümanları aynı anda yükleme.
+const TOKEN_LIMIT = 28000;
 
 /**
  * Token Estimation: Heuristic for character-to-token count (approx 4 chars/token)
@@ -342,7 +342,8 @@ async function discoverNewProjects() {
 
             context_files: Bu görevin yazılabilmesi için Coder'ın önceden okuması gereken mevcut dosyaların listesi (tip tanımları, interface'ler, paylaşılan yardımcı fonksiyonlar). Yalnızca planda daha önce yaratılacak dosyaları referans ver. Yoksa boş bırak.`;
 
-            const estimatedTokens = estimateTokens(combinedContent + researchContext + planPrompt);
+            // planPrompt zaten combinedContent içeriyor; sadece planPrompt'u say
+            const estimatedTokens = estimateTokens(planPrompt);
             if (estimatedTokens > TOKEN_LIMIT) {
                 log(`⚠️ [${project_id}] Kritik Uyarı: Toplam döküman boyutu çok büyük (~${estimatedTokens} token). Limit: ${TOKEN_LIMIT}`);
                 log(`💡 Dökümanları parçalara bölün.`);

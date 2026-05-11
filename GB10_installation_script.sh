@@ -81,8 +81,18 @@ if [ "$CUDA_INSTALLED" = false ]; then
     # Repository'yi güncelle
     sudo apt-get update
 
-    # CUDA Toolkit yükle (en son stable sürüm)
-    sudo apt-get install -y cuda-toolkit cuda-drivers
+    # Önce NVIDIA driver kurulumunu kontrol et
+    if ! nvidia-smi &> /dev/null; then
+        echo "NVIDIA driver yükleniyor..."
+        sudo apt-get install -y nvidia-driver-535 nvidia-utils-535
+    else
+        echo "✅ NVIDIA driver zaten yüklü"
+    fi
+
+    # CUDA Toolkit yükle
+    sudo apt-get install -y cuda-toolkit-12-6 || \
+    sudo apt-get install -y cuda-toolkit-12-5 || \
+    sudo apt-get install -y cuda-toolkit
 
     # CUDA environment variables ayarla
     if [ -d "/usr/local/cuda" ]; then
@@ -154,27 +164,19 @@ else
     CUDA_VERSION="12.1"
 fi
 
-# NCCL paketini yükle
-echo "HuggingFace CLI ve NCCL yükleniyor..."
-if [[ "$CUDA_VERSION" == "13.2" ]]; then
-    sudo pip3 install --upgrade "huggingface_hub[cli]" --break-system-packages
-    echo "CUDA 13.2 için NCCL atlandı (sistem NCCL kullanılacak)"
-elif [[ "$CUDA_VERSION" == "12.1" ]] || [[ "$CUDA_VERSION" == "12.0" ]]; then
-    sudo pip3 install --upgrade "huggingface_hub[cli]" --break-system-packages
-    # NCCL'i pip yerine conda/sistem paketleri ile yüklemeye çalış
-    echo "CUDA $CUDA_VERSION için sistem NCCL kullanılacak"
-else
-    # Fallback - sadece huggingface_hub yükle
-    sudo pip3 install --upgrade "huggingface_hub[cli]" --break-system-packages
-    echo "NCCL sistem paketlerinden kullanılacak"
-fi
+# HuggingFace CLI yükle (sistem paket çakışmalarını önle)
+echo "HuggingFace CLI yükleniyor..."
+sudo pip3 install --upgrade --force-reinstall --no-deps huggingface_hub --break-system-packages
+sudo pip3 install --upgrade tqdm filelock requests --break-system-packages
+echo "✅ HuggingFace CLI kuruldu"
 
 if [ ! -d "$MODEL_DIR" ] || [ -z "$(ls -A "$MODEL_DIR" 2>/dev/null)" ]; then
     hash -r 2>/dev/null
     echo "🚀 HuggingFace CLI ile model indirme başlıyor..."
     # NOT: --include filtresi KULLANILMAZ. Bu SafeTensors modelidir (GGUF/llama.cpp değil).
     # vLLM tüm shard dosyalarına ihtiyaç duyar.
-    huggingface-cli download "$MODEL_ID" \
+    # Yeni hf komutunu kullan (huggingface-cli deprecated)
+    hf download "$MODEL_ID" \
         --local-dir "$MODEL_DIR" \
         --local-dir-use-symlinks False
 else
