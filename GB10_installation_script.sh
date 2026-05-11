@@ -59,29 +59,51 @@ fi
 
 # CUDA 13.2 yükle (eğer gerekirse)
 if [ "$CUDA_INSTALLED" = false ]; then
-    echo "CUDA 13.2 Toolkit indiriliyor ve kuruluyor..."
+    echo "CUDA Toolkit indiriliyor ve kuruluyor..."
 
-    # NVIDIA GPG anahtarını ekle
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.0-1_all.deb
+    # Ubuntu sürümünü belirle
+    UBUNTU_VER=$(lsb_release -rs | cut -d '.' -f1-2 | tr -d '.')
+    echo "Ubuntu sürümü: $UBUNTU_VER"
+
+    # NVIDIA CUDA repository ekle (Ubuntu 24.04 için 22.04 repo kullan)
+    if [[ "$UBUNTU_VER" == "2404" ]]; then
+        REPO_VER="ubuntu2204"
+    else
+        REPO_VER="ubuntu${UBUNTU_VER}04"
+    fi
+
+    echo "Repository: $REPO_VER kullanılıyor"
+
+    # NVIDIA GPG anahtarını ve repository'i ekle
+    wget https://developer.download.nvidia.com/compute/cuda/repos/$REPO_VER/x86_64/cuda-keyring_1.0-1_all.deb
     sudo dpkg -i cuda-keyring_1.0-1_all.deb
 
     # Repository'yi güncelle
     sudo apt-get update
 
-    # CUDA 13.2 yükle
-    sudo apt-get install -y cuda-toolkit-13-2 cuda-drivers
+    # CUDA Toolkit yükle (en son stable sürüm)
+    sudo apt-get install -y cuda-toolkit cuda-drivers
 
-    # CUDA environment variables
-    export CUDA_HOME="/usr/local/cuda-13.2"
+    # CUDA environment variables ayarla
+    if [ -d "/usr/local/cuda" ]; then
+        export CUDA_HOME="/usr/local/cuda"
+    elif [ -d "/usr/local/cuda-12.6" ]; then
+        export CUDA_HOME="/usr/local/cuda-12.6"
+    elif [ -d "/usr/local/cuda-12.5" ]; then
+        export CUDA_HOME="/usr/local/cuda-12.5"
+    else
+        export CUDA_HOME="/usr/local/cuda"
+    fi
+
     export PATH="$CUDA_HOME/bin:$PATH"
     export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
 
     # Profile'a kalıcı olarak ekle
-    echo 'export CUDA_HOME="/usr/local/cuda-13.2"' >> ~/.bashrc
+    echo "export CUDA_HOME=\"$CUDA_HOME\"" >> ~/.bashrc
     echo 'export PATH="$CUDA_HOME/bin:$PATH"' >> ~/.bashrc
     echo 'export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"' >> ~/.bashrc
 
-    echo "✅ CUDA 13.2 kurulumu tamamlandı"
+    echo "✅ CUDA kurulumu tamamlandı: $CUDA_HOME"
     echo "⚠️ Sistem yeniden başlatılması önerilir"
 fi
 
