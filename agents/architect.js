@@ -10,9 +10,9 @@ const retryCounts = {};
 
 let isDiscovering = false;
 const PROMPT_MODE = 'FULL'; // Forge V3 Standard
-// TOKEN_LIMIT: vLLM max-model-len=32768. 28K limit ile ~4K çıktı tamponu korunur.
-// Sprint'leri ayrı ayrı işle — tüm dökümanları aynı anda yükleme.
-const TOKEN_LIMIT = 28000;
+// TOKEN_LIMIT: Tahmin (chars/4) gerçek tokenizer'dan ~1.22x düşük sayıyor.
+// 32768 context - 1.22 düzeltme - 12000 output tamponu = ~17000 güvenli içerik sınırı.
+const TOKEN_LIMIT = 17000;
 
 /**
  * Token Estimation: Heuristic for character-to-token count (approx 4 chars/token)
