@@ -5,7 +5,7 @@ async function main() {
   let createElectricClient: (() => ElectricClient) | undefined;
 
   if (typeof electricConfig.createElectricClient === 'function') {
-    createElectricClient = electricConfig.createClient;
+    createElectricClient = electricConfig.createElectricClient;
   } else if (typeof electricConfig.default === 'function') {
     createElectricClient = electricConfig.default;
   } else {

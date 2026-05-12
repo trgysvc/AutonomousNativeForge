@@ -1,66 +1,60 @@
+export interface DeepSeekConfig {
+    apiKey: string;
+    baseURL?: string;
+}
+
 export class DeepSeekWrapper {
-  private apiKey: string | undefined;
-  private baseUrl: string;
-  private model: string;
+    private apiKey: string;
+    private baseURL: string;
 
-  constructor(options: {
-    apiKey?: string;
-    baseUrl?: string;
-    model?: string;
-  } = {}) {
-    this.apiKey = options.apiKey ?? process.env.DEEPSEEK_API_KEY;
-    this.baseUrl = options.baseUrl ?? process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com';
-    this.model = options.model ?? process.env.DEEPSEEK_MODEL ?? 'deepseek-chat';
-  }
-
-  async generate(
-    prompt: string,
-    options: {
-      temperature?: number;
-      maxTokens?: number;
-      topP?: number;
-      frequencyPenalty?: number;
-      presencePenalty?: number;
-      stop?: string | string[];
-    } = {}
-  ): Promise<string> {
-    const url = `${this.baseUrl.replace(/\/+$/, '')}/v1/chat/completions`;
-    
-    const payload = {
-      model: this.model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 512,
-      top_p: options.topP ?? 1.0,
-      frequency_penalty: options.frequencyPenalty ?? 0.0,
-      presence_penalty: options.presencePenalty ?? 0.0,
-      stop: options.stop ?? undefined
-    };
-
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json'
-    };
-
-    if (this.apiKey) {
-      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    constructor(config: Partial<DeepSeekConfig> = {}) {
+        this.apiKey = config.apiKey ?? process.env.DEEPSEEK_API_KEY;
+        if (!this.apiKey) {
+            throw new Error('DeepSeek API key is required. Provide it in config or set DEEPSEEK_API_KEY environment variable.');
+        }
+        this.baseURL = config.baseURL ?? process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com/v1';
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload)
-    });
+    async chatCompletion(
+        messages: Array<{ role: string; content: string }>,
+        options: {
+            model?: string;
+            temperature?: number;
+            maxTokens?: number;
+            [key: string]: any;
+        } = {}
+    ) {
+        const {
+            model = 'deepseek-chat',
+            temperature,
+            maxTokens,
+            ...rest
+        } = options;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
+        const body: any = {
+            model,
+            messages,
+            ...(temperature !== undefined && { temperature }),
+            ...(maxTokens !== undefined && { max_tokens: maxTokens }),
+            ...rest
+        };
+
+        const url = `${this.baseURL}/chat/completions`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`DeepSeek API request failed with status ${response.status}: ${errorText}`);
+        }
+
+        return response.json();
     }
-
-    const data = await response.json();
-    if (!data.choices?.[0]?.message?.content) {
-      throw new Error('Invalid response format from DeepSeek API');
-    }
-
-    return data.choices[0].message.content;
-  }
 }
