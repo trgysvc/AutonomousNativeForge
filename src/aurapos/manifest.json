@@ -175,7 +175,15 @@
         "S0-6"
       ],
       "status": "FIXING",
-      "retry_count": 1
+      "retry_count": 2,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-12T20:31:08.694Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/pos/app/layout.tsx\"\n"
+        }
+      ]
     },
     {
       "task_id": "S0-8",
@@ -186,7 +194,16 @@
         "S0-4",
         "S0-5"
       ],
-      "status": "FIXING"
+      "status": "FIXING",
+      "retry_count": 1,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-12T20:31:30.040Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/src/routes/orders.ts\"\n"
+        }
+      ]
     },
     {
       "task_id": "S0-9",
@@ -2682,6 +2699,1392 @@
       "status": "PENDING"
     },
     {
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S6-9",
+      "desc": "Sprint 6 entegrasyon testi senaryosu: tüm akışları (Dashboard yükleme, AI insight, Realtime, raporlar, export, ürün raporu, aktif mesailer, responsive) doğrulayan test senaryosu.",
+      "file_path": "apps/dashboard/app/(panel)/layout.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-1",
+      "desc": "Implement getElectricClient function that creates a PGlite instance with IndexedDB or file system storage based on environment and connects to ElectricSQL.",
+      "file_path": "packages/electric-config/src/client.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-2",
+      "desc": "Create env.ts exporting ELECTRIC_URL, SUPABASE_URL, and BRANCH_ID constants used across the ElectricSQL client.",
+      "file_path": "packages/electric-config/src/env.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-3",
+      "desc": "Write unit tests for getElectricClient covering both browser (IndexedDB) and Node (file system) scenarios.",
+      "file_path": "packages/electric-config/src/client.test.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-4",
+      "desc": "Implement startBranchSync function that defines and starts ElectricSQL shape syncs for all relevant tables with appropriate branch/business filters.",
+      "file_path": "packages/electric-config/src/shapes.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-5",
+      "desc": "Write unit tests for startBranchSync to verify each shape registration and sync initiation.",
+      "file_path": "packages/electric-config/src/shapes.test.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-6",
+      "desc": "Implement the resolveConflict function with conflict type handling (order, payment, stock, table_status) as per the specification.",
+      "file_path": "apps/branch-server/src/sync/conflict.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-7",
+      "desc": "Complete the TODO: insert conflict resolution logs into the Supabase audit_logs table using service role.",
+      "file_path": "apps/branch-server/src/sync/conflict.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-8",
+      "desc": "Define and export the IHardwareDriver interface with all required sub‑interfaces (payment terminal, printer, drawer, display, barcode, scale) and associated response types.",
+      "file_path": "packages/hardware/IHardwareDriver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-9",
+      "desc": "Create unit test mocks for each hardware driver interface to ensure contract compliance.",
+      "file_path": "packages/hardware/IHardwareDriver.test.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S30-10",
+      "desc": "Add @electric-sql/pglite as a dependency in the root package.json (or relevant workspace) to enable ElectricSQL client usage.",
+      "file_path": "package.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-1",
+      "desc": "PIN giriş ekranı UI ve form logicini implement et",
+      "file_path": "aurapos/apps/pos/app/(auth)/pin/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-2",
+      "desc": "Masa planı sayfası için masa seçimi ve durumu gösterimi",
+      "file_path": "aurapos/apps/pos/app/(pos)/tables/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-3",
+      "desc": "Sipariş detay sayfası: ürün listeleme, quantity kontrolü, not ekleme",
+      "file_path": "aurapos/apps/pos/app/(pos)/order/[id]/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-4",
+      "desc": "Ödeme sayfası: ödeme yöntemi seçimi, kart entegrasyonu, iptal/tamamla",
+      "file_path": "aurapos/apps/pos/app/(pos)/payment/[id]/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-5",
+      "desc": "POS uygulaması için root layout: sağ üst menü, offline indicator, PWA meta",
+      "file_path": "aurapos/apps/pos/app/layout.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-6",
+      "desc": "Masa kartı bileşeni: durum rengi, masa numarası, rezervasyon ikonu",
+      "file_path": "aurapos/apps/pos/components/tables/TableItem.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-7",
+      "desc": "Masa düzeni ızgara: sürükle‑bırak masa düzenleme, zoom",
+      "file_path": "aurapos/apps/pos/components/tables/TableGrid.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-8",
+      "desc": "Aktif siparişler listesi: filtre, sıralama, hızlı ekle",
+      "file_path": "aurapos/apps/pos/components/order/OrderList.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-9",
+      "desc": "Tek sipariş kalemi: ürün adı, miktar, birim fiyat, sil/düzenle",
+      "file_path": "aurapos/apps/pos/components/order/OrderItem.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-10",
+      "desc": "Ödeme yöntemi seçici: nakit, kart, ticket, split payment",
+      "file_path": "aurapos/apps/pos/components/payment/PaymentMethodSelector.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-11",
+      "desc": "KDS OrderCard: ürün listesi, hazırlık süresi, tamamla butonu",
+      "file_path": "aurapos/apps/pos/components/kds/OrderCard.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-12",
+      "desc": "KDS istasyon filtresi: mutfak, bar, soğuk büfe seçimi",
+      "file_path": "aurapos/apps/pos/components/kds/StationFilter.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-13",
+      "desc": "KDS TimerBadge: geçen süre, renk kodlaması (yeşil/sarı/kırmızı)",
+      "file_path": "aurapos/apps/pos/components/kds/TimerBadge.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-14",
+      "desc": "ElectricSQL client başlatma: schema, sync shapes, error handling",
+      "file_path": "aurapos/apps/pos/lib/electric.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-15",
+      "desc": "Supabase istemci (anon key) yapılandırması ve yeniden deneme mantığı",
+      "file_path": "aurapos/apps/pos/lib/supabase.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-16",
+      "desc": "Hardware Bridge API çağrıları: ödeme terminali, yazıcı, çekmece",
+      "file_path": "aurapos/apps/pos/lib/hardware.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-17",
+      "desc": "Service Worker (Workbox) önbellek stratejileri ve background sync",
+      "file_path": "aurapos/apps/pos/public/sw.js",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-18",
+      "desc": "PWA yapılandırması (next-pwa): manifest, offline fallback, image optimization",
+      "file_path": "aurapos/apps/pos/next.config.js",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-19",
+      "desc": "POS uygulaması bağımlılıkları: next, react, electric-sql, @supabase/supabase-js",
+      "file_path": "aurapos/apps/pos/package.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-20",
+      "desc": "Dashboard login sayfası: email/şifre, remember me, hata mesajı",
+      "file_path": "aurapos/apps/dashboard/app/(auth)/login/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-21",
+      "desc": "Ana dashboard / AI insights sayfası: kartlar, tarih filtresi, yenile",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-22",
+      "desc": "Şube yönetimi: liste, ekle/düzenle/sil, aktif/pasif durumu",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/branches/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-23",
+      "desc": "Menü yönetimi: kategori, ürün, porsiyon, seçenek CRUD",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/menu/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-24",
+      "desc": "Personel yönetimi: rol, izin, vardiya, aktiflik durumu",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/staff/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-25",
+      "desc": "Stok yönetimi: giriş/çıkış, düşük uyarı, transfer talebi",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/stock/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-26",
+      "desc": "Raporlar: günlük, haftalık, aylık satış, ödeme tipi dağılımı",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/reports/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-27",
+      "desc": "Ayarlar: işletme bilgileri, vergiler, yazıcı/terminal ayarları, yedekleme",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/settings/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-28",
+      "desc": "Ödeme raporları: başarılı/başarısız, iade, bakiye rapprou",
+      "file_path": "aurapos/apps/dashboard/app/(panel)/payments/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-29",
+      "desc": "Dashboard root layout: yan menü, üst başlık, tema geçişi",
+      "file_path": "aurapos/apps/dashboard/app/layout.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-30",
+      "desc": "Paylaşılan Button bileşeni: variant, size, loading state, disabled",
+      "file_path": "aurapos/apps/dashboard/components/ui/Button.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-31",
+      "desc": "Paylaşılan Table bileşeni: sıralama, sayfalama, seçenek menüsü",
+      "file_path": "aurapos/apps/dashboard/components/ui/Table.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-32",
+      "desc": "Paylaşılan Modal: backdrop, kilitleme, animasyon, dışa tıkla kapat",
+      "file_path": "aurapos/apps/dashboard/components/ui/Modal.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-33",
+      "desc": "AI insight kartı: başlık, açıklama, öneri butonu, renk teması",
+      "file_path": "aurapos/apps/dashboard/components/ai/InsightCard.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-34",
+      "desc": "Dashboard Supabase istemcisi: anon key, realtime abonelikleri",
+      "file_path": "aurapos/apps/dashboard/lib/supabase.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-35",
+      "desc": "KDS tek sayfa: WebSocket bağlantısı, order listesi render, filtre",
+      "file_path": "aurapos/apps/kds/app/page.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-36",
+      "desc": "KDS OrderCard bileşeni (detaylı): ürün, özel istek, hazırlık süresi",
+      "file_path": "aurapos/apps/kds/components/OrderCard.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-37",
+      "desc": "KDS StationFilter: mutfak/bar/soğuk büfe seçimi, aktif durum göstergesi",
+      "file_path": "aurapos/apps/kds/components/StationFilter.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-38",
+      "desc": "KDS TimerBadge: saniye bazlı sayıcı, renk uyarısı",
+      "file_path": "aurapos/apps/kds/components/TimerBadge.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-39",
+      "desc": "Garson tablet masa ekrani: masa seçimi, sipariş oluşturma, hızlı menü",
+      "file_path": "aurapos/apps/waiter-app/src/screens/TablesScreen.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-40",
+      "desc": "Garson tablet sipariş ekrani: ürün ekleme, not, bölük ödeme, masa değiştir",
+      "file_path": "aurapos/apps/waiter-app/src/screens/OrderScreen.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-41",
+      "desc": "Garson tablet profil ekrani: fotoğraf, adı, vardiya, çıkış",
+      "file_path": "aurapos/apps/waiter-app/src/screens/ProfileScreen.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-42",
+      "desc": "Garson tablet sipariş kalemi bileşeni: artı/eksi, sil, fiyat gösterimi",
+      "file_path": "aurapos/apps/waiter-app/src/components/OrderItem.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-43",
+      "desc": "ElectricSQL React Native client: sync shapes, offline kuyruk",
+      "file_path": "aurapos/apps/waiter-app/src/lib/electric.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-44",
+      "desc": "Hardware bridge + backend çağrıları: ödeme, yazıcı, çekmece",
+      "file_path": "aurapos/apps/waiter-app/src/lib/api.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-45",
+      "desc": "Android yapılandırma: minSdk, targetSdk, electric-sql react-native bağımlılıkları",
+      "file_path": "aurapos/apps/waiter-app/android/build.gradle",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-46",
+      "desc": "iOS Podfile: ElectricSQL, React Native core, Hardware bridge podları",
+      "file_path": "aurapos/apps/waiter-app/ios/Podfile",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-47",
+      "desc": "Waiter-app bağımlılıkları: react-native, @react-navigation, electric-sql",
+      "file_path": "aurapos/apps/waiter-app/package.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-48",
+      "desc": "Fastify sunucu başlatma: port, middleware, route kayıtları",
+      "file_path": "aurapos/apps/branch-server/src/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-49",
+      "desc": "PGlite + ElectricSQL şube sync yapılandırması: shapes, yeniden bağlanma",
+      "file_path": "aurapos/apps/branch-server/src/electric.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-50",
+      "desc": "Sipariş route'ları: oluştur, güncelle, sil, WebSocket yayın",
+      "file_path": "aurapos/apps/branch-server/src/routes/orders.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-51",
+      "desc": "Ödeme route'ları: ödeme alma, iade, webhook bildirimleri",
+      "file_path": "aurapos/apps/branch-server/src/routes/payments.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-52",
+      "desc": "Hardware bridge endpoint'leri: yazdır, çekmece aç, terminal ödeme",
+      "file_path": "aurapos/apps/branch-server/src/routes/hardware.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-53",
+      "desc": "HARDWARE_DEVICE env'e göre driver yükleme fonksiyonu",
+      "file_path": "aurapos/apps/branch-server/src/hardware/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-54",
+      "desc": "ElectricSQL sync yöneticisi: başlatma, durdurma, konflikt tetikleyicisi",
+      "file_path": "aurapos/apps/branch-server/src/sync/engine.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-55",
+      "desc": "Conflict resolution kuralları: son yazan wins, özel birleştirme fonksiyonları",
+      "file_path": "aurapos/apps/branch-server/src/sync/conflict.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-56",
+      "desc": "Şube SQLite (PGlite) dosyası oluşturma ve başlangıç şeması",
+      "file_path": "aurapos/apps/branch-server/data/branch.db",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-57",
+      "desc": "Branch-server bağımlılıkları: fastify, @electric-sql/pglite, ts-node",
+      "file_path": "aurapos/apps/branch-server/package.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-58",
+      "desc": "Order, OrderItem, OrderStatus tipleri ve enum tanımları",
+      "file_path": "aurapos/packages/shared-types/src/order.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-59",
+      "desc": "Payment, PaymentMethod, PaymentStatus tipleri",
+      "file_path": "aurapos/packages/shared-types/src/payment.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-60",
+      "desc": "Category, Product, Portion, Option tipleri ve ilişkileri",
+      "file_path": "aurapos/packages/shared-types/src/menu.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-61",
+      "desc": "Staff, Role, Permission tipleri ve yetki kontrolü yardımcıları",
+      "file_path": "aurapos/packages/shared-types/src/staff.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-62",
+      "desc": "ReceiptObject, ApprovalResponse, cihaz yanıt tipleri",
+      "file_path": "aurapos/packages/shared-types/src/hardware.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-63",
+      "desc": "Tüm paylaşılan tipleri dışa aktarma barrel dosyası",
+      "file_path": "aurapos/packages/shared-types/src/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-64",
+      "desc": "Mock ödeme terminali driverı: başarılı/başarısız yanıt simülasyonu",
+      "file_path": "aurapos/packages/hardware/payment-terminal/mock-driver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-65",
+      "desc": "Ingenico A910 gerçek driverı: seri port üzerinden EMV akışı",
+      "file_path": "aurapos/packages/hardware/payment-terminal/real-driver-ingenico-a910.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-66",
+      "desc": "Ingenico Move5000 gerçek driverı: BluetoothLE üzerinden ödeme",
+      "file_path": "aurapos/packages/hardware/payment-terminal/real-driver-ingenico-move5000.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-67",
+      "desc": "Beko ödeme terminali driverı: USB HID üzerinden kart okuma",
+      "file_path": "aurapos/packages/hardware/payment-terminal/real-driver-beko.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-68",
+      "desc": "HARDWARE_DEVICE env'e göre ödeme terminali driver yükleyici",
+      "file_path": "aurapos/packages/hardware/payment-terminal/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-69",
+      "desc": "Mock yazıcı driverı: basit metin çıktı simülasyonu",
+      "file_path": "aurapos/packages/hardware/printer/mock-driver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-70",
+      "desc": "USB üzerinden ESC/POS gerçek yazıcı driverı",
+      "file_path": "aurapos/packages/hardware/printer/real-driver-usb.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-71",
+      "desc": "Ethernet/WiFi üzerinden ESC/POS gerçek yazıcı driverı",
+      "file_path": "aurapos/packages/hardware/printer/real-driver-network.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-72",
+      "desc": "PRINTER_MODE env'e göre yazıcı driver yükleyici",
+      "file_path": "aurapos/packages/hardware/printer/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-73",
+      "desc": "Mock çekmece driverı: komut alıp hemen tamamla simülasyonu",
+      "file_path": "aurapos/packages/hardware/drawer/mock-driver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-74",
+      "desc": "Yazıcı üzerinden ESC/POS komutla çekmece açma driverı",
+      "file_path": "aurapos/packages/hardware/drawer/real-driver-escpos.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-75",
+      "desc": "Doğrudan seri port üzerinden çekmece sürücüsü",
+      "file_path": "aurapos/packages/hardware/drawer/real-driver-serial.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-76",
+      "desc": "DRAWER_MODE env'e göre çekmece driver yükleyici",
+      "file_path": "aurapos/packages/hardware/drawer/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-77",
+      "desc": "Mock müşteri ekranı driverı: basit metin gösterimi",
+      "file_path": "aurapos/packages/hardware/display/mock-driver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-78",
+      "desc": "Seri port üzerinden gerçek müşteri ekranı driverı (VFD/LCD)",
+      "file_path": "aurapos/packages/hardware/display/real-driver-serial.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-79",
+      "desc": "DISPLAY_MODE env'e göre müşteri ekranı driver yükleyici",
+      "file_path": "aurapos/packages/hardware/display/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-80",
+      "desc": "Mock barkod okuyucu driverı: rastgele kod üretimi",
+      "file_path": "aurapos/packages/hardware/barcode/mock-driver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-81",
+      "desc": "BARKOD_MODE env'e göre barkod okuyucu driver yükleyici",
+      "file_path": "aurapos/packages/hardware/barcode/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-82",
+      "desc": "Mock terazi driverı: sabit ağırlık döndürme",
+      "file_path": "aurapos/packages/hardware/scale/mock-driver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-83",
+      "desc": "SCALE_MODE env'e göre terazi driver yükleyici",
+      "file_path": "aurapos/packages/hardware/scale/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-84",
+      "desc": "Tüm donanım driver'larının implement etmesi gereken arayüz: init, send, dispose",
+      "file_path": "aurapos/packages/hardware/IHardwareDriver.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-85",
+      "desc": "Paylaşılan UI Button bileşeni: variant, size, loading, disabled",
+      "file_path": "aurapos/packages/ui/src/Button.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-86",
+      "desc": "Paylaşılan UI Table bileşeni: header, rows, actions column",
+      "file_path": "aurapos/packages/ui/src/Table.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-87",
+      "desc": "Paylaşılan UI Modal bileşeni: overlay, body, footer, esc kapatma",
+      "file_path": "aurapos/packages/ui/src/Modal.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-88",
+      "desc": "AI insight kartı: başlık, açıklama, öneri butonu, renk teması",
+      "file_path": "aurapos/packages/ui/src/InsightCard.tsx",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-89",
+      "desc": "UI paketi barrel dosyası: tüm bileşenleri dışa aktar",
+      "file_path": "aurapos/packages/ui/src/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-90",
+      "desc": "ElectricSQL sync şekilleri: hangi tablolar/kolonlar senkronize edilecek",
+      "file_path": "aurapos/packages/electric-config/src/shapes.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-91",
+      "desc": "PGlite + Electric istemci factory: client oluşturma ve yeniden bağlanma",
+      "file_path": "aurapos/packages/electric-config/src/client.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-92",
+      "desc": "DeepSeek R1 orchestrator: ajan yönetimi, görev kuyruğu, sonuç toplama",
+      "file_path": "aurapos/packages/ai/src/orchestrator.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-93",
+      "desc": "Dashboard uyarı üretici ajanı: veri analizi, öneri üretimi",
+      "file_path": "aurapos/packages/ai/src/agents/insight.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-94",
+      "desc": "Stok tahmin ajanı: geçmiş satışlar, trend, yeniden sıralama önerisi",
+      "file_path": "aurapos/packages/ai/src/agents/stock.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-95",
+      "desc": "Hata tespit ajanı: log analizi, exception pattern matching, bildirim",
+      "file_path": "aurapos/packages/ai/src/agents/tester.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-96",
+      "desc": "Fix üretici ajanı (V2.0+): hata önerisi, kod parçası üretimi, PR oluşturma",
+      "file_path": "aurapos/packages/ai/src/agents/coder.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-97",
+      "desc": "Insight ajanı için sistem promptu: ton, format, çıktı sınırları",
+      "file_path": "aurapos/packages/ai/src/prompts/insight.prompt",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-98",
+      "desc": "Stock ajanı için sistem promptu: veri kaynakları, tahmin metodu",
+      "file_path": "aurapos/packages/ai/src/prompts/stock.prompt",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-99",
+      "desc": "Tester ajanı için sistem promptu: hata türleri, öncelik sıralaması",
+      "file_path": "aurapos/packages/ai/src/prompts/tester.prompt",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-100",
+      "desc": "Coder ajanı için sistem promptu: still guide, test kapsamı, dokümantasyon",
+      "file_path": "aurapos/packages/ai/src/prompts/coder.prompt",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-101",
+      "desc": "AI paketi bağımlılıkları: @huggingface/inference, langchain, zod",
+      "file_path": "aurapos/packages/ai/package.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-102",
+      "desc": "Tablolar: branches, staff, menu, orders, order_items, payments, hardware_events",
+      "file_path": "aurapos/supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-103",
+      "desc": "Row Level Security politikaları: her tablo için select/insert/update/delete",
+      "file_path": "aurapos/supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-104",
+      "desc": "Supabase fonksiyonları: sipariş toplamı, stok düşürme, webhook hazırlayıcı",
+      "file_path": "aurapos/supabase/migrations/003_functions.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-105",
+      "desc": "Seed data: örnek şube, personel, menü ürünleri, başlangıç stoğu",
+      "file_path": "aurapos/supabase/migrations/004_seed_data.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-106",
+      "desc": "AI insight hesaplama Edge Function: veri toplama, DeepSeek çağrısı, sonuç kaydı",
+      "file_path": "aurapos/supabase/functions/ai-insights/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-107",
+      "desc": "e-Fatura webhook callback: GİB yanıtını işleme, fatura durumu güncelleme",
+      "file_path": "aurapos/supabase/functions/efatura-webhook/index.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-108",
+      "desc": "Supabase proje yapılandırması: storage bucket'ları, fonksiyon ayarları",
+      "file_path": "aurapos/supabase/config.toml",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-109",
+      "desc": "Tüm mock donanım driver'larını çalıştırıp başarılı/başarısız raporu",
+      "file_path": "aurapos/scripts/test-all-mocks.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-110",
+      "desc": "Demo verileri yükleme scripti: şube, personel, menü, örnek siparişler",
+      "file_path": "aurapos/scripts/seed-demo-data.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-111",
+      "desc": "HARDWARE_DEVICE değişkenini değiştirip ilgili servisleri yeniden başlatma",
+      "file_path": "aurapos/scripts/switch-hardware.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-112",
+      "desc": "ElectricSQL sync durumu kontrol scripti: pending, error, last sync zamanları",
+      "file_path": "aurapos/scripts/check-sync-status.ts",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-113",
+      "desc": "Tüm servislerin (next apps, branch-server, supabase-studio) tanımı",
+      "file_path": "aurapos/docker/docker-compose.yml",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-114",
+      "desc": "Staging ortamı için ekstra servisler ve ortam değişkenleri",
+      "file_path": "aurapos/docker/docker-compose.staging.yml",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-115",
+      "desc": "Şube sunucu imajı: node base, derleme, çalıştırma komutları",
+      "file_path": "aurapos/docker/Dockerfile.branch-server",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-116",
+      "desc": "CI workflow: lint, test, build, mock testleri her PR'de",
+      "file_path": "aurapos/.github/workflows/ci.yml",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-117",
+      "desc": "Deploy workflow: staging/prod promotion, db migrate, cache temizliği",
+      "file_path": "aurapos/.github/workflows/deploy.yml",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-118",
+      "desc": "Turborepo pipeline önbellek ve bağımlılık tanımları: build, test, lint",
+      "file_path": "aurapos/turbo.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-119",
+      "desc": "pnpm workspace tanımları: paket dizinleri, versiyon bağımlılıkları",
+      "file_path": "aurapos/pnpm-workspace.yaml",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-120",
+      "desc": "Root package.json: workspaces, devDependencies, postinstall scripts",
+      "file_path": "aurapos/package.json",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-121",
+      "desc": "Create uuid-ossp extension if not exists",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-122",
+      "desc": "Create businesses table with multi-tenant columns and constraints",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-123",
+      "desc": "Create branches table with foreign key to businesses",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-124",
+      "desc": "Create roles table with JSONB permissions and system flag",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-125",
+      "desc": "Create staff table with PIN hash, Supabase UID, and branch/role relations",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-126",
+      "desc": "Create shifts table to track staff work periods",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-127",
+      "desc": "Create table_areas table for dining area categorization",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-128",
+      "desc": "Create tables table with position coordinates and status enum",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-129",
+      "desc": "Create categories table with optional branch scoping and hierarchy",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-130",
+      "desc": "Create products table with VAT, barcode, kitchen station, prep time, allergens, calories",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-131",
+      "desc": "Create portions table for product size modifiers",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-132",
+      "desc": "Create option_groups table for product customization",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-133",
+      "desc": "Create option_items table with price modifiers",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-134",
+      "desc": "Create orders table with serial order_number, status/type enums, cover count, financial columns",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-135",
+      "desc": "Create order_items table with snapshot pricing, status enum, KDS flag",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-136",
+      "desc": "Create order_item_options table linking items to selected options",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-137",
+      "desc": "Create payments table with method enum, tip, Ingenico fields, voucher type",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-138",
+      "desc": "Create payment_splits table for mixed payment breakdown",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-139",
+      "desc": "Create cash_registers table for shift opening/closing amounts",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-140",
+      "desc": "Create cash_movements table for in/out cash transactions",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-141",
+      "desc": "Create ingredients table with warehouse linkage placeholder",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-142",
+      "desc": "Create recipes table linking products to ingredients with unique constraint",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-143",
+      "desc": "Create stock_movements table with type enum and optional order_item reference",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-144",
+      "desc": "Create tasks table for recurring work management with photo requirement flag",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-145",
+      "desc": "Create task_logs table to record task completion with optional photo",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-146",
+      "desc": "Create customers table for loyalty and contact info",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-147",
+      "desc": "Create warehouses table for multi-warehouse per branch",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-148",
+      "desc": "Add warehouse_id column to ingredients table",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-149",
+      "desc": "Add warehouse_type column to products table with check constraint",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-150",
+      "desc": "Create aggregator_mappings table for external platform SKU mapping",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-151",
+      "desc": "Create aggregator_orders table to store raw payload and mapping status",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-152",
+      "desc": "Create customer_ledgers table for receivable/payable tracking",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-153",
+      "desc": "Create semi_products table for intermediate production items",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-154",
+      "desc": "Create semi_product_recipes table linking semi-products to ingredients",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-155",
+      "desc": "Create production_logs table to record semi-product production",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-156",
+      "desc": "Create printers table for kitchen/bar/receipt/packaging devices",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-157",
+      "desc": "Create printer_routing_rules table with condition_type/value and priority",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-158",
+      "desc": "Add seat_no column to order_items for seat-level ordering",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-159",
+      "desc": "Add lock_version column to orders for optimistic locking",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-160",
+      "desc": "Create qr_attendance_tokens table for rotating QR check-in tokens",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-161",
+      "desc": "Create performance indexes on orders, order_items, payments, stock_movements, tables, staff",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-162",
+      "desc": "Create update_updated_at trigger function",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-163",
+      "desc": "Attach update_updated_at trigger to orders table",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-164",
+      "desc": "Create release_table_on_close trigger function to free tables on order close/cancel",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-165",
+      "desc": "Attach release_table_on_close trigger to orders table",
+      "file_path": "supabase/migrations/001_init_schema.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-166",
+      "desc": "Enable Row Level Security on all core tables",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-167",
+      "desc": "Create auth_business_id helper function to extract business_id from JWT",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-168",
+      "desc": "Create business_isolation policy for businesses table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-169",
+      "desc": "Create business_isolation policy for branches table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-170",
+      "desc": "Create business_isolation policy for staff table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-171",
+      "desc": "Create business_isolation policy for roles table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-172",
+      "desc": "Create business_isolation policy for categories table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-173",
+      "desc": "Create business_isolation policy for products table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-174",
+      "desc": "Create business_isolation policy for orders table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-175",
+      "desc": "Create business_isolation policy for order_items table using subquery",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-176",
+      "desc": "Create business_isolation policy for payments table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-177",
+      "desc": "Create business_isolation policy for cash_registers table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-178",
+      "desc": "Create business_isolation policy for ingredients table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-179",
+      "desc": "Create business_isolation policy for stock_movements table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-180",
+      "desc": "Create business_isolation policy for tasks table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-181",
+      "desc": "Create business_isolation policy for task_logs table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-182",
+      "desc": "Create business_isolation policy for customers table",
+      "file_path": "supabase/migrations/002_rls_policies.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-183",
+      "desc": "Create get_daily_revenue function for dashboard summary",
+      "file_path": "supabase/migrations/003_functions.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-184",
+      "desc": "Create get_critical_stock function for low-stock alerts",
+      "file_path": "supabase/migrations/003_functions.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-185",
+      "desc": "Insert demo business record",
+      "file_path": "supabase/migrations/004_seed_data.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-186",
+      "desc": "Insert demo branch record",
+      "file_path": "supabase/migrations/004_seed_data.sql",
+      "depends_on": [],
+      "status": "PENDING"
+    },
+    {
+      "task_id": "S31-187",
+      "desc": "Insert system roles (owner, manager, cashier, waiter, barista) with permissions",
+      "file_path": "supabase/migrations/004_seed_data.sql",
       "depends_on": [],
       "status": "PENDING"
     }
