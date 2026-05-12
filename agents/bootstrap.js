@@ -178,7 +178,7 @@ function deployProjectCredentials() {
 
 function checkCoreAgents() {
     log("📝 Ajan dosyaları kontrol ediliyor...");
-    const required = ['architect.js', 'base-agent.js', 'coder.js', 'tester.js', 'docs.js'];
+    const required = ['architect.js', 'base-agent.js', 'coder.js', 'tester.js', 'docs.js', 'telemetry.js'];
     required.forEach(file => {
         const p = path.join(BASE_DIR, 'agents', file);
         if (!fs.existsSync(p)) {
@@ -193,7 +193,8 @@ function spawnAgents() {
         { name: 'ARCHITECT', script: 'architect.js' },
         { name: 'CODER',     script: 'coder.js'     },
         { name: 'TESTER',    script: 'tester.js'    },
-        { name: 'DOCS',      script: 'docs.js'      }
+        { name: 'DOCS',      script: 'docs.js'      },
+        { name: 'TELEMETRY', script: 'telemetry.js' }
     ];
 
     const isMac = process.platform === 'darwin';

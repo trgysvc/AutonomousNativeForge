@@ -2,14 +2,30 @@
   "lessons": [
     {
       "id": "FORBIDDEN_LIB_AXIOS",
-      "context": ["network", "http", "api"],
+      "context": [
+        "network",
+        "http",
+        "api"
+      ],
       "rule": "Do not use 'axios'. Use native 'node:http' or 'fetch' if available. PRD V4 strictly prohibits external HTTP clients to minimize dependencies.",
       "severity": "CRITICAL"
     },
     {
       "id": "FORBIDDEN_LIB_EXPRESS",
-      "context": ["server", "web", "api"],
+      "context": [
+        "server",
+        "web",
+        "api"
+      ],
       "rule": "Do not use 'express'. Use 'fastify' for high-performance requirements as per PRD V4.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-2_1778606116338",
+      "context": [
+        "prd-validation"
+      ],
+      "rule": "Before generating any task, confirm that the PRD (Product Requirements Document) is fully loaded and all required sections are defined; otherwise, halt and request the missing PRD content.",
       "severity": "CRITICAL"
     }
   ]

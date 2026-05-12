@@ -507,6 +507,8 @@ Detailed GB10 guide: `docs/GB10 system installation procedures/`
 - [x] Orphan recovery bug fixed (correct matching with PROCESSING prefix)
 - [x] Researcher agent — external resource enrichment via PRD URL fetch
 - [x] Web Dashboard — `http://localhost:3000`, 5s refresh, dark theme
+- [x] Otonom Telemetri — 7/24 Arka planda çalışan performans ve sağlık gözlemcisi
+- [x] Telemetry Daemon — Autonomous 24/7 background system health & speed tracker
 
 **In Progress / Planned**
 - [ ] Step 11: Multi-file task — single task generating multiple files

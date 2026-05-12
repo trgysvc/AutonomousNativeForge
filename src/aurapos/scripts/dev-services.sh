@@ -32,7 +32,7 @@ start_postgres() {
   fi
 
   echo "Starting PostgreSQL on port ${PG_PORT}..."
-  "${PG_CTL}" -D "${PG_DATA_DIR}" -o "-c listen_addresses='localhost' -c port=${PG_PORT}" -w start
+  "${PG_CTL}" -D "${PG_DATA_DIR}" -o "-c listen_addresses='localhost' -c port=${PG_PORT}" start
 
   # Wait for readiness
   echo "Waiting for PostgreSQL to accept connections..."
@@ -42,7 +42,7 @@ start_postgres() {
   echo "PostgreSQL is ready."
 
   # Keep the script running until interrupted
-  wait
+  tail -f /dev/null
 }
 
 start_redis() {
@@ -52,7 +52,7 @@ start_redis() {
   fi
 
   echo "Starting Redis on port ${REDIS_PORT}..."
-  redis-server --port "${REDIS_PORT}" --dir "${REDIS_DATA_DIR}" --save "" --appendonly no --loglevel warning &
+  redis-server --port "${REDIS_PORT}" --dir "${REDIS_DATA_DIR}" --save "" --appendonly no --loglevel warning --daemonize no &
   REDIS_PID=$!
 
   # Wait for readiness
