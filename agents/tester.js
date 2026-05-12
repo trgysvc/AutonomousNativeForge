@@ -130,7 +130,7 @@ async function handleMessage(msg) {
     const syntax = await validateCode(file_path);
     if (!syntax.valid) {
         log(`❌ SYNC FAIL: ${path.basename(file_path)}`);
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `SENTAKS HATASI: ${syntax.error}` });
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'SYNTAX', description: `SENTAKS HATASI: ${syntax.error}` });
     }
 
     // 1.5 ADIM: Docker Sandbox — izole ortamda çalıştırma kontrolü
@@ -141,7 +141,7 @@ async function handleMessage(msg) {
         log(`⏭️ SANDBOX ATLANDI: ${sandbox.reason}`);
     } else if (!sandbox.passed) {
         log(`❌ SANDBOX FAIL: ${path.basename(file_path)}`);
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `SANDBOX HATASI (İzole Ortam):\n${sandbox.output}` });
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'SANDBOX', description: `SANDBOX HATASI (İzole Ortam):\n${sandbox.output}` });
     } else {
         log(`🐳 SANDBOX GEÇTİ: ${path.basename(file_path)}`);
     }
@@ -150,7 +150,7 @@ async function handleMessage(msg) {
     const guardrailIssues = checkArchitectureGuardrails(code, file_path, project_id);
     if (guardrailIssues.length > 0) {
         log(`🛡️ GUARDRAIL FAIL: [${project_id}] Mimari İhlal!`);
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: guardrailIssues.join('\n') });
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'GUARDRAIL', description: guardrailIssues.join('\n') });
     }
 
     // 2.5 ADIM: Shadow Tester (Security Scan)
@@ -160,7 +160,7 @@ async function handleMessage(msg) {
         log(`🚨 SECURITY FAIL: [${project_id}] Kritik açık tespit edildi!`);
         const firstFinding = securityFindings[0];
         const steerMsg = `GÜVENLİK İHLALİ: ${firstFinding.reason} (L:${firstFinding.line})\nÖNERİ: ${firstFinding.steer}`;
-        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: steerMsg });
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'SECURITY', description: steerMsg });
     }
 
     // 3. ADIM: AI Review (PRD Uyumluluk Denetimi)
@@ -192,7 +192,7 @@ async function handleMessage(msg) {
 
         if (!match) {
             log(`❌ AI Review: JSON parse edilemedi. Yanıt: ${res.substring(0, 100)}`);
-            return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `AI Review yanıtı geçersiz JSON: ${res.substring(0, 200)}` });
+            return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'AI_REVIEW_PARSE', description: `AI Review yanıtı geçersiz JSON: ${res.substring(0, 200)}` });
         }
 
         const result = JSON.parse(match[0]);
@@ -201,11 +201,11 @@ async function handleMessage(msg) {
             log(`✅ [${project_id}] ${task_id} onaylandı. ${SILENT_REPLY_TOKEN}`);
             sendMessage('ARCHITECT', 'TEST_PASSED', msg);
         } else {
-            sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `PRD UYUMSUZLUĞU: ${result.reason}` });
+            sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'PRD_COMPLIANCE', description: `PRD UYUMSUZLUĞU: ${result.reason}` });
         }
     } catch (e) {
         log(`❌ AI Review başarısız: ${e.message}`);
-        sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `AI Review hatası (inceleme yapılamadı): ${e.message}` });
+        sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'AI_REVIEW_ERROR', description: `AI Review hatası (inceleme yapılamadı): ${e.message}` });
     }
 }
 

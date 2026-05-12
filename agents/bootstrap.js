@@ -122,8 +122,9 @@ function recoverStuckTasks() {
         });
     }
 
-    // 2. Manifest tabanlı iyileştirme (Zombi ve Hatalı görevleri sıfırla)
+    // 2. Manifest tabanlı iyileştirme (Zombi görevleri sıfırla, retry_count'a göre karar ver)
     if (fs.existsSync(SRC_DIR)) {
+        const MAX_RETRIES = 3; // architect.js ile aynı değer
         const projects = fs.readdirSync(SRC_DIR).filter(d => fs.lstatSync(path.join(SRC_DIR, d)).isDirectory());
         projects.forEach(projectId => {
             const manifestPath = path.join(SRC_DIR, projectId, 'manifest.json');
@@ -133,11 +134,19 @@ function recoverStuckTasks() {
                 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
                 let changed = false;
                 manifest.tasks.forEach(task => {
-                    // IN_PROGRESS, FIXING, TESTING veya FAILED durumundakileri sıfırla
-                    const stuckStates = ['IN_PROGRESS', 'FIXING', 'TESTING', 'FAILED'];
-                    if (stuckStates.includes(task.status)) {
-                        log(`   + [HEALED MANIFEST] ${projectId}:${task.task_id} (${task.status} -> PENDING)`);
-                        task.status = 'PENDING';
+                    // Sadece aktif zombi durumları (IN_PROGRESS, FIXING, TESTING) kurtarılır.
+                    // FAILED görevlere dokunma — retry_count kaybetme.
+                    const zombieStates = ['IN_PROGRESS', 'FIXING', 'TESTING'];
+                    if (zombieStates.includes(task.status)) {
+                        task.retry_count = (task.retry_count || 0) + 1;
+                        if (task.retry_count > MAX_RETRIES) {
+                            // Limit aşıldı: bu görev gerçekten yapılamıyor, FAILED'a gönder
+                            log(`   + [PERMANENT FAIL] ${projectId}:${task.task_id} (${task.retry_count}. restart, FAILED'a alındı)`);
+                            task.status = 'FAILED';
+                        } else {
+                            log(`   + [HEALED MANIFEST] ${projectId}:${task.task_id} (${task.status} -> PENDING, retry_count: ${task.retry_count})`);
+                            task.status = 'PENDING';
+                        }
                         changed = true;
                     }
                 });

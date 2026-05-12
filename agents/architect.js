@@ -18,7 +18,7 @@ function parseJsonRobust(raw) {
         return JSON.parse(jsonrepair(raw));
     }
 }
-const retryCounts = {};
+// retryCounts moved to manifest.json (task.retry_count) for persistence across restarts
 
 let isDiscovering = false;
 const PROMPT_MODE = 'FULL'; // Forge V3 Standard
@@ -119,11 +119,11 @@ async function dispatchNextTasks(projectId) {
         const currentSprint = task.task_id.split('-')[0];
         const sprintIndex = sprints.indexOf(currentSprint);
 
-        // Eğer önceki bir sprint'te hala tamamlanmamış (DONE olmayan) görev varsa, bu görevi başlatma
+        // Eğer önceki bir sprint'te hala tamamlanmamış (DONE veya FAILED olmayan) görev varsa, bu görevi başlatma
         if (sprintIndex > 0) {
             const previousSprints = sprints.slice(0, sprintIndex);
             const unfinishedInPrevious = manifest.tasks.filter(t => 
-                previousSprints.includes(t.task_id.split('-')[0]) && t.status !== 'DONE'
+                previousSprints.includes(t.task_id.split('-')[0]) && t.status !== 'DONE' && t.status !== 'FAILED'
             );
 
             if (unfinishedInPrevious.length > 0) {
@@ -134,7 +134,7 @@ async function dispatchNextTasks(projectId) {
 
         const dependenciesMet = !task.depends_on || task.depends_on.every(depId => {
             const dep = manifest.tasks.find(t => t.task_id === depId);
-            return dep && dep.status === 'DONE';
+            return dep && (dep.status === 'DONE' || dep.status === 'FAILED');
         });
 
         if (dependenciesMet) {
@@ -241,25 +241,41 @@ async function handleMessage(msg) {
             }
             break;
 
-        case 'BUG_REPORT':
-            retryCounts[task_id] = (retryCounts[task_id] || 0) + 1;
-            
-            if (retryCounts[task_id] > MAX_RETRIES) {
+        case 'BUG_REPORT': {
+            // Read retry_count from manifest (persistent across restarts)
+            const manifest_br = getManifest(project_id);
+            const taskObj_br = manifest_br.tasks.find(t => t.task_id === task_id);
+            const currentRetry = (taskObj_br?.retry_count || 0) + 1;
+
+            // Append to failure_log in manifest — persistent failure history
+            const failureEntry = {
+                attempt: currentRetry,
+                timestamp: new Date().toISOString(),
+                error_type: msg.error_type || 'UNKNOWN',
+                error: (description || '').substring(0, 800) // limit size
+            };
+            const existingLog = taskObj_br?.failure_log || [];
+            const failure_log = [...existingLog, failureEntry];
+
+            // Write incremented retry_count + failure_log back to manifest immediately
+            updateTaskStatus(project_id, task_id, taskObj_br?.status || 'FIXING', { retry_count: currentRetry, failure_log });
+
+            if (currentRetry > MAX_RETRIES) {
                 log(`${prefix} ⛔ MAX RETRY (${MAX_RETRIES}) AŞILDI. Re-planning başlatılıyor.`);
-                updateTaskStatus(project_id, task_id, 'FAILED');
+                updateTaskStatus(project_id, task_id, 'FAILED', { retry_count: currentRetry, failure_log });
                 await notify('TASK_FAILED', { project_id, task_id, title, description, retries: MAX_RETRIES });
 
-                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nHATA: ${description}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revise et.`;
+                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nHATA GEÇMİŞİ:\n${failure_log.map(f => `- Deneme ${f.attempt} [${f.error_type}]: ${f.error}`).join('\n')}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revise et.`;
                 const rca = await ask('ARCHITECT', planPrompt, __dirname);
                 const rcaPath = path.join(__dirname, '..', 'queue', 'error', `${task_id}_RCA.md`);
                 fs.writeFileSync(rcaPath, `# RE-PLANNING REPORT: ${task_id}\n\n${rca}`);
             } else {
                 // Forge V3: Steering Protocol
-                log(`${prefix} 🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (${retryCounts[task_id]}/${MAX_RETRIES})`);
-                updateTaskStatus(project_id, task_id, 'FIXING');
+                log(`${prefix} 🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (${currentRetry}/${MAX_RETRIES})`);
+                updateTaskStatus(project_id, task_id, 'FIXING', { retry_count: currentRetry });
 
                 // Active Recall: Check if this should be a lesson
-                if (retryCounts[task_id] >= 2) {
+                if (currentRetry >= 2) {
                     recordLesson(project_id, task_id, description);
                 }
                 
@@ -272,6 +288,7 @@ async function handleMessage(msg) {
                 });
             }
             break;
+        }
             
         case 'DOCS_COMPLETE':
             log(`${prefix} 📄 Dokümantasyon tamamlandı. Sistem durumu güncelleniyor...`);

@@ -125,6 +125,16 @@ async function handleMessage(msg) {
     const lessons = getRelevantLessons(project_id, title, desc);
     if (lessons) prompt += lessons;
 
+    // Failure Log Injection: Geçmiş başarısız denemeler — aynı hatayı tekrar yapma
+    const failureLog = msg.failure_log || [];
+    if (failureLog.length > 0) {
+        prompt += `\n\n⚠️ BAŞARISIZ DENEME GEÇMİŞİ — BU HATALARI TEKRAR YAPMA:\n`;
+        failureLog.forEach(f => {
+            prompt += `- Deneme ${f.attempt} [${f.error_type}] (${f.timestamp.substring(0, 10)}): ${f.error.substring(0, 300)}\n`;
+        });
+        prompt += `\nYukarıdaki hataları analiz et ve farklı bir strateji uygula.`;
+    }
+
     // Context File Injection (bağımlılık çıktıları + planlanan shared dosyalar)
     prompt += buildContextInjection(context_files, projectPath, `CODER: [${project_id}] ${task_id} —`);
 

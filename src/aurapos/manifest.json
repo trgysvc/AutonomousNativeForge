@@ -15,7 +15,8 @@
       "desc": "Implement a thin TypeScript wrapper that uses native `fetch` with keepAlive connection pooling to call the DeepSeek R1 API, or optionally spin up a local vLLM instance. Design for async, non‑blocking usage.",
       "file_path": "packages/shared/ai/wrapper.ts",
       "depends_on": [],
-      "status": "FAILED"
+      "status": "PENDING",
+      "retry_count": 0
     },
     {
       "task_id": "S0-4",
@@ -152,7 +153,7 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "FIXING"
+      "status": "DONE"
     },
     {
       "task_id": "S0-6",
@@ -162,7 +163,8 @@
       "depends_on": [
         "S0-5"
       ],
-      "status": "FAILED"
+      "status": "PENDING",
+      "retry_count": 0
     },
     {
       "task_id": "S0-7",
@@ -172,7 +174,7 @@
       "depends_on": [
         "S0-6"
       ],
-      "status": "PENDING"
+      "status": "FIXING"
     },
     {
       "task_id": "S0-8",
@@ -223,7 +225,8 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "FAILED"
+      "status": "PENDING",
+      "retry_count": 0
     },
     {
       "task_id": "S0-18",
@@ -243,7 +246,8 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "IN_PROGRESS"
+      "status": "PENDING",
+      "retry_count": 0
     },
     {
       "task_id": "S0-20",
@@ -344,7 +348,8 @@
       "depends_on": [
         "S0-8_Dashboard"
       ],
-      "status": "FAILED"
+      "status": "PENDING",
+      "retry_count": 0
     },
     {
       "task_id": "S0-10_CheckSync",
@@ -354,7 +359,7 @@
       "depends_on": [
         "S0-9_DashboardPage"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S2-2",
