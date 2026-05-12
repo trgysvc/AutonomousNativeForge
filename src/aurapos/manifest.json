@@ -7,7 +7,7 @@
       "desc": "Create npm scripts (e.g., `dev:db` and `dev:redis`) that start PostgreSQL and Redis locally, include healthcheck logic (e.g., using `wait-for` or pg_isready) to ensure services are ready before the Node app starts. Optionally keep Docker Compose for CI only.",
       "file_path": "scripts/dev-services.sh",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "TESTING"
     },
     {
       "task_id": "S0-3",
@@ -15,7 +15,7 @@
       "desc": "Implement a thin TypeScript wrapper that uses native `fetch` with keepAlive connection pooling to call the DeepSeek R1 API, or optionally spin up a local vLLM instance. Design for async, non‑blocking usage.",
       "file_path": "packages/shared/ai/wrapper.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-4",
@@ -162,7 +162,7 @@
       "depends_on": [
         "S0-5"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-7",
@@ -183,7 +183,7 @@
         "S0-4",
         "S0-5"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-9",
@@ -223,7 +223,7 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "FIXING"
+      "status": "PENDING"
     },
     {
       "task_id": "S0-18",
@@ -243,7 +243,7 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "FIXING"
+      "status": "PENDING"
     },
     {
       "task_id": "S0-20",
@@ -261,7 +261,7 @@
       "desc": "Service Worker kaydı, ön bellekleme stratejileri ve PWA manifestı için Workbox kullan. /apps/pos ve /apps/dashboard için offline destek ve yükleme deneyimi iyileştir.",
       "file_path": "apps/pos/src/serviceWorker.js",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-1_Init",
@@ -318,7 +318,7 @@
       "depends_on": [
         "S0-4_Hardware"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-7_POS",
@@ -344,7 +344,7 @@
       "depends_on": [
         "S0-8_Dashboard"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-10_CheckSync",

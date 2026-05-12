@@ -51,6 +51,14 @@
       ],
       "rule": "Always verify that TypeScript source files have correct syntax and that the tsconfig targets the appropriate module/target before running tsc; missing or incorrect import/export statements will cause compilation failures.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-19_1778601321654",
+      "context": [
+        "typescript"
+      ],
+      "rule": "Always verify that TypeScript source files have correct syntax and that the tsconfig targets the appropriate module/esnext settings before running tsc; missing or malformed imports/type definitions will cause compilation failures.",
+      "severity": "CRITICAL"
     }
   ]
 }

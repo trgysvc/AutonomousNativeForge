@@ -101,7 +101,7 @@ function updateTaskStatus(projectId, taskId, status, extra = {}) {
         saveManifest(projectId, manifest);
         
         // Dependency Trigger: Check if any pending tasks can now start
-        if (status === 'DONE') {
+        if (status === 'DONE' || status === 'FAILED') {
             dispatchNextTasks(projectId);
         }
     }
