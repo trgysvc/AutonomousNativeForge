@@ -1,4 +1,4 @@
-import { ElectricClient } from '@electric-sql/client';
+import ElectricClient from '@electric-sql/client';
 import * as electricConfig from '../../../packages/electric-config';
 
 async function main() {

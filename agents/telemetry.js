@@ -205,6 +205,8 @@ function generateReport() {
             ? Object.entries(tasks.error_breakdown).sort((a, b) => b[1] - a[1]).map(([k, v]) => `| ${k} | ${v} |`).join('\n')
             : '| No records yet | — |';
 
+        const progressBar = "█".repeat(Math.round(completionPct / 5)).padEnd(20, "░");
+
         const report = `# ANF Autonomous System — Live Telemetry Report
 *Last Updated: ${now}*
 *System Status: **${sys.status}***
@@ -261,16 +263,16 @@ ${errRows}
 
 ---
 
-## 📊 4. Project Progress
+## 📊 4. Project Progress (Task Telemetry)
 
-| Status | Count | Completion |
-|:---|:---:|:---|
-| ✅ **DONE** | ${tasks.done} | ${completionPct}% |
-| 🛠️ **IN_PROGRESS** | ${tasks.in_progress} | |
-| 🔄 **TESTING** | ${tasks.testing} | |
-| ⏳ **PENDING** | ${tasks.pending} | |
-| ❌ **FAILED** | ${tasks.failed} | |
-| **TOTAL** | **${tasks.total}** | |
+| Status | Count | Percentage | Progress Bar |
+|:---|:---:|:---|:---|
+| ✅ **DONE** | ${tasks.done} | ${completionPct}% | ${progressBar} |
+| 🛠️ **IN_PROGRESS** | ${tasks.in_progress} | ${(tasks.in_progress / tasks.total * 100).toFixed(1)}% | 🔄 |
+| 🩹 **FIXING (Self-Healing)** | ${tasks.self_healing_count} | ${(tasks.self_healing_count / tasks.total * 100).toFixed(1)}% | 🩹 |
+| ⏳ **PENDING** | ${tasks.pending} | ${(tasks.pending / tasks.total * 100).toFixed(1)}% | ⏳ |
+| ❌ **FAILED (Max Retry)** | ${tasks.failed} | ${(tasks.failed / tasks.total * 100).toFixed(1)}% | ❌ |
+| **TOTAL** | **${tasks.total}** | **100%** | **Master Plan: AuraPOS** |
 
 **Estimated Time to Completion (ETA):** ~${etaHours} hours (${remainingTasks} tasks × ~${(avgTaskSec / 60).toFixed(0)} min/task)
 
