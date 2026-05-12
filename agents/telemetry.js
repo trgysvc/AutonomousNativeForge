@@ -329,10 +329,10 @@ ${errRows}
 ## 🔍 7. Audit & Verification Logs (Proof of Work)
 To verify the metrics and progress above, refer to the following raw system logs:
 
-- [**Master Project Manifest**](file:///workspaces/AutonomousNativeForge/src/aurapos/manifest.json) — *Task states and retry counts*
-- [**System Event Log (sys.log)**](file:///workspaces/AutonomousNativeForge/sys.log) — *Execution timestamps and agent heartbeats*
-- [**LLM Communication Log**](file:///workspaces/AutonomousNativeForge/llm_communication.log) — *Raw code generation and reasoning streams*
-- [**Development Log (DEVLOG.md)**](file:///workspaces/AutonomousNativeForge/DEVLOG.md) — *High-level completion summaries*
+- [Master Project Manifest (manifest.json)](file:///workspaces/AutonomousNativeForge/src/aurapos/manifest.json)
+- [System Event Log (sys.log)](file:///workspaces/AutonomousNativeForge/sys.log)
+- [LLM Communication Log (llm_communication.log)](file:///workspaces/AutonomousNativeForge/llm_communication.log)
+- [Development Log (DEVLOG.md)](file:///workspaces/AutonomousNativeForge/DEVLOG.md)
 
 ---
 *ANF Telemetry Daemon v2.0 — Updates every 15 seconds*

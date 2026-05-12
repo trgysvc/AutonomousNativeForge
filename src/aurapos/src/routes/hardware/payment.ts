@@ -1,151 +1,173 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import type { ApprovalResponse, PaymentRequest } from '../../../../../packages/shared-types/src/index.ts';
+import { FastifyInstance } from 'fastify';
+import { PaymentRequest, PaymentResponse } from '../../../shared-types';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+async function paymentRoutes(fastify: FastifyInstance, opts: any) {
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const generateMockTransactionId = () => `mock_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-
-const saleHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-  await delay(500);
-  const { amount, paymentMethod, cardAmount, mealVoucherAmount, cashGiven } = request.body as PaymentRequest;
-
-  if (paymentMethod === 'mixed') {
-    if (cardAmount === undefined || mealVoucherAmount === undefined || cashGiven === undefined) {
-      return reply.status(400).send({ error: 'Missing required fields for mixed payment' });
+  fastify.post('/sale', async (request, reply) => {
+    await delay(Math.floor(Math.random() * 800) + 200);
+    const req = request.body as PaymentRequest;
+    
+    if (!req.amount || req.amount <= 0) {
+      return reply.status(400).send({ error: 'Invalid amount' });
     }
-    const cashDue = amount - cardAmount - mealVoucherAmount;
-    if (cashGiven < cashDue) {
-      return reply.status(400).send({ error: 'Insufficient cash provided' });
+
+    let response: PaymentResponse = { approved: false };
+
+    switch (req.method) {
+      case 'card':
+        response = {
+          approved: true,
+          amount: req.amount,
+          authorizationCode: `ING_MOCK_${Math.floor(Math.random() * 900000) + 100000}`,
+          transactionId: `txn_${Date.now()}`,
+          timestamp: new Date().toISOString()
+        };
+        break;
+      case 'cash':
+        if (!req.amountTendered || req.amountTendered < req.amount) {
+          return reply.status(400).send({ error: 'Insufficient cash tendered' });
+        }
+        response = {
+          approved: true,
+          amount: req.amount,
+          change: req.amountTendered - req.amount,
+          transactionId: `cash_${Date.now()}`,
+          timestamp: new Date().toISOString()
+        };
+        break;
+      case 'meal_voucher':
+        if (!req.voucherId) {
+          return reply.status(400).send({ error: 'Voucher ID required' });
+        }
+        response = {
+          approved: true,
+          amount: req.amount,
+          voucherId: req.voucherId,
+          authorizationCode: `MV_${Math.floor(Math.random() * 9000) + 1000}`,
+          transactionId: `mv_${Date.now()}`,
+          timestamp: new Date().toISOString()
+        };
+        break;
+      case 'mixed':
+        if (!req.cardAmount || !req.cashAmount || req.cardAmount + req.cashAmount !== req.amount) {
+          return reply.status(400).send({ error: 'Invalid mixed payment amounts' });
+        }
+        if (!req.amountTendered || req.amountTendered < req.cashAmount) {
+          return reply.status(400).send({ error: 'Insufficient cash tendered for cash portion' });
+        }
+        
+        const cardResp = {
+          approved: true,
+          amount: req.cardAmount,
+          authorizationCode: `ING_MOCK_${Math.floor(Math.random() * 900000) + 100000}`,
+          transactionId: `txn_card_${Date.now()}`,
+          timestamp: new Date().toISOString()
+        };
+        
+        const cashResp = {
+          approved: true,
+          amount: req.cashAmount,
+          change: req.amountTendered - req.cashAmount,
+          transactionId: `txn_cash_${Date.now() + 1}`,
+          timestamp: new Date().toISOString()
+        };
+        
+        response = {
+          approved: true,
+          amount: req.amount,
+          cardApproval: cardResp,
+          cashApproval: cashResp,
+          transactionId: `mixed_${Date.now()}`,
+          timestamp: new Date().toISOString()
+        };
+        break;
+      default:
+        return reply.status(400).send({ error: 'Unsupported payment method' });
     }
-    const change = cashGiven - cashDue;
-    const transactionId = generateMockTransactionId();
-    const response: ApprovalResponse = {
-      approval: true,
-      amount,
-      transactionId,
-      cardAmount: cardAmount > 0 ? cardAmount : undefined,
-      mealVoucherAmount: mealVoucherAmount > 0 ? mealVoucherAmount : undefined,
-      cashAmount: cashDue,
-      change: change > 0 ? change : undefined,
-    };
-    return reply.send(response);
-  }
 
-  if (paymentMethod === 'card') {
-    const transactionId = generateMockTransactionId();
-    const response: ApprovalResponse = {
-      approval: true,
-      amount,
-      transactionId,
-    };
-    return reply.send(response);
-  }
+    reply.send(response);
+  });
 
-  if (paymentMethod === 'meal_voucher') {
-    const transactionId = generateMockTransactionId();
-    const response: ApprovalResponse = {
-      approval: true,
-      amount,
-      transactionId,
-    };
-    return reply.send(response);
-  }
-
-  if (paymentMethod === 'cash') {
-    if (cashGiven === undefined) {
-      return reply.status(400).send({ error: 'cashGiven is required for cash payment' });
+  fastify.post('/cancel', async (request, reply) => {
+    await delay(Math.floor(Math.random() * 600) + 100);
+    const { originalTransactionId } = request.body as { originalTransactionId: string };
+    
+    if (!originalTransactionId) {
+      return reply.status(400).send({ error: 'Transaction ID required' });
     }
-    if (cashGiven < amount) {
-      return reply.status(400).send({ error: 'Insufficient cash provided' });
+    
+    reply.send({
+      approved: true,
+      originalTransactionId,
+      cancellationCode: `CANC_${Math.floor(Math.random() * 9000) + 1000}`,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  fastify.post('/refund', async (request, reply) => {
+    await delay(Math.floor(Math.random() * 700) + 150);
+    const { originalTransactionId, amount } = request.body as { originalTransactionId: string; amount: number };
+    
+    if (!originalTransactionId || !amount || amount <= 0) {
+      return reply.status(400).send({ error: 'Valid transaction ID and amount required' });
     }
-    const change = cashGiven - amount;
-    const transactionId = generateMockTransactionId();
-    const response: ApprovalResponse = {
-      approval: true,
-      amount,
-      transactionId,
-      change: change > 0 ? change : undefined,
-    };
-    return reply.send(response);
-  }
+    
+    reply.send({
+      approved: true,
+      originalTransactionId,
+      refundAmount: amount,
+      refundCode: `RFND_${Math.floor(Math.random() * 9000) + 1000}`,
+      timestamp: new Date().toISOString()
+    });
+  });
 
-  return reply.status(400).send({ error: 'Unsupported payment method' });
-};
+  fastify.post('/addTip', async (request, reply) => {
+    await delay(Math.floor(Math.random() * 500) + 100);
+    const { originalTransactionId, tipAmount } = request.body as { originalTransactionId: string; tipAmount: number };
+    
+    if (!originalTransactionId || !tipAmount || tipAmount < 0) {
+      return reply.status(400).send({ error: 'Valid transaction ID and tip amount required' });
+    }
+    
+    reply.send({
+      approved: true,
+      originalTransactionId,
+      tipAmount,
+      totalAmount: tipAmount, // Assuming tip amount only, original amount would be from original transaction
+      tipCode: `TIP_${Math.floor(Math.random() * 900) + 100}`,
+      timestamp: new Date().toISOString()
+    });
+  });
 
-const cancelHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-  await delay(500);
-  const { transactionId } = request.body as { transactionId: string };
-  if (!transactionId) {
-    return reply.status(400).send({ error: 'transactionId is required' });
-  }
-  const response: ApprovalResponse = {
-    approval: true,
-    amount: 0,
-    transactionId: `${transactionId}_cancelled`,
-  };
-  return reply.send(response);
-};
+  fastify.post('/partialPayment', async (request, reply) => {
+    await delay(Math.floor(Math.random() * 600) + 100);
+    const { originalTransactionId, amount } = request.body as { originalTransactionId: string; amount: number };
+    
+    if (!originalTransactionId || !amount || amount <= 0) {
+      return reply.status(400).send({ error: 'Valid transaction ID and amount required' });
+    }
+    
+    reply.send({
+      approved: true,
+      originalTransactionId,
+      partialAmount: amount,
+      partialCode: `PART_${Math.floor(Math.random() * 9000) + 1000}`,
+      timestamp: new Date().toISOString()
+    });
+  });
 
-const refundHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-  await delay(500);
-  const { transactionId, amount } = request.body as { transactionId: string; amount: number };
-  if (!transactionId || amount === undefined) {
-    return reply.status(400).send({ error: 'transactionId and amount are required' });
-  }
-  const response: ApprovalResponse = {
-    approval: true,
-    amount,
-    transactionId: `${transactionId}_refunded`,
-  };
-  return reply.send(response);
-};
-
-const addTipHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-  await delay(500);
-  const { transactionId, tipAmount } = request.body as { transactionId: string; tipAmount: number };
-  if (!transactionId || tipAmount === undefined) {
-    return reply.status(400).send({ error: 'transactionId and tipAmount are required' });
-  }
-  const response: ApprovalResponse = {
-    approval: true,
-    amount: tipAmount,
-    transactionId: `${transactionId}_tip_added`,
-  };
-  return reply.send(response);
-};
-
-const partialPaymentHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-  await delay(500);
-  const { amount, paymentMethod } = request.body as PaymentRequest;
-  if (amount === undefined || paymentMethod === undefined) {
-    return reply.status(400).send({ error: 'amount and paymentMethod are required' });
-  }
-  // Simplified: treat as a sale for the partial amount
-  const transactionId = generateMockTransactionId();
-  const response: ApprovalResponse = {
-    approval: true,
-    amount,
-    transactionId,
-  };
-  return reply.send(response);
-};
-
-const batchCloseHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-  await delay(500);
-  const response: ApprovalResponse = {
-    approval: true,
-    amount: 0,
-    transactionId: `batch_closed_${Date.now()}`,
-  };
-  return reply.send(response);
-};
-
-export default function (fastify: FastifyInstance, opts: any, done: any) {
-  fastify.post('/api/hardware/payment/sale', saleHandler);
-  fastify.post('/api/hardware/payment/cancel', cancelHandler);
-  fastify.post('/api/hardware/payment/refund', refundHandler);
-  fastify.post('/api/hardware/payment/addTip', addTipHandler);
-  fastify.post('/api/hardware/payment/partialPayment', partialPaymentHandler);
-  fastify.post('/api/hardware/payment/batchClose', batchCloseHandler);
-  done();
+  fastify.post('/batchClose', async (request, reply) => {
+    await delay(Math.floor(Math.random() * 1000) + 500);
+    
+    reply.send({
+      approved: true,
+      batchCloseCode: `BATCH_${Date.now()}`,
+      totalAmount: Math.floor(Math.random() * 10000) + 500,
+      transactionCount: Math.floor(Math.random() * 50) + 10,
+      timestamp: new Date().toISOString()
+    });
+  });
 }
+
+export default paymentRoutes;

@@ -505,7 +505,7 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "IN_PROGRESS",
+      "status": "FAILED",
       "retry_count": 0
     },
     {
@@ -526,7 +526,7 @@
       "depends_on": [
         "S0-1"
       ],
-      "status": "IN_PROGRESS",
+      "status": "TESTING",
       "retry_count": 0
     },
     {
@@ -640,7 +640,7 @@
         "S0-9_DashboardPage"
       ],
       "status": "FAILED",
-      "retry_count": 102,
+      "retry_count": 150,
       "failure_log": [
         {
           "attempt": 1,
@@ -1251,6 +1251,294 @@
         {
           "attempt": 102,
           "timestamp": "2026-05-12T22:05:05.665Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 103,
+          "timestamp": "2026-05-12T22:05:15.913Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 104,
+          "timestamp": "2026-05-12T22:05:26.154Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 105,
+          "timestamp": "2026-05-12T22:05:36.402Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 106,
+          "timestamp": "2026-05-12T22:05:46.653Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 107,
+          "timestamp": "2026-05-12T22:05:56.911Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 108,
+          "timestamp": "2026-05-12T22:06:07.148Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 109,
+          "timestamp": "2026-05-12T22:06:17.401Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 110,
+          "timestamp": "2026-05-12T22:06:27.701Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 111,
+          "timestamp": "2026-05-12T22:06:37.912Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 112,
+          "timestamp": "2026-05-12T22:06:48.163Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 113,
+          "timestamp": "2026-05-12T22:06:58.407Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 114,
+          "timestamp": "2026-05-12T22:07:08.646Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 115,
+          "timestamp": "2026-05-12T22:07:18.914Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 116,
+          "timestamp": "2026-05-12T22:07:29.153Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 117,
+          "timestamp": "2026-05-12T22:07:39.401Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 118,
+          "timestamp": "2026-05-12T22:07:49.657Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 119,
+          "timestamp": "2026-05-12T22:07:59.907Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 120,
+          "timestamp": "2026-05-12T22:08:10.152Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 121,
+          "timestamp": "2026-05-12T22:08:20.422Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 122,
+          "timestamp": "2026-05-12T22:08:30.675Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 123,
+          "timestamp": "2026-05-12T22:08:40.906Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 124,
+          "timestamp": "2026-05-12T22:08:51.165Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 125,
+          "timestamp": "2026-05-12T22:09:01.404Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 126,
+          "timestamp": "2026-05-12T22:09:11.652Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 127,
+          "timestamp": "2026-05-12T22:09:21.896Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 128,
+          "timestamp": "2026-05-12T22:09:32.148Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 129,
+          "timestamp": "2026-05-12T22:09:42.412Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 130,
+          "timestamp": "2026-05-12T22:09:52.646Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 131,
+          "timestamp": "2026-05-12T22:10:02.911Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 132,
+          "timestamp": "2026-05-12T22:10:13.142Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 133,
+          "timestamp": "2026-05-12T22:10:23.405Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 134,
+          "timestamp": "2026-05-12T22:10:33.655Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 135,
+          "timestamp": "2026-05-12T22:10:43.898Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 136,
+          "timestamp": "2026-05-12T22:10:54.150Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 137,
+          "timestamp": "2026-05-12T22:11:04.409Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 138,
+          "timestamp": "2026-05-12T22:11:14.651Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 139,
+          "timestamp": "2026-05-12T22:11:24.911Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 140,
+          "timestamp": "2026-05-12T22:11:35.166Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 141,
+          "timestamp": "2026-05-12T22:11:45.399Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 142,
+          "timestamp": "2026-05-12T22:11:55.651Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 143,
+          "timestamp": "2026-05-12T22:12:05.910Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 144,
+          "timestamp": "2026-05-12T22:12:16.150Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 145,
+          "timestamp": "2026-05-12T22:12:26.404Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 146,
+          "timestamp": "2026-05-12T22:12:36.656Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 147,
+          "timestamp": "2026-05-12T22:12:46.903Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 148,
+          "timestamp": "2026-05-12T22:12:57.154Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 149,
+          "timestamp": "2026-05-12T22:13:07.403Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
+        },
+        {
+          "attempt": 150,
+          "timestamp": "2026-05-12T22:13:17.661Z",
           "error_type": "SYNTAX",
           "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/check-sync-status.ts\"\n"
         }
