@@ -7,11 +7,12 @@ import type {
     PartialPaymentResponse, 
     BatchCloseResponse 
 } from '../../../../packages/shared-types/src/index.ts';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export default async function (fastify: any) {
-    fastify.post('/api/hardware/payment/sale', async (request, reply) => {
+export default async function (fastify: FastifyInstance) {
+    fastify.post('/api/hardware/payment/sale', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         const { method, amount, cardAmount, cashAmount, cashGiven } = request.body as PaymentRequest;
         
@@ -45,7 +46,7 @@ export default async function (fastify: any) {
         return reply.send(response);
     });
 
-    fastify.post('/api/hardware/payment/cancel', async (request, reply) => {
+    fastify.post('/api/hardware/payment/cancel', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         const { transactionId } = request.body as { transactionId: string };
         const response: CancelResponse = {
@@ -55,7 +56,7 @@ export default async function (fastify: any) {
         return reply.send(response);
     });
 
-    fastify.post('/api/hardware/payment/refund', async (request, reply) => {
+    fastify.post('/api/hardware/payment/refund', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         const { transactionId, amount } = request.body as { transactionId: string; amount: number };
         const response: RefundResponse = {
@@ -66,7 +67,7 @@ export default async function (fastify: any) {
         return reply.send(response);
     });
 
-    fastify.post('/api/hardware/payment/addTip', async (request, reply) => {
+    fastify.post('/api/hardware/payment/addTip', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         const { transactionId, tipAmount } = request.body as { transactionId: string; tipAmount: number };
         const response: AddTipResponse = {
@@ -77,7 +78,7 @@ export default async function (fastify: any) {
         return reply.send(response);
     });
 
-    fastify.post('/api/hardware/payment/partialPayment', async (request, reply) => {
+    fastify.post('/api/hardware/payment/partialPayment', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         const { transactionId, amount } = request.body as { transactionId: string; amount: number };
         const response: PartialPaymentResponse = {
@@ -88,7 +89,7 @@ export default async function (fastify: any) {
         return reply.send(response);
     });
 
-    fastify.post('/api/hardware/payment/batchClose', async (request, reply) => {
+    fastify.post('/api/hardware/payment/batchClose', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         const response: BatchCloseResponse = {
             status: 'closed',
@@ -100,7 +101,7 @@ export default async function (fastify: any) {
     });
 
     // End of day cash count & batch close (POS level)
-    fastify.post('/api/payments/batch-close', async (request, reply) => {
+    fastify.post('/api/payments/batch-close', async (request: FastifyRequest, reply: FastifyReply) => {
         await delay(500);
         // Mock cash count and batch close logic
         const response = {
