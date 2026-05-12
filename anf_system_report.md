@@ -1,83 +1,83 @@
-# ANF Otonom Sistem — Canlı Telemetri Raporu
-*Son Güncelleme: 2026-05-12T18:24:12.353Z*
-*Sistem Durumu: **🟡 IDLE (9 dk)***
+# ANF Autonomous System — Live Telemetry Report
+*Last Updated: 2026-05-12T18:32:48.429Z*
+*System Status: **🟡 IDLE (5 min)***
 
 ---
 
-## 💻 1. Donanım Kaynak Verimliliği (Hardware Utilization)
+## 💻 1. Hardware Resource Utilization
 
-| Metrik | Değer | Notlar |
+| Metric | Value | Notes |
 |:---|:---|:---|
 | **GPU** | NVIDIA GB10 | NVIDIA GB10 Blackwell Superchip |
-| **GPU İş Yükü** | 96% | Aktif inferans sırasında |
-| **GPU Güç Tüketimi** | 38.5 W | Anlık (Limit: ~300W) |
-| **GPU Sıcaklık** | 68°C | Termal limit: 85°C |
-| **Thermal Throttling** | 🟢 YOK | — |
-| **VRAM Kullanımı** | Unified Memory (128GB) | Model ağırlıkları ~60GB |
-| **KV Cache (vLLM)** | **2.1%** | Bağlam belleği kullanımı |
-| **Sistem RAM** | 97.9 GB / 121.6 GB (80.5%) | |
-| **CPU Yük Ortalaması (1dk)** | 3.43 | Ajanların işlemci baskısı |
+| **GPU Compute Load** | 95% | During active inference |
+| **GPU Power Draw** | 38.9 W | Instantaneous (Limit: ~300 W) |
+| **GPU Temperature** | 69°C | Thermal limit: 85°C |
+| **Thermal Throttling** | 🟢 NONE | — |
+| **VRAM Usage** | Unified Memory (128 GB) | Model weights ~60 GB |
+| **KV Cache (vLLM)** | **1.8%** | Active context memory usage |
+| **System RAM** | 98.2 GB / 121.6 GB (80.7%) | |
+| **CPU Load Average (1m)** | 6.14 | Agent process pressure |
 
 ---
 
-## 🧠 2. Ajan Zeka ve Model Performans Metrikleri
+## 🧠 2. AI Agent & Model Performance Metrics
 
-| Metrik | Değer | Açıklama |
+| Metric | Value | Description |
 |:---|:---|:---|
-| **Üretim Hızı (TPS)** | **13.4 tokens/sn** | Nemotron-3-Super-120B NVFP4 |
-| **Anlık İstek** | 1 Running / 0 Waiting | Paralel agent kapasitesi |
-| **Prefix Cache Hit Rate** | 0% | Tekrarlayan prompt önbelleklemesi |
-| **Context Window Kullanımı** | ~5K / 24K token | KV Cache oranından hesaplama |
-| **Döküman Okuma / RAG Süresi** | **230.1 sn** | Ort. (24 ölçüm) |
-| **Kod Yazma Süresi** | **164.4 sn** ort. | Min: 0.8s / Max: 787.1s (22 ölçüm) |
-| **QA Test Süresi** | **19.0 sn** | Ort. (45 ölçüm) |
-| **Self-Healing Başarısı** | **89 STEER** | Başarısız → Ajan kendi düzeltti |
-| **Nihai Başarılı Görev** | 30 görev | QA onaylı teslim |
+| **Generation Speed (TPS)** | **13.4 tokens/sec** | Nemotron-3-Super-120B NVFP4 |
+| **Active Requests** | 1 Running / 0 Waiting | Parallel agent capacity |
+| **Prefix Cache Hit Rate** | 0% | Repeated prompt caching efficiency |
+| **Context Window Usage** | ~4K / 24K tokens | Estimated from KV cache ratio |
+| **Doc Reading / RAG Time** | **230.1 sec** | Avg over 24 samples |
+| **Code Writing Time** | **190.3 sec** avg | Min: 0.8s / Max: 787.1s (23 samples) |
+| **QA Testing Time** | **23.0 sec** | Avg over 46 samples |
+| **Self-Healing (STEER)** | **91 corrections** | Failed → Agent autonomously fixed |
+| **QA-Approved Deliveries** | 15 tasks | Passed all quality gates |
 
 ---
 
-## 🛡️ 3. Güvenilirlik ve Hata Analizi (Reliability)
+## 🛡️ 3. Reliability & Error Analysis
 
-| Metrik | Değer |
+| Metric | Value |
 |:---|:---|
-| **MTBF** | 103.5 dakika |
-| **Syntax Hata (SYNC FAIL)** | 30 |
-| **MAX RETRY Aşımı** | 13 |
-| **Retry Oranı** | %0.0 |
-| **Ort. Deneme / Görev** | 0.00 |
+| **MTBF** | 103.5 minutes |
+| **Syntax Failures (SYNC FAIL)** | 31 |
+| **MAX RETRY Exceeded** | 13 |
+| **Retry Rate** | 0.0% |
+| **Avg Attempts / Task** | 0.00 |
 
-**Hata Sınıflandırması (failure_log):**
+**Error Classification (failure_log):**
 
-| Hata Tipi | Adet |
+| Error Type | Count |
 |:---|:---|
-| Henüz kayıt yok | — |
+| No records yet | — |
 
 ---
 
-## 📊 4. Proje İlerleme Durumu
+## 📊 4. Project Progress
 
-| Statü | Adet | Oran |
+| Status | Count | Completion |
 |:---|:---:|:---|
 | ✅ **DONE** | 15 | 17.0% |
 | 🛠️ **IN_PROGRESS** | 4 | |
 | 🔄 **TESTING** | 0 | |
 | ⏳ **PENDING** | 69 | |
 | ❌ **FAILED** | 0 | |
-| **TOPLAM** | **88** | |
+| **TOTAL** | **88** | |
 
-**Tahmini Kalan Süre (ETA):** ~4.3 saat (73 görev × ~3 dk/görev)
+**Estimated Time to Completion (ETA):** ~4.9 hours (73 tasks × ~3 min/task)
 
 ---
 
-## 💰 5. Operasyonel Maliyet ve Verimlilik
+## 💰 5. Operational Cost & Efficiency
 
-| Metrik | Değer | Notlar |
+| Metric | Value | Notes |
 |:---|:---|:---|
-| **Görev Başına Ortalama Süre** | 2.7 dakika | Kod yazımı + QA dahil |
-| **Tahmini Görev Başı Enerji Maliyeti** | $0.0002 | 38.5W × 0.046h × $0.10/kWh |
-| **Paralelizasyon Kapasitesi** | 3 eş zamanlı Coder | vault.concurrency |
-| **Aktif İnsan Müdahalesi** | Sıfır | Tamamen Otonom Yürütme |
-| **İnsan Ekibi Karşılaştırması** | 4-6 Hafta → ~4.3 Saat | Senior ekip tahmini |
+| **Avg Time Per Task** | 3.2 minutes | Code writing + QA included |
+| **Est. Energy Cost Per Task** | $0.0002 | 38.9W × 0.053h × $0.10/kWh |
+| **Parallelization Capacity** | 3 concurrent Coders | vault.concurrency |
+| **Human Intervention Required** | Zero | Fully Autonomous Execution |
+| **vs. Human Engineering Team** | 4–6 Weeks → ~4.9 Hours | Senior full-stack team estimate |
 
 ---
-*ANF Telemetry Daemon v2.0 — Her 15 saniyede güncellenir*
+*ANF Telemetry Daemon v2.0 — Updates every 15 seconds*
