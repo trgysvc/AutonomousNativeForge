@@ -36,6 +36,31 @@
       ],
       "rule": "Files containing JSX must use the .tsx extension and include the necessary React import (or rely on automatic JSX runtime) to avoid TypeScript syntax errors during compilation.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-11_1778624279997",
+      "context": [
+        "security"
+      ],
+      "rule": "Always validate and sanitize file paths to prevent directory traversal; reject any path that attempts to escape the project workspace.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-12_1778624344961",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never allow file paths that escape the project root; validate and sanitize all paths to prevent directory traversal.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-11_1778624425253",
+      "context": [
+        "path-validation"
+      ],
+      "rule": "Always validate and sanitize file paths to prevent directory traversal; reject any path containing '..' or absolute paths outside the project workspace.",
+      "severity": "CRITICAL"
     }
   ]
 }
