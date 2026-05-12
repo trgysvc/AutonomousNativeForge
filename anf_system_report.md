@@ -1,5 +1,5 @@
 # ANF Otonom Sistem Canlı Telemetri
-**Son Güncelleme:** 2026-05-12T17:34:54.819Z
+**Son Güncelleme:** 2026-05-12T17:35:09.823Z
 **Sistem Durumu:** 🟢 ONLINE (Aktif İşlem Yapılıyor)
 
 ## 📊 1. Görev Dağılımı (Manifesto Analizi)
