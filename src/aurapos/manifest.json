@@ -2988,7 +2988,7 @@
       "desc": "Login page using email/password and Supabase auth",
       "file_path": "apps/dashboard/app/(auth)/login/page.tsx",
       "depends_on": [],
-      "status": "FIXING",
+      "status": "FAILED",
       "failure_log": [
         {
           "attempt": 1,
@@ -3019,11 +3019,17 @@
           "timestamp": "2026-05-13T22:32:47.353Z",
           "error_type": "UNKNOWN",
           "error": "HATA: Dosya bulunamadı."
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T22:39:12.648Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
         }
       ],
       "recovery_count": 2,
       "last_recovery": "2026-05-13T22:17:16.909Z",
-      "retry_count": 3
+      "retry_count": 4
     },
     {
       "task_id": "S14-3",
@@ -3031,11 +3037,23 @@
       "file_path": "apps/dashboard/app/(panel)/page.tsx",
       "depends_on": [],
       "status": "FIXING",
-      "retry_count": 1,
+      "retry_count": 3,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T22:27:57.139Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T22:35:47.485Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T22:43:12.784Z",
           "error_type": "UNKNOWN",
           "error": "HATA: Dosya bulunamadı."
         }
@@ -3046,7 +3064,24 @@
       "desc": "Branch list view with create/edit/delete controls",
       "file_path": "apps/dashboard/app/(panel)/branches/page.tsx",
       "depends_on": [],
-      "status": "IN_PROGRESS"
+      "status": "FIXING",
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T22:43:17.925Z",
+          "error_type": "SYSTEM_RECOVERY",
+          "error": "WATCHDOG_ACTION: Heartbeat bulunamadı ve işlem dosyası eski."
+        },
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T22:47:57.995Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
+        }
+      ],
+      "recovery_count": 1,
+      "last_recovery": "2026-05-13T22:43:17.926Z",
+      "retry_count": 1
     },
     {
       "task_id": "S14-5",

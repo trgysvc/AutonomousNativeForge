@@ -11551,3 +11551,92 @@
 [2026-05-13T22:34:12.054Z] ⏳ [CODER] Streaming... 1026 tokens so far (finish=generating)
 [2026-05-13T22:34:17.317Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
 [2026-05-13T22:34:42.086Z] ⏳ [CODER] Streaming... 1439 tokens so far (finish=generating)
+[2026-05-13T22:35:12.088Z] ⏳ [CODER] Streaming... 1842 tokens so far (finish=generating)
+[2026-05-13T22:35:17.376Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:35:39.108Z] 💾 Dosya mühürlendi (2218 bytes): page.tsx
+[2026-05-13T22:35:42.005Z] 🧭 STEERING: [aurapos] S14-2 yönlendirme ile düzeltiliyor...
+[2026-05-13T22:35:42.005Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T22:35:42.005Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T22:35:42.472Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S14-3
+[2026-05-13T22:35:42.982Z] 🧐 QA GUARDRAIL: [aurapos] S14-3 denetleniyor...
+[2026-05-13T22:35:47.490Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (2/3)
+[2026-05-13T22:35:47.495Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:35:47.495Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:35:47.496Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:35:47.497Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:36:12.042Z] ⏳ [CODER] Streaming... 254 tokens so far (finish=generating)
+[2026-05-13T22:36:15.125Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T22:36:17.507Z] ⏳ [ARCHITECT] Streaming... 254 tokens so far (finish=generating)
+[2026-05-13T22:36:17.695Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:36:42.058Z] ⏳ [CODER] Streaming... 623 tokens so far (finish=generating)
+[2026-05-13T22:37:12.073Z] ⏳ [CODER] Streaming... 1040 tokens so far (finish=generating)
+[2026-05-13T22:37:17.470Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:37:42.133Z] ⏳ [CODER] Streaming... 1461 tokens so far (finish=generating)
+[2026-05-13T22:38:12.191Z] ⏳ [CODER] Streaming... 1880 tokens so far (finish=generating)
+[2026-05-13T22:38:17.531Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:38:42.255Z] ⏳ [CODER] Streaming... 2300 tokens so far (finish=generating)
+[2026-05-13T22:39:06.224Z] 💾 Dosya mühürlendi (3213 bytes): page.tsx
+[2026-05-13T22:39:07.018Z] 🧭 STEERING: [aurapos] S14-3 yönlendirme ile düzeltiliyor...
+[2026-05-13T22:39:07.018Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T22:39:07.018Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T22:39:07.636Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S14-2
+[2026-05-13T22:39:08.156Z] 🧐 QA GUARDRAIL: [aurapos] S14-2 denetleniyor...
+[2026-05-13T22:39:12.653Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T22:39:12.700Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:39:12.701Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:39:17.778Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:39:37.072Z] ⏳ [CODER] Streaming... 334 tokens so far (finish=generating)
+[2026-05-13T22:39:42.762Z] ⏳ [ARCHITECT] Streaming... 346 tokens so far (finish=generating)
+[2026-05-13T22:40:07.102Z] ⏳ [CODER] Streaming... 692 tokens so far (finish=generating)
+[2026-05-13T22:40:12.779Z] ⏳ [ARCHITECT] Streaming... 703 tokens so far (finish=generating)
+[2026-05-13T22:40:17.601Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:40:37.113Z] ⏳ [CODER] Streaming... 1049 tokens so far (finish=generating)
+[2026-05-13T22:40:42.863Z] ⏳ [ARCHITECT] Streaming... 1060 tokens so far (finish=generating)
+[2026-05-13T22:40:45.965Z] [aurapos]  📝 RCA Raporu oluşturuldu: S14-2_RCA.md. Diğer görevlere geçiliyor...
+[2026-05-13T22:41:07.120Z] ⏳ [CODER] Streaming... 1445 tokens so far (finish=generating)
+[2026-05-13T22:41:17.607Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:41:37.134Z] ⏳ [CODER] Streaming... 1855 tokens so far (finish=generating)
+[2026-05-13T22:42:07.189Z] ⏳ [CODER] Streaming... 2271 tokens so far (finish=generating)
+[2026-05-13T22:42:17.621Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:42:37.231Z] ⏳ [CODER] Streaming... 2686 tokens so far (finish=generating)
+[2026-05-13T22:43:03.152Z] 💾 Dosya mühürlendi (3077 bytes): page.tsx
+[2026-05-13T22:43:07.031Z] ✍️ CODER: [aurapos] S14-4 yazılıyor...
+[2026-05-13T22:43:07.031Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T22:43:07.031Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T22:43:07.774Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S14-3
+[2026-05-13T22:43:08.388Z] 🧐 QA GUARDRAIL: [aurapos] S14-3 denetleniyor...
+[2026-05-13T22:43:12.788Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (3/3)
+[2026-05-13T22:43:12.807Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:43:12.807Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:43:12.808Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:43:12.808Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:43:17.919Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-WRITE_CODE-1778708595712.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T22:43:17.920Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-WRITE_CODE-1778708595712.json
+[2026-05-13T22:43:17.926Z] 🔄 [WATCHDOG] Manifest durumu sıfırlandı: S14-4 (aurapos) [Kurtarma: 1/3]
+[2026-05-13T22:43:17.930Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-WRITE_CODE-1778708595712.json -> coder/inbox
+[2026-05-13T22:43:17.930Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:43:37.063Z] ⏳ [CODER] Streaming... 259 tokens so far (finish=generating)
+[2026-05-13T22:43:40.012Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T22:43:42.853Z] ⏳ [ARCHITECT] Streaming... 259 tokens so far (finish=generating)
+[2026-05-13T22:44:07.091Z] ⏳ [CODER] Streaming... 621 tokens so far (finish=generating)
+[2026-05-13T22:44:17.926Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:44:37.100Z] ⏳ [CODER] Streaming... 1035 tokens so far (finish=generating)
+[2026-05-13T22:45:07.128Z] ⏳ [CODER] Streaming... 1440 tokens so far (finish=generating)
+[2026-05-13T22:45:17.747Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:45:37.162Z] ⏳ [CODER] Streaming... 1851 tokens so far (finish=generating)
+[2026-05-13T22:46:07.234Z] ⏳ [CODER] Streaming... 2266 tokens so far (finish=generating)
+[2026-05-13T22:46:17.797Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:46:37.268Z] ⏳ [CODER] Streaming... 2683 tokens so far (finish=generating)
+[2026-05-13T22:47:07.296Z] ⏳ [CODER] Streaming... 3097 tokens so far (finish=generating)
+[2026-05-13T22:47:17.801Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:47:37.329Z] ⏳ [CODER] Streaming... 3492 tokens so far (finish=generating)
+[2026-05-13T22:47:50.625Z] 💾 Dosya mühürlendi (7381 bytes): page.tsx
+[2026-05-13T22:47:50.627Z] ❌ Hata: ENOENT: no such file or directory, rename '/workspaces/AutonomousNativeForge/queue/processing/coder-WRITE_CODE-1778708595712.json' -> '/workspaces/AutonomousNativeForge/queue/done/coder-WRITE_CODE-1778708595712.json'
+[2026-05-13T22:47:52.041Z] 🧭 STEERING: [aurapos] S14-3 yönlendirme ile düzeltiliyor...
+[2026-05-13T22:47:52.041Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T22:47:52.041Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T22:47:52.984Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S14-4
+[2026-05-13T22:47:53.653Z] 🧐 QA GUARDRAIL: [aurapos] S14-4 denetleniyor...
+[2026-05-13T22:47:57.999Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (1/3)
+[2026-05-13T22:47:58.003Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:47:58.003Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144

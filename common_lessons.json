@@ -1163,6 +1163,23 @@
       ],
       "rule": "Before referencing a file in a task, verify that the file exists or will be created by a prior task; otherwise, create the file first or adjust the task to handle missing files gracefully.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S14-3_1778711775125",
+      "context": [
+        "file-creation"
+      ],
+      "rule": "Always ensure the target directory exists before attempting to create or write a file; create missing directories as needed.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S14-3_1778712220011",
+      "context": [
+        "file-path",
+        "error-handling"
+      ],
+      "rule": "Before referencing or importing a file, verify that the file exists at the specified path; if it does not, either create the file with the required content or correct the path to match the actual project structure.",
+      "severity": "CRITICAL"
     }
   ]
 }
