@@ -11696,3 +11696,9 @@
 [2026-05-13T22:56:28.455Z] ⏳ [ARCHITECT] Streaming... 253 tokens so far (finish=generating)
 [2026-05-13T22:56:28.455Z] ⏳ [ARCHITECT] Streaming... 253 tokens so far (finish=generating)
 [2026-05-13T22:56:29.999Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T22:56:52.144Z] ⏳ [CODER] Streaming... 602 tokens so far (finish=generating)
+[2026-05-13T22:57:18.213Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:57:22.191Z] ⏳ [CODER] Streaming... 1017 tokens so far (finish=generating)
+[2026-05-13T22:57:52.204Z] ⏳ [CODER] Streaming... 1438 tokens so far (finish=generating)
+[2026-05-13T22:58:18.273Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:58:22.213Z] ⏳ [CODER] Streaming... 1856 tokens so far (finish=generating)

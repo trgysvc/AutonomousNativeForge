@@ -1,5 +1,5 @@
 # ANF Autonomous System — Live Telemetry Report
-*Last Updated: 2026-05-13T22:56:42.461Z*
+*Last Updated: 2026-05-13T22:58:28.243Z*
 *System Status: **🟢 ONLINE***
 
 ---
@@ -21,10 +21,10 @@
 | **GPU** | NVIDIA GB10 | Real-time sensor data |
 | **GPU Compute Load** | 96% | During active inference |
 | **GPU Power Draw** | 39.6 W | Instantaneous |
-| **GPU Temperature** | 68°C | Thermal limit: 85°C |
+| **GPU Temperature** | 69°C | Thermal limit: 85°C |
 | **Thermal Throttling** | 🟢 NONE | — |
-| **System RAM** | 100141 / 124547 MB | Memory pressure |
-| **CPU Load Average (1m)** | 1.97 | Agent process pressure |
+| **System RAM** | 100313 / 124547 MB | Memory pressure |
+| **CPU Load Average (1m)** | 1.5 | Agent process pressure |
 
 ---
 
@@ -32,8 +32,8 @@
 
 | Metric | Value | Description |
 |:---|:---|:---|
-| **Generation Speed (TPS)** | **24.2 tokens/sec** | NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 |
-| **Active Requests** | 2 Running / 0 Waiting | Parallel capacity |
+| **Generation Speed (TPS)** | **14 tokens/sec** | NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 |
+| **Active Requests** | 1 Running / 0 Waiting | Parallel capacity |
 | **Prefix Cache Hit Rate** | 0% | Prompt caching efficiency |
 | **Self-Healing (STEER)** | 2 corrections | Agent autonomously fixed |
 | **QA-Approved Deliveries** | 21 tasks | Passed all quality gates |
