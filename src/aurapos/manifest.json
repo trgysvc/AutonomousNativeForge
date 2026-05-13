@@ -2704,7 +2704,7 @@
       "file_path": "apps/pos/lib/supabase.ts",
       "depends_on": [],
       "status": "FAILED",
-      "retry_count": 15,
+      "retry_count": 17,
       "failure_log": [
         {
           "attempt": 1,
@@ -2795,6 +2795,18 @@
           "timestamp": "2026-05-13T21:10:52.124Z",
           "error_type": "SYNTAX",
           "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 16,
+          "timestamp": "2026-05-13T21:13:37.138Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 17,
+          "timestamp": "2026-05-13T21:23:22.522Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
         }
       ],
       "recovery_count": 1,
@@ -2805,8 +2817,8 @@
       "desc": "Wrap IHardwareDriver implementations and expose async functions for POS",
       "file_path": "apps/pos/lib/hardware.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 3,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
@@ -2825,6 +2837,12 @@
           "timestamp": "2026-05-13T20:33:25.987Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T21:17:54.352Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
         }
       ]
     },
@@ -2833,21 +2851,53 @@
       "desc": "Configure Workbox service worker for offline caching and background sync",
       "file_path": "apps/pos/public/sw.js",
       "depends_on": [],
-      "status": "IN_PROGRESS"
+      "status": "PENDING",
+      "retry_count": 2,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T21:20:54.365Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T21:24:44.548Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
+        },
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T21:32:14.888Z",
+          "error_type": "SYSTEM_RECOVERY",
+          "error": "WATCHDOG_ACTION: Heartbeat bulunamadı ve işlem dosyası eski."
+        }
+      ],
+      "recovery_count": 1,
+      "last_recovery": "2026-05-13T21:32:14.888Z"
     },
     {
       "task_id": "S13-14",
       "desc": "Enable next-pwa, set output: 'export', and configure images domains",
       "file_path": "apps/pos/next.config.js",
       "depends_on": [],
-      "status": "IN_PROGRESS"
+      "status": "DONE",
+      "retry_count": 1,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T21:20:37.431Z",
+          "error_type": "PRD_COMPLIANCE",
+          "error": "PRD UYUMSUZLUĞU: The project lacks a defined PRD, making it a native-only project. The use of the non-built-in module 'next-pwa' constitutes a Native Architecture Violation."
+        }
+      ]
     },
     {
       "task_id": "S13-15",
       "desc": "Add dependencies: next, react, react-dom, @supabase/supabase-js, @electric-sql/pglite, next-pwa",
       "file_path": "apps/pos/package.json",
       "depends_on": [],
-      "status": "IN_PROGRESS"
+      "status": "DONE"
     },
     {
       "task_id": "S14-1",

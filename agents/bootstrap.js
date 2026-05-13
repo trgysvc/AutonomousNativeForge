@@ -96,70 +96,7 @@ const TYPE_TO_AGENT = {
     'TASK_READY':   'architect',
 };
 
-function recoverStuckTasks() {
-    log("🔄 Yetim görevler kurtarılıyor ve Manifest iyileştiriliyor (Self-Healing)...");
-    const PROCESSING = path.join(BASE_DIR, 'queue', 'processing');
-    const INBOX = path.join(BASE_DIR, 'queue', 'inbox');
-    const SRC_DIR = path.join(BASE_DIR, 'src');
 
-    // 1. Klasör tabanlı kurtarma (İşlem klasöründeki dosyaları inbox'a geri taşı)
-    if (fs.existsSync(PROCESSING)) {
-        const files = fs.readdirSync(PROCESSING).filter(f => f.endsWith('.json'));
-        files.forEach(f => {
-            try {
-                const source = path.join(PROCESSING, f);
-                const content = JSON.parse(fs.readFileSync(source, 'utf8'));
-                content.recovery_count = (content.recovery_count || 0) + 1;
-                const targetAgent = TYPE_TO_AGENT[content.type] || 'architect';
-                const newFileName = f.includes('_recovered_') ? f : f.replace('.json', `_recovered_${Date.now()}.json`);
-                const targetDir = path.join(INBOX, targetAgent);
-                if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-                fs.writeFileSync(path.join(targetDir, newFileName), JSON.stringify(content, null, 2));
-                fs.unlinkSync(source);
-                log(`   + [RECOVERED FILE] ${f} → ${targetAgent}`);
-            } catch (err) {
-                log(`   ❌ [RECOVERY HATASI] ${f}: ${err.message}`);
-            }
-        });
-    }
-
-    // 2. Manifest tabanlı iyileştirme (Zombi görevleri sıfırla, retry_count'a göre karar ver)
-    if (fs.existsSync(SRC_DIR)) {
-        const MAX_RETRIES = 3; // architect.js ile aynı değer
-        const projects = fs.readdirSync(SRC_DIR).filter(d => fs.lstatSync(path.join(SRC_DIR, d)).isDirectory());
-        projects.forEach(projectId => {
-            const manifestPath = path.join(SRC_DIR, projectId, 'manifest.json');
-            if (!fs.existsSync(manifestPath)) return;
-
-            try {
-                const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-                let changed = false;
-                manifest.tasks.forEach(task => {
-                    // Sadece aktif zombi durumları (IN_PROGRESS, FIXING, TESTING) kurtarılır.
-                    // FAILED görevlere dokunma — retry_count kaybetme.
-                    const zombieStates = ['IN_PROGRESS', 'FIXING', 'TESTING'];
-                    if (zombieStates.includes(task.status)) {
-                        task.retry_count = (task.retry_count || 0) + 1;
-                        if (task.retry_count > MAX_RETRIES) {
-                            // Limit aşıldı: bu görev gerçekten yapılamıyor, FAILED'a gönder
-                            log(`   + [PERMANENT FAIL] ${projectId}:${task.task_id} (${task.retry_count}. restart, FAILED'a alındı)`);
-                            task.status = 'FAILED';
-                        } else {
-                            log(`   + [HEALED MANIFEST] ${projectId}:${task.task_id} (${task.status} -> PENDING, retry_count: ${task.retry_count})`);
-                            task.status = 'PENDING';
-                        }
-                        changed = true;
-                    }
-                });
-                if (changed) {
-                    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-                }
-            } catch (err) {
-                log(`   ❌ [MANIFEST HEAL HATASI] ${projectId}: ${err.message}`);
-            }
-        });
-    }
-}
 
 function deployProjectCredentials() {
     log("🔑 Supabase ve GitHub anahtarları mühürleniyor...");
@@ -293,7 +230,6 @@ async function runBootstrap() {
     console.log("\n🚀 AUTONOMOUS NATIVE FORGE - KİMLİK DOĞRULAMALI KURULUM\n");
     
     initializeFolders();
-    recoverStuckTasks();
     deployProjectCredentials();
     checkCoreAgents();
     

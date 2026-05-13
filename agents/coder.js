@@ -12,7 +12,7 @@ function getProjectTree(projectPath) {
     try {
         if (!fs.existsSync(projectPath)) return "Dizin henüz oluşturulmadı.";
         const files = fs.readdirSync(projectPath, { recursive: true });
-        return files.slice(0, 50).join('\n'); // İlk 50 dosyayı döndür
+        return files.slice(0, 500).join('\n'); // 50'den 500'e çıkarıldı (Nemotron Kapasitesi)
     } catch (e) { return "Dizin okunamadı."; }
 }
 
@@ -68,8 +68,8 @@ const LANG_MAP = {
     '.yaml':  'YAML',
 };
 
-// Context dosyası başına maksimum karakter (≈750 token). Toplam cap: 10 dosya × 3000 = 30K char.
-const MAX_CONTEXT_CHARS_PER_FILE = 3000;
+// Context dosyası başına maksimum karakter (≈2500 token). Toplam cap: 10 dosya × 10000 = 100K char.
+const MAX_CONTEXT_CHARS_PER_FILE = 10000;
 
 /**
  * Context File Injection: Bağımlı ve paylaşılan dosyaları okuyup prompt'a ekler.

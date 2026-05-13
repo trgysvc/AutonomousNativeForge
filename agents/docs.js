@@ -47,8 +47,9 @@ async function updateSystemState(msg) {
     log(`📊 Sistem Durumu Güncelleniyor: [${project_id}]`);
 
     const manifest = project_manifest || { tasks: [] };
-    const doneTasks = manifest.tasks.filter(t => t.status === 'DONE');
-    const technicalDebt = manifest.tasks.filter(t => t.status === 'DONE' && (t.desc.toLowerCase().includes('geçici') || t.desc.toLowerCase().includes('temp') || t.desc.toLowerCase().includes('workaround')));
+    const tasks = Array.isArray(manifest.tasks) ? manifest.tasks : [];
+    const doneTasks = tasks.filter(t => t.status === 'DONE');
+    const technicalDebt = tasks.filter(t => t.status === 'DONE' && (t.desc.toLowerCase().includes('geçici') || t.desc.toLowerCase().includes('temp') || t.desc.toLowerCase().includes('workaround')));
 
     const prompt = `
     Sen bir Baş Mimarsın. Projenin şu anki fiziksel ve mantıksal durumunu özetleyen bir SYSTEM_STATE.md içeriği hazırla.

@@ -166,7 +166,7 @@ async function handleMessage(msg) {
     }
 
     // 3. ADIM: AI Review (PRD Uyumluluk Denetimi)
-    const stackRules = loadStackRules(project_id);
+    const stackRules = await loadStackRules(project_id);
     const rulesContext = stackRules.forbidden_libs?.length > 0
         ? `Yasak kütüphaneler: ${stackRules.forbidden_libs.join(', ')}.`
         : 'Proje stack kuralları manifest\'te henüz tanımlı değil.';

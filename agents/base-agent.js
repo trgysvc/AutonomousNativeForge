@@ -506,28 +506,6 @@ async function start(agentName, processTask) {
     const MAX_CONCURRENT = Math.max(1, concurrencyMap[agentName.toUpperCase()] || 1);
     if (MAX_CONCURRENT > 1) log(`⚡ [${agentName}] Paralel mod: ${MAX_CONCURRENT} eş zamanlı görev.`);
 
-    // Orphan Recovery: PROCESSING dosyaları "{agentName}-{originalFile}" formatında.
-    // Prefix olmadan filter yazılmış eski kod hiçbir zaman eşleşmiyordu — düzeltildi.
-    if (fs.existsSync(PROCESSING)) {
-        const prefix = `${agentName.toLowerCase()}-`;
-        const orphans = fs.readdirSync(PROCESSING)
-            .filter(f => f.startsWith(prefix) && f.endsWith('.json'));
-        for (const f of orphans) {
-            log(`♻️ Orphan task kurtarıldı: ${f}`);
-            const source = path.join(PROCESSING, f);
-            try {
-                const task = JSON.parse(fs.readFileSync(source, 'utf-8'));
-                await processTask(task);
-                if (!fs.existsSync(DONE)) fs.mkdirSync(DONE, { recursive: true });
-                fs.renameSync(source, path.join(DONE, f));
-            } catch (err) {
-                log(`❌ Orphan Hata: ${err.message}`);
-                if (!fs.existsSync(ERROR)) fs.mkdirSync(ERROR, { recursive: true });
-                try { fs.renameSync(source, path.join(ERROR, f)); } catch (_) {}
-            }
-        }
-    }
-
     let activeCount = 0;
 
     // runTask: claim → execute → archive. Not awaited in the main loop — runs concurrently.
@@ -601,7 +579,8 @@ async function withLock(lockName, fn) {
                 return;
             } catch (e) {
                 if (fs.existsSync(lockDir)) {
-                    const ts = parseInt(fs.readFileSync(path.join(lockDir, 'timestamp'), 'utf8') || '0');
+                    const tsFile = path.join(lockDir, 'timestamp');
+                    const ts = fs.existsSync(tsFile) ? parseInt(fs.readFileSync(tsFile, 'utf8') || '0') : Date.now();
                     if (Date.now() - ts > STALE_MS) {
                         log(`⚠️ Stale lock detected (${lockName}), breaking it...`);
                         try { fs.rmSync(lockDir, { recursive: true, force: true }); } catch (_) {}

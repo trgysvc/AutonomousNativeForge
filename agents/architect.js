@@ -406,7 +406,7 @@ async function handleMessage(msg) {
             log(`${prefix} 📄 Dokümantasyon tamamlandı. Sistem durumu güncelleniyor...`);
             sendMessage('DOCS', 'UPDATE_STATE', { 
                 ...msg, 
-                project_manifest: getManifest(project_id) 
+                project_manifest: await getManifest(project_id) 
             });
             break;
     }

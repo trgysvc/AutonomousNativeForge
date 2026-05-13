@@ -1,6 +1,7 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 const { log, withLock } = require('./base-agent');
 
 const QUEUE = path.join(__dirname, '..', 'queue');
@@ -11,6 +12,7 @@ const PROJECTS_DIR = path.join(__dirname, '..', 'src');
 
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_RECOVERY_ATTEMPTS = 3;
+const CHECK_INTERVAL = 60000; // 1 minute
 
 /**
  * Checks if a PID is still running
@@ -21,6 +23,19 @@ function isPidRunning(pid) {
         return true;
     } catch (e) {
         return false;
+    }
+}
+
+/**
+ * Force restarts an agent service via systemd
+ */
+function restartAgent(scriptName) {
+    const serviceName = `anf-${scriptName.replace('.js', '')}.service`;
+    log(`⚠️ [WATCHDOG] Servis restart ediliyor: ${serviceName}`);
+    try {
+        execSync(`systemctl --user restart ${serviceName}`);
+    } catch (e) {
+        log(`❌ [WATCHDOG] Restart hatası (${serviceName}): ${e.message}`);
     }
 }
 
@@ -94,6 +109,23 @@ async function recoverTask(processingFile, reason) {
 async function scan() {
     if (!fs.existsSync(PROCESSING)) return;
 
+    // 1. CONTEXT OVERFLOW DETECTION (llm_communication.log)
+    const COMM_LOG = path.join(__dirname, '..', 'llm_communication.log');
+    if (fs.existsSync(COMM_LOG)) {
+        try {
+            const stats = fs.statSync(COMM_LOG);
+            if (Date.now() - stats.mtimeMs < 30000) {
+                const content = fs.readFileSync(COMM_LOG, 'utf8');
+                const lastLines = content.split('\n').slice(-20).join('\n');
+                if (lastLines.includes('finish=length') || lastLines.includes('tokens=4097')) {
+                    log(`🚨 [WATCHDOG] CONTEXT TAŞMASI TESPİT EDİLDİ! Ajanlar resetleniyor.`);
+                    ['architect.js', 'coder.js', 'tester.js'].forEach(restartAgent);
+                }
+            }
+        } catch (e) {}
+    }
+
+    // 2. STALL DETECTION (Heartbeats & PIDs)
     const files = fs.readdirSync(PROCESSING).filter(f => f.endsWith('.json'));
     const now = Date.now();
 
@@ -119,7 +151,6 @@ async function scan() {
                     reason = `Heartbeat çok eski (${Math.round((now - heartbeat.timestamp)/1000)}s).`;
                 }
             } catch (e) {
-                // Heartbeat file corrupted? Treat as stale if file is old
                 const stats = fs.statSync(heartbeatPath);
                 if ((now - stats.mtimeMs) > STALE_THRESHOLD_MS) {
                     shouldRecover = true;
@@ -127,7 +158,6 @@ async function scan() {
                 }
             }
         } else {
-            // No heartbeat file. Check file age of the processing file itself
             const stats = fs.statSync(processingPath);
             if ((now - stats.mtimeMs) > STALE_THRESHOLD_MS) {
                 shouldRecover = true;
@@ -138,14 +168,15 @@ async function scan() {
         if (shouldRecover) {
             log(`⚠️ [WATCHDOG] Donma tespit edildi: ${file}. Sebep: ${reason}`);
             await recoverTask(processingPath, reason);
-            // Clean up stale heartbeat
             if (fs.existsSync(heartbeatPath)) {
                 try { fs.unlinkSync(heartbeatPath); } catch (_) {}
             }
         }
     }
+    
+    log(`✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol ${CHECK_INTERVAL / 1000}s sonra.`);
 }
 
 log('🛡️ Watchdog (Koruyucu Göz) başlatıldı.');
-setInterval(scan, 60000); // Her dakika tara
-scan(); // İlk taramayı hemen yap
+setInterval(scan, CHECK_INTERVAL);
+scan();

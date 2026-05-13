@@ -1111,6 +1111,15 @@
       ],
       "rule": "Always ensure that the prompt and expected response stay within the model's token limit; if a task risks exceeding it, break the task into smaller subtasks or increase the max_tokens setting.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S13-13_1778707529940",
+      "context": [
+        "file-management",
+        "path-validation"
+      ],
+      "rule": "Always verify that the file specified in a task's `file_path` is created before marking the task complete; a missing file indicates a skipped file‑creation step and must be caught early.",
+      "severity": "CRITICAL"
     }
   ]
 }

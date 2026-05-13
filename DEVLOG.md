@@ -1,5 +1,17 @@
 
 ---
+### [2026-05-13T21:30:00.000Z] - system - Industrial Hardening Phase 2: Watchdog Integration & Context Scaling
+- **Watchdog Deep-Integration:** Upgraded `agents/watchdog.js` with **Context Overflow Detection**. It now proactively monitors `llm_communication.log` for `finish=length` or token exhaustion stalls, resetting agents before they enter a degraded state.
+- **Tester Agent Hardening:** Fixed a critical logic error in `agents/tester.js`. Added missing `await` to `loadStackRules`, fully activating PRD compliance and forbidden library checks.
+- **Coder Capacity Expansion:** Optimized `agents/coder.js` to leverage Nemotron-3-Super's large context window. Increased project tree limit from 50 to **500 files** and context file buffer from 3k to **10k characters** (≈2500 tokens).
+- **Global Stability Cleanup:**
+    - Removed redundant "Orphan Recovery" blocks from `base-agent.js` and `bootstrap.js`. 
+    - Centralized all self-healing and recovery logic into the Watchdog.
+    - Improved `withLock` (mutex) safety with robust stale-timestamp validation.
+- **Process Orchestration:** Successfully migrated all agents to **systemd --user** units. Automated the full-system restart process, ensuring all agents are running on the latest industrial patches with zero downtime.
+- **Status:** **OPERATIONAL & OPTIMIZED**. The factory is now running with maximized context visibility and deep-integrated failure telemetry.
+
+---
 ### [2026-05-13T20:58:00.000Z] - system - Industrial Stabilization & Autonomous Recovery (Watchdog)
 - **Autonomous Watchdog Deployment:** Created `agents/watchdog.js` to monitor and recover frozen tasks. The system now autonomously detects dead PIDs or stale heartbeats and resets them within <60 seconds.
 - **Heartbeat Protocol:** Implemented a real-time heartbeat system in `base-agent.js`. Active agents now sign their progress every 30s to `queue/heartbeats/`, providing ground-truth for system health.
@@ -1259,3 +1271,13 @@ echo "=== Restarting services ==="
 docker compose up -d --remove-orphans
 
 echo "=== Deployment completed ==="
+
+---
+### [2026-05-13T21:30:30.425Z] - aurapos - undefined
+// next.config.js
+module.exports = {
+  output: 'export', // Statik site exportu
+  images: {
+    domains: ['images.unsplash.com', 'example.com'], // İzin verilen görüntü kaynakları
+  },
+};

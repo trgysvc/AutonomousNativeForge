@@ -10,11 +10,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export const signIn = async (email: string, password: string) => {
-  return await supabase.auth.signInWithPassword({ email, password })
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (error) throw error
+  return data
 }
 
 export const signOut = async () => {
-  return await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut()
+  if (error) throw error
 }
 
 export const getUser = async () => {
@@ -22,14 +28,22 @@ export const getUser = async () => {
   return user
 }
 
+export const updateUser = async (updates: { [key: string]: any }) => {
+  const { data, error } = await supabase.auth.updateUser(updates)
+  if (error) throw error
+  return data
+}
+
 export const resetPassword = async (email: string) => {
-  const redirectTo = typeof window !== 'undefined' 
-    ? `${window.location.origin}/reset-password` 
-    : `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
-  
-  return await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+  if (error) throw error
+  return data
 }
 
 export const updatePassword = async (password: string) => {
-  return await supabase.auth.updateUser({ password })
+  const { data, error } = await supabase.auth.updateUser({ password })
+  if (error) throw error
+  return data
 }
