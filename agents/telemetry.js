@@ -189,7 +189,7 @@ async function generateReport() {
         const powerKw = (hw.gpu_power_w !== 'N/A' ? parseFloat(hw.gpu_power_w) : 240) / 1000;
         const costPerTask = (powerKw * (avgTaskSec / 3600) * 0.10).toFixed(4);
         const thermalAlert = hw.thermal_throttling ? '\n> [!CAUTION]\n> **THERMAL THROTTLING DETECTED:** GPU is over 85°C. Cooling required.\n' : '';
-        const progressIdx = Math.floor(parseFloat(completionPct) / 5);
+        const progressIdx = Math.max(tasks.done > 0 ? 1 : 0, Math.round(parseFloat(completionPct) / 5));
         const bar = '█'.repeat(progressIdx) + '░'.repeat(20 - progressIdx);
 
         const report = `# ANF Autonomous System — Live Telemetry Report

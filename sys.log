@@ -9667,3 +9667,25 @@
 [2026-05-13T19:10:24.670Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
 [2026-05-13T19:10:24.671Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
 [2026-05-13T19:10:24.671Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T19:10:44.247Z] ⏳ [CODER] Streaming... 2871 tokens so far (finish=generating)
+[2026-05-13T19:10:51.495Z] ⏳ [CODER] Streaming... 263 tokens so far (finish=generating)
+[2026-05-13T19:10:54.368Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T19:10:54.765Z] ⏳ [ARCHITECT] Streaming... 265 tokens so far (finish=generating)
+[2026-05-13T19:11:14.275Z] ⏳ [CODER] Streaming... 3218 tokens so far (finish=generating)
+[2026-05-13T19:11:21.500Z] ⏳ [CODER] Streaming... 633 tokens so far (finish=generating)
+[2026-05-13T19:11:44.340Z] ⏳ [CODER] Streaming... 3600 tokens so far (finish=generating)
+[2026-05-13T19:11:51.516Z] ⏳ [CODER] Streaming... 1008 tokens so far (finish=generating)
+[2026-05-13T19:12:14.416Z] ⏳ [CODER] Streaming... 3958 tokens so far (finish=generating)
+[2026-05-13T19:12:21.575Z] ⏳ [CODER] Streaming... 1368 tokens so far (finish=generating)
+[2026-05-13T19:12:25.487Z] 💾 Dosya mühürlendi (2762 bytes): page.tsx
+[2026-05-13T19:12:27.920Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S13-2
+[2026-05-13T19:12:27.937Z] 🧭 STEERING: [aurapos] S13-4 yönlendirme ile düzeltiliyor...
+[2026-05-13T19:12:27.938Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T19:12:27.938Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T19:12:28.371Z] 🧐 QA GUARDRAIL: [aurapos] S13-2 denetleniyor...
+[2026-05-13T19:12:29.074Z] ❌ SYNC FAIL: page.tsx
+[2026-05-13T19:12:29.745Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (2/3)
+[2026-05-13T19:12:29.749Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T19:12:29.749Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T19:12:29.750Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T19:12:29.750Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144

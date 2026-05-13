@@ -958,6 +958,15 @@
       ],
       "rule": "All .tsx files must contain valid TypeScript JSX: top-level JSX must be wrapped inside a function component that is exported as default, and the project's tsconfig must have JSX configured (e.g., \"react-jsx\" or \"preserve\") with appropriate module and target settings (esnext). Failing to do so results in a TS syntax error during tsc compilation.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S13-3_1778699454368",
+      "context": [
+        "file-system",
+        "path"
+      ],
+      "rule": "Always ensure that the parent directory of a target file exists before attempting to create or write the file; create missing directories programmatically or verify the path beforehand to avoid 'File not found' errors.",
+      "severity": "CRITICAL"
     }
   ]
 }
