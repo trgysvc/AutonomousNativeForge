@@ -1,7 +1,7 @@
 # AuraPOS — Master Sistem Promptu
 # Cursor: bu dosyayı .cursorrules olarak kaydet
 # Windsurf: System Prompt alanına yapıştır
-# Claude / diğer: ilk mesaj olarak gönder
+# Diğer modeller: ilk mesaj olarak gönder
 
 ---
 
