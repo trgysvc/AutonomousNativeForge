@@ -130,7 +130,11 @@ async function dispatchNextTasks(projectId) {
     
     // Sprint Gate: Get the hierarchy of current tasks (SAFE PARSING)
     const allTaskIds = manifest.tasks.map(t => t.task_id || t.id || 'S0-0');
-    const sprints = [...new Set(allTaskIds.map(id => String(id).split('-')[0]))].sort(); // S0, S1, S2...
+    const sprints = [...new Set(allTaskIds.map(id => String(id).split('-')[0]))].sort((a, b) => {
+        const numA = parseInt(a.replace('S', ''));
+        const numB = parseInt(b.replace('S', ''));
+        return numA - numB;
+    });
 
     for (const task of pendingTasks) {
         const safeTaskId = String(task.task_id || task.id || 'S0-0');
@@ -409,6 +413,46 @@ async function handleMessage(msg) {
                 project_manifest: await getManifest(project_id) 
             });
             break;
+
+        case 'SYSTEM_INTEGRITY_VIOLATION': {
+            const { agent_name, agent_file, error_log } = msg;
+            log(`🚨 [CRITICAL] SİSTEM BÜTÜNLÜK İHLALİ: ${agent_name} çöküyor! Otomatik onarım başlatılıyor...`);
+            
+            if (!fs.existsSync(agent_file)) {
+                log(`❌ [REPAIR] Dosya bulunamadı: ${agent_file}`);
+                break;
+            }
+
+            const currentCode = fs.readFileSync(agent_file, 'utf8');
+            const repairPrompt = `
+            SEN BİR SİSTEM MİMARISIN. BİR ANF AJANI SÜREKLİ ÇÖKÜYOR.
+            AJAN: ${agent_name}
+            HATA LOGU:
+            ${error_log}
+            
+            MEVCUT KOD:
+            ${currentCode}
+            
+            GÖREVİN:
+            1. Hatayı analiz et.
+            2. Mevcut koddaki hatayı düzelt.
+            3. Düzeltilmiş KODUN TAMAMINI geri dön.
+            
+            DİKKAT: Sadece kodu dön, açıklama yapma.`;
+
+            log(`🧠 [REPAIR] ${agent_name} için çözüm üretiliyor...`);
+            const fixedCode = await ask('ARCHITECT', repairPrompt, __dirname);
+            
+            if (fixedCode && fixedCode.length > 100) {
+                fs.writeFileSync(agent_file, fixedCode);
+                log(`✅ [REPAIR] ${agent_name} başarıyla yamalandı. Servis yeniden başlatılıyor.`);
+                // Reset crash history in watchdog and restart
+                sendMessage('WATCHDOG', 'RESTART_AGENT', { script: `${agent_name}.js` });
+            } else {
+                log(`❌ [REPAIR] Geçerli bir yama üretilemedi!`);
+            }
+            break;
+        }
     }
 }
 
@@ -442,7 +486,7 @@ async function discoverNewProjects() {
                 // Harici dizin: `_` filtresi yok, manifest tabanlı tekrar işleme engeli
                 files = fs.readdirSync(projectPath).filter(f => f.endsWith('.md'));
                 if (files.length === 0) continue;
-                const existingManifest = getManifest(project_id);
+                const existingManifest = await getManifest(project_id);
                 if (existingManifest.tasks.length > 0) continue; // Zaten planlandı
             } else {
                 // Dahili dizin: `_` ile başlayanlar zaten işlenmiş sayılır
@@ -558,7 +602,7 @@ SADECE şu JSON formatında yanıt ver (başka hiçbir şey yazma):
                     const stackMatch = stackRaw.match(/\{[\s\S]*\}/);
                     if (stackMatch) {
                         const stackRules = parseJsonRobust(stackMatch[0]);
-                        const stackManifest = getManifest(project_id);
+                        const stackManifest = await getManifest(project_id);
                         stackManifest.stack_rules = stackRules;
                         saveManifest(project_id, stackManifest);
                         log(`📋 [${project_id}] Stack kuralları mühürlendi. Yasak: [${(stackRules.forbidden_libs || []).join(', ')}]`);
@@ -567,7 +611,7 @@ SADECE şu JSON formatında yanıt ver (başka hiçbir şey yazma):
                     log(`⚠️ [${project_id}] Stack rules çıkarılamadı, varsayılanlar kullanılacak: ${stackErr.message}`);
                 }
 
-                const manifest = getManifest(project_id);
+                const manifest = await getManifest(project_id);
 
                 tasks.forEach(t => {
                     // Desteklenen uzantılar: Web, Backend, Mobile, DB, DevOps, Sistem dilleri

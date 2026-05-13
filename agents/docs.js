@@ -46,8 +46,15 @@ async function updateSystemState(msg) {
     const { project_id, project_manifest } = msg;
     log(`📊 Sistem Durumu Güncelleniyor: [${project_id}]`);
 
-    const manifest = project_manifest || { tasks: [] };
+    // Robust manifest check: handles Promise objects, undefined, or missing tasks
+    let manifest = project_manifest;
+    if (manifest && typeof manifest.then === 'function') {
+        log(`⚠️ DOCS: Manifest bir Promise olarak geldi! Bekleniyor...`);
+        manifest = await project_manifest;
+    }
+    manifest = manifest || { tasks: [] };
     const tasks = Array.isArray(manifest.tasks) ? manifest.tasks : [];
+    
     const doneTasks = tasks.filter(t => t.status === 'DONE');
     const technicalDebt = tasks.filter(t => t.status === 'DONE' && (t.desc.toLowerCase().includes('geçici') || t.desc.toLowerCase().includes('temp') || t.desc.toLowerCase().includes('workaround')));
 

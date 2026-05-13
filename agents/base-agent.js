@@ -490,10 +490,18 @@ async function pushToGithub(projectId, filePath, content, commitMessage, branch 
 }
 
 function sendMessage(target, type, data) {
-    const fileName = `${type}-${Date.now()}.json`;
-    const targetPath = path.join(INBOX, target.toLowerCase(), fileName);
-    if (!fs.existsSync(path.dirname(targetPath))) fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.writeFileSync(targetPath, JSON.stringify({ ...data, type }, null, 2));
+    const timestamp = Date.now();
+    const fileName = `${type}-${timestamp}.json`;
+    const tmpName = `${type}-${timestamp}.tmp`;
+    const targetDir = path.join(INBOX, target.toLowerCase());
+    const targetPath = path.join(targetDir, fileName);
+    const tmpPath = path.join(targetDir, tmpName);
+
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+    
+    // Atomik yazma: Önce geçici dosyaya yaz, sonra ismini değiştir
+    fs.writeFileSync(tmpPath, JSON.stringify({ ...data, type }, null, 2));
+    fs.renameSync(tmpPath, targetPath);
 }
 
 async function start(agentName, processTask) {

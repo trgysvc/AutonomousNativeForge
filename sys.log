@@ -11085,3 +11085,238 @@
 [2026-05-13T21:33:14.918Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
 [2026-05-13T21:33:18.420Z] ⏳ [DOCS] Streaming... 671 tokens so far (finish=generating)
 [2026-05-13T21:33:18.499Z] ⏳ [CODER] Streaming... 671 tokens so far (finish=generating)
+[2026-05-13T21:33:48.468Z] ⏳ [DOCS] Streaming... 1022 tokens so far (finish=generating)
+[2026-05-13T21:33:48.553Z] ⏳ [CODER] Streaming... 1022 tokens so far (finish=generating)
+[2026-05-13T21:34:14.926Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:34:18.525Z] ⏳ [DOCS] Streaming... 1374 tokens so far (finish=generating)
+[2026-05-13T21:34:18.611Z] ⏳ [CODER] Streaming... 1375 tokens so far (finish=generating)
+[2026-05-13T21:34:48.603Z] ⏳ [DOCS] Streaming... 1725 tokens so far (finish=generating)
+[2026-05-13T21:34:48.678Z] ⏳ [CODER] Streaming... 1726 tokens so far (finish=generating)
+[2026-05-13T21:35:14.978Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:35:18.656Z] ⏳ [DOCS] Streaming... 2083 tokens so far (finish=generating)
+[2026-05-13T21:35:18.737Z] ⏳ [CODER] Streaming... 2084 tokens so far (finish=generating)
+[2026-05-13T21:35:44.138Z] ✅ Süreç Tamamlandı.
+[2026-05-13T21:35:48.554Z] [aurapos]  📄 Dokümantasyon tamamlandı. Sistem durumu güncelleniyor...
+[2026-05-13T21:35:48.789Z] ⏳ [CODER] Streaming... 2449 tokens so far (finish=generating)
+[2026-05-13T21:35:53.314Z] 📊 Sistem Durumu Güncelleniyor: [aurapos]
+[2026-05-13T21:35:53.314Z] ❌ Hata: Cannot read properties of undefined (reading 'filter')
+[2026-05-13T21:36:15.040Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:36:18.852Z] ⏳ [CODER] Streaming... 2869 tokens so far (finish=generating)
+[2026-05-13T21:36:48.856Z] ⏳ [CODER] Streaming... 3287 tokens so far (finish=generating)
+[2026-05-13T21:37:15.100Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:37:18.883Z] ⏳ [CODER] Streaming... 3698 tokens so far (finish=generating)
+[2026-05-13T21:37:47.842Z] ❌ CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)
+[2026-05-13T21:37:48.651Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (3/3)
+[2026-05-13T21:37:48.654Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:37:48.655Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:37:48.663Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:37:48.663Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:38:08.068Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T21:38:15.371Z] 🚨 [WATCHDOG] CONTEXT TAŞMASI TESPİT EDİLDİ! Ajanlar resetleniyor.
+[2026-05-13T21:38:15.371Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-architect.service
+[2026-05-13T21:38:15.407Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-coder.service
+[2026-05-13T21:38:15.428Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-tester.service
+[2026-05-13T21:38:15.435Z] 🚀 [STARTUP] [aurapos] Görev kuyruğu kontrol ediliyor...
+[2026-05-13T21:38:15.437Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T21:38:15.443Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:38:15.462Z] 🚀 CODER başlatıldı.
+[2026-05-13T21:38:15.470Z] 🚀 TESTER başlatıldı.
+[2026-05-13T21:39:15.160Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:40:15.161Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:41:15.220Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:42:15.279Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:43:15.283Z] ⚠️ [WATCHDOG] Donma tespit edildi: architect-BUG_REPORT-1778708267842.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T21:43:15.283Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: architect-BUG_REPORT-1778708267842.json
+[2026-05-13T21:43:15.294Z] 🔄 [WATCHDOG] Manifest durumu sıfırlandı: S13-13 (aurapos) [Kurtarma: 2/3]
+[2026-05-13T21:43:15.296Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: architect-BUG_REPORT-1778708267842.json -> architect/inbox
+[2026-05-13T21:43:15.296Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:43:15.695Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T21:43:15.703Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.705Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.708Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.710Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.713Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.715Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.718Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.720Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.722Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.724Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.727Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.729Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.730Z] ✍️ CODER: [aurapos] S14-1 yazılıyor...
+[2026-05-13T21:43:15.730Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:43:15.730Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:43:15.731Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.734Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.736Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:43:15.761Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:43:15.761Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:43:45.797Z] ⏳ [ARCHITECT] Streaming... 317 tokens so far (finish=generating)
+[2026-05-13T21:43:45.797Z] ⏳ [CODER] Streaming... 317 tokens so far (finish=generating)
+[2026-05-13T21:44:15.344Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:44:15.843Z] ⏳ [CODER] Streaming... 668 tokens so far (finish=generating)
+[2026-05-13T21:44:15.843Z] ⏳ [ARCHITECT] Streaming... 668 tokens so far (finish=generating)
+[2026-05-13T21:44:45.886Z] ⏳ [ARCHITECT] Streaming... 1017 tokens so far (finish=generating)
+[2026-05-13T21:44:45.886Z] ⏳ [CODER] Streaming... 1018 tokens so far (finish=generating)
+[2026-05-13T21:44:49.022Z] [aurapos]  📝 RCA Raporu oluşturuldu: S13-13_RCA.md. Diğer görevlere geçiliyor...
+[2026-05-13T21:45:15.605Z] 🚨 [WATCHDOG] CONTEXT TAŞMASI TESPİT EDİLDİ! Ajanlar resetleniyor.
+[2026-05-13T21:45:15.605Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-architect.service
+[2026-05-13T21:45:15.639Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-coder.service
+[2026-05-13T21:45:15.666Z] 🚀 [STARTUP] [aurapos] Görev kuyruğu kontrol ediliyor...
+[2026-05-13T21:45:15.668Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T21:45:15.672Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-tester.service
+[2026-05-13T21:45:15.672Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Orders API (branch-server)
+[2026-05-13T21:45:15.680Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: WebSocket Sunucusu
+[2026-05-13T21:45:15.686Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Masa yönetimi ve optimistic lock entegrasyonu
+[2026-05-13T21:45:15.688Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-WRITE_CODE-1778708595705.json. Sebep: PID 2694606 artık çalışmıyor.
+[2026-05-13T21:45:15.688Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-WRITE_CODE-1778708595705.json
+[2026-05-13T21:45:15.690Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Optimistic Lock Middleware
+[2026-05-13T21:45:15.696Z] 🚀 CODER başlatıldı.
+[2026-05-13T21:45:15.697Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:45:15.702Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:45:15.704Z] ✍️ CODER: [aurapos] S14-1 yazılıyor...
+[2026-05-13T21:45:15.705Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:45:15.705Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:45:15.715Z] 🚀 TESTER başlatıldı.
+[2026-05-13T21:45:15.718Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T21:45:15.793Z] 🔄 [WATCHDOG] Manifest durumu sıfırlandı: S14-1 (aurapos) [Kurtarma: 1/3]
+[2026-05-13T21:45:15.795Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-WRITE_CODE-1778708595705.json -> coder/inbox
+[2026-05-13T21:45:15.796Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:45:45.743Z] ⏳ [CODER] Streaming... 387 tokens so far (finish=generating)
+[2026-05-13T21:46:15.406Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:46:15.812Z] ⏳ [CODER] Streaming... 796 tokens so far (finish=generating)
+[2026-05-13T21:46:45.833Z] ⏳ [CODER] Streaming... 1208 tokens so far (finish=generating)
+[2026-05-13T21:47:15.466Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:47:15.860Z] ⏳ [CODER] Streaming... 1615 tokens so far (finish=generating)
+[2026-05-13T21:47:45.868Z] ⏳ [CODER] Streaming... 2022 tokens so far (finish=generating)
+[2026-05-13T21:48:15.477Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:48:15.882Z] ⏳ [CODER] Streaming... 2429 tokens so far (finish=generating)
+[2026-05-13T21:48:45.889Z] ⏳ [CODER] Streaming... 2836 tokens so far (finish=generating)
+[2026-05-13T21:49:15.485Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:49:15.905Z] ⏳ [CODER] Streaming... 3249 tokens so far (finish=generating)
+[2026-05-13T21:49:45.970Z] ⏳ [CODER] Streaming... 3667 tokens so far (finish=generating)
+[2026-05-13T21:50:15.488Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:50:15.975Z] ⏳ [CODER] Streaming... 4081 tokens so far (finish=generating)
+[2026-05-13T21:50:17.127Z] ❌ CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)
+[2026-05-13T21:50:20.733Z] ✍️ CODER: [aurapos] S14-2 yazılıyor...
+[2026-05-13T21:50:20.734Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:50:20.734Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:50:20.924Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (1/3)
+[2026-05-13T21:50:20.944Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:50:20.944Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:50:50.792Z] ⏳ [CODER] Streaming... 326 tokens so far (finish=generating)
+[2026-05-13T21:50:50.970Z] ⏳ [ARCHITECT] Streaming... 327 tokens so far (finish=generating)
+[2026-05-13T21:51:15.735Z] 🚨 [WATCHDOG] CONTEXT TAŞMASI TESPİT EDİLDİ! Ajanlar resetleniyor.
+[2026-05-13T21:51:15.735Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-architect.service
+[2026-05-13T21:51:15.767Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-coder.service
+[2026-05-13T21:51:15.785Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-tester.service
+[2026-05-13T21:51:15.797Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-WRITE_CODE-1778708595707.json. Sebep: PID 2714206 artık çalışmıyor.
+[2026-05-13T21:51:15.798Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-WRITE_CODE-1778708595707.json
+[2026-05-13T21:51:15.803Z] 🔄 [WATCHDOG] Manifest durumu sıfırlandı: S14-2 (aurapos) [Kurtarma: 1/3]
+[2026-05-13T21:51:15.807Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-WRITE_CODE-1778708595707.json -> coder/inbox
+[2026-05-13T21:51:15.807Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:51:15.806Z] 🚀 [STARTUP] [aurapos] Görev kuyruğu kontrol ediliyor...
+[2026-05-13T21:51:15.808Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T21:51:15.819Z] 🚀 CODER başlatıldı.
+[2026-05-13T21:51:15.827Z] 🧭 STEERING: [aurapos] S14-1 yönlendirme ile düzeltiliyor...
+[2026-05-13T21:51:15.828Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:51:15.828Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:51:15.833Z] 🚀 TESTER başlatıldı.
+[2026-05-13T21:51:45.845Z] ⏳ [CODER] Streaming... 390 tokens so far (finish=generating)
+[2026-05-13T21:52:15.600Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:52:15.911Z] ⏳ [CODER] Streaming... 808 tokens so far (finish=generating)
+[2026-05-13T21:52:45.937Z] ⏳ [CODER] Streaming... 1225 tokens so far (finish=generating)
+[2026-05-13T21:53:15.659Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:53:15.980Z] ⏳ [CODER] Streaming... 1636 tokens so far (finish=generating)
+[2026-05-13T21:53:46.008Z] ⏳ [CODER] Streaming... 2049 tokens so far (finish=generating)
+[2026-05-13T21:54:15.719Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:54:16.030Z] ⏳ [CODER] Streaming... 2461 tokens so far (finish=generating)
+[2026-05-13T21:54:46.031Z] ⏳ [CODER] Streaming... 2869 tokens so far (finish=generating)
+[2026-05-13T21:55:15.775Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:55:16.039Z] ⏳ [CODER] Streaming... 3274 tokens so far (finish=generating)
+[2026-05-13T21:55:46.067Z] ⏳ [CODER] Streaming... 3687 tokens so far (finish=generating)
+[2026-05-13T21:56:15.780Z] ❌ CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)
+[2026-05-13T21:56:15.856Z] ✍️ CODER: [aurapos] S14-2 yazılıyor...
+[2026-05-13T21:56:15.856Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:56:15.856Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:56:15.925Z] 🚨 [WATCHDOG] CONTEXT TAŞMASI TESPİT EDİLDİ! Ajanlar resetleniyor.
+[2026-05-13T21:56:15.925Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-architect.service
+[2026-05-13T21:56:15.968Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-coder.service
+[2026-05-13T21:56:15.987Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-tester.service
+[2026-05-13T21:56:16.003Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-WRITE_CODE-1778708595707.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T21:56:16.003Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-WRITE_CODE-1778708595707.json
+[2026-05-13T21:56:16.008Z] 🚀 [STARTUP] [aurapos] Görev kuyruğu kontrol ediliyor...
+[2026-05-13T21:56:16.009Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-WRITE_CODE-1778708595707.json -> coder/inbox
+[2026-05-13T21:56:16.009Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:56:16.009Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T21:56:16.017Z] 🚀 CODER başlatıldı.
+[2026-05-13T21:56:16.027Z] ✍️ CODER: [aurapos] S14-2 yazılıyor...
+[2026-05-13T21:56:16.028Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:56:16.028Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:56:16.041Z] 🚀 TESTER başlatıldı.
+[2026-05-13T21:56:16.120Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (2/3)
+[2026-05-13T21:56:16.127Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:56:16.128Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:56:16.135Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:56:16.135Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:56:45.588Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T21:56:46.036Z] ⏳ [CODER] Streaming... 231 tokens so far (finish=generating)
+[2026-05-13T21:56:46.207Z] ⏳ [ARCHITECT] Streaming... 232 tokens so far (finish=generating)
+[2026-05-13T21:57:16.036Z] 🚨 [WATCHDOG] CONTEXT TAŞMASI TESPİT EDİLDİ! Ajanlar resetleniyor.
+[2026-05-13T21:57:16.037Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-architect.service
+[2026-05-13T21:57:16.049Z] ⏳ [CODER] Streaming... 585 tokens so far (finish=generating)
+[2026-05-13T21:57:16.094Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-coder.service
+[2026-05-13T21:57:16.111Z] ⚠️ [WATCHDOG] Servis restart ediliyor: anf-tester.service
+[2026-05-13T21:57:16.129Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-WRITE_CODE-1778708595707.json. Sebep: PID 2723529 artık çalışmıyor.
+[2026-05-13T21:57:16.129Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-WRITE_CODE-1778708595707.json
+[2026-05-13T21:57:16.129Z] 🚀 [STARTUP] [aurapos] Görev kuyruğu kontrol ediliyor...
+[2026-05-13T21:57:16.131Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T21:57:16.147Z] 🚀 CODER başlatıldı.
+[2026-05-13T21:57:16.155Z] 🧭 STEERING: [aurapos] S14-1 yönlendirme ile düzeltiliyor...
+[2026-05-13T21:57:16.156Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:57:16.156Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:57:16.166Z] 🚀 TESTER başlatıldı.
+[2026-05-13T21:57:16.234Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-WRITE_CODE-1778708595707.json -> coder/inbox
+[2026-05-13T21:57:16.235Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:57:46.219Z] ⏳ [CODER] Streaming... 396 tokens so far (finish=generating)
+[2026-05-13T21:58:15.887Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:58:16.261Z] ⏳ [CODER] Streaming... 814 tokens so far (finish=generating)
+[2026-05-13T21:58:46.317Z] ⏳ [CODER] Streaming... 1232 tokens so far (finish=generating)
+[2026-05-13T21:59:15.888Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T21:59:16.386Z] ⏳ [CODER] Streaming... 1648 tokens so far (finish=generating)
+[2026-05-13T21:59:46.387Z] ⏳ [CODER] Streaming... 2061 tokens so far (finish=generating)
+[2026-05-13T22:00:12.118Z] 💾 Dosya mühürlendi (1645 bytes): layout.tsx
+[2026-05-13T22:00:16.054Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:00:16.176Z] ✍️ CODER: [aurapos] S14-2 yazılıyor...
+[2026-05-13T22:00:16.176Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T22:00:16.176Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T22:00:16.269Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S14-1
+[2026-05-13T22:00:16.344Z] 🧐 QA GUARDRAIL: [aurapos] S14-1 denetleniyor...
+[2026-05-13T22:00:21.286Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (3/3)
+[2026-05-13T22:00:21.291Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:00:21.292Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:00:21.302Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:00:21.302Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:00:43.015Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T22:00:46.243Z] ⏳ [CODER] Streaming... 265 tokens so far (finish=generating)
+[2026-05-13T22:00:51.363Z] ⏳ [ARCHITECT] Streaming... 276 tokens so far (finish=generating)
+[2026-05-13T22:01:16.226Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:01:16.318Z] ⏳ [CODER] Streaming... 648 tokens so far (finish=generating)
+[2026-05-13T22:01:46.332Z] ⏳ [CODER] Streaming... 1057 tokens so far (finish=generating)
+[2026-05-13T22:02:16.021Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:02:16.148Z] 🔍 [anf_internal] Multi-Doc Synthesis başlatılıyor (1/1 dosya, ~2950 token)...
+[2026-05-13T22:02:16.150Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:02:16.150Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:02:17.008Z] ⏳ [CODER] Streaming... 1465 tokens so far (finish=generating)
+[2026-05-13T22:02:46.234Z] ⏳ [ARCHITECT] Streaming... 331 tokens so far (finish=generating)
+[2026-05-13T22:02:47.064Z] ⏳ [CODER] Streaming... 1806 tokens so far (finish=generating)
+[2026-05-13T22:03:16.081Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:03:16.248Z] ⏳ [ARCHITECT] Streaming... 688 tokens so far (finish=generating)
+[2026-05-13T22:03:17.145Z] ⏳ [CODER] Streaming... 2164 tokens so far (finish=generating)
+[2026-05-13T22:03:46.254Z] ⏳ [ARCHITECT] Streaming... 1040 tokens so far (finish=generating)
+[2026-05-13T22:03:47.166Z] ⏳ [CODER] Streaming... 2516 tokens so far (finish=generating)
+[2026-05-13T22:04:16.141Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:04:16.329Z] ⏳ [ARCHITECT] Streaming... 1398 tokens so far (finish=generating)
+[2026-05-13T22:04:17.243Z] ⏳ [CODER] Streaming... 2874 tokens so far (finish=generating)
+[2026-05-13T22:04:46.358Z] ⏳ [ARCHITECT] Streaming... 1753 tokens so far (finish=generating)
+[2026-05-13T22:04:47.273Z] ⏳ [CODER] Streaming... 3229 tokens so far (finish=generating)

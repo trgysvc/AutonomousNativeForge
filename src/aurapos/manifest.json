@@ -1010,7 +1010,7 @@
       "desc": "Implement order creation, validation, item addition, calculation, cancellation, splitting, table status updates, and KDS notification via WebSocket after persisting order. Use DB column-level optimistic locking (lock_version) handling 409 errors directly.",
       "file_path": "apps/branch-server/src/routes/orders.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S2-3",
@@ -1018,7 +1018,7 @@
       "desc": "Set up Fastify WebSocket using @fastify/websocket plugin, manage client connections, provide broadcast functions with rooms per-table/per-order to reduce fan-out.",
       "file_path": "apps/branch-server/src/lib/websocket.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S2-5",
@@ -1304,7 +1304,7 @@
       "depends_on": [
         "S1-4"
       ],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S4-2",
@@ -1553,7 +1553,7 @@
       "desc": "Implement middleware that checks lock_version via a single UPDATE … WHERE lock_version = expected; return 409 if no rows affected (eliminates extra SELECT).",
       "file_path": "apps/branch-server/src/middleware/optimisticLock.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S2-1c",
@@ -2300,14 +2300,14 @@
       "desc": "Implement Payment Service client for cash, card (Ingenico mock), meal voucher, mixed, and batch‑close operations.",
       "file_path": "/workspace/aurapos/apps/pos/services/paymentService.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S2-7",
       "desc": "Create modal UI for initiating payments, displaying Ingenico mock flow, handling tips, partial amounts, and cash‑given.",
       "file_path": "/workspace/aurapos/apps/pos/components/PaymentModal.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S4-8",
@@ -2851,8 +2851,8 @@
       "desc": "Configure Workbox service worker for offline caching and background sync",
       "file_path": "apps/pos/public/sw.js",
       "depends_on": [],
-      "status": "PENDING",
-      "retry_count": 2,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
@@ -2871,10 +2871,28 @@
           "timestamp": "2026-05-13T21:32:14.888Z",
           "error_type": "SYSTEM_RECOVERY",
           "error": "WATCHDOG_ACTION: Heartbeat bulunamadı ve işlem dosyası eski."
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T21:37:48.647Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T21:43:15.294Z",
+          "error_type": "SYSTEM_RECOVERY",
+          "error": "WATCHDOG_ACTION: Heartbeat bulunamadı ve işlem dosyası eski."
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T21:43:15.692Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
         }
       ],
-      "recovery_count": 1,
-      "last_recovery": "2026-05-13T21:32:14.888Z"
+      "recovery_count": 2,
+      "last_recovery": "2026-05-13T21:43:15.294Z"
     },
     {
       "task_id": "S13-14",
@@ -2904,105 +2922,144 @@
       "desc": "Root layout for dashboard with auth guard and sidebar navigation",
       "file_path": "apps/dashboard/app/layout.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "FIXING",
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T21:45:15.793Z",
+          "error_type": "SYSTEM_RECOVERY",
+          "error": "WATCHDOG_ACTION: PID 2694606 artık çalışmıyor."
+        },
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T21:50:20.919Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T21:56:16.114Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T22:00:21.281Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
+        }
+      ],
+      "recovery_count": 1,
+      "last_recovery": "2026-05-13T21:45:15.793Z",
+      "retry_count": 3
     },
     {
       "task_id": "S14-2",
       "desc": "Login page using email/password and Supabase auth",
       "file_path": "apps/dashboard/app/(auth)/login/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "PENDING",
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T21:51:15.803Z",
+          "error_type": "SYSTEM_RECOVERY",
+          "error": "WATCHDOG_ACTION: PID 2714206 artık çalışmıyor."
+        }
+      ],
+      "recovery_count": 1,
+      "last_recovery": "2026-05-13T21:51:15.803Z"
     },
     {
       "task_id": "S14-3",
       "desc": "Main dashboard showing AI insights cards and quick metrics",
       "file_path": "apps/dashboard/app/(panel)/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-4",
       "desc": "Branch list view with create/edit/delete controls",
       "file_path": "apps/dashboard/app/(panel)/branches/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-5",
       "desc": "Menu management UI for categories, products, portions, options",
       "file_path": "apps/dashboard/app/(panel)/menu/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-6",
       "desc": "Staff management with role assignment, PIN reset, and shift overview",
       "file_path": "apps/dashboard/app/(panel)/staff/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-7",
       "desc": "Stock overview with critical stock alerts and adjustment forms",
       "file_path": "apps/dashboard/app/(panel)/stock/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-8",
       "desc": "Revenue, sales, and labor reports using Recharts wrappers",
       "file_path": "apps/dashboard/app/(panel)/reports/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-9",
       "desc": "Business settings: logo, tax info, payment gateway config",
       "file_path": "apps/dashboard/app/(panel)/settings/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-10",
       "desc": "Payment reconciliation view with filters and export",
       "file_path": "apps/dashboard/app/(panel)/payments/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-11",
       "desc": "Export Button from shared ui package with dashboard theme",
       "file_path": "apps/dashboard/components/ui/Button.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-12",
       "desc": "Recharts wrapper for daily revenue line chart",
       "file_path": "apps/dashboard/components/charts/RevenueChart.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-13",
       "desc": "Card displaying AI-generated insight with action button",
       "file_path": "apps/dashboard/components/ai/InsightCard.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-14",
       "desc": "Supabase client for dashboard with service role key for admin ops",
       "file_path": "apps/dashboard/lib/supabase.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-15",
       "desc": "Add dependencies: next, react, react-dom, recharts, @supabase/supabase-js",
       "file_path": "apps/dashboard/package.json",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S15-1",
@@ -4310,7 +4367,7 @@
       "task_id": "S2-1b",
       "desc": "Add seat_no column to order_items, create SeatSelector component, implement seat-based total calculation and payment flow.",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S6-9",
