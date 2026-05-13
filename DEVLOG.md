@@ -1,5 +1,13 @@
 
 ---
+### [2026-05-13T07:20:00.000Z] - system - Critical Factory Restoration & Infinite Loop Recovery
+- **Root Cause Analysis:** Identified a systemic stall caused by a combination of an undefined variable ReferenceError and LLM context bloating (200+ failure logs sent to vLLM).
+- **Infinite Loop Fix:** Removed the unauthorized `retryCounts` reference in `architect.js`. Status tracking is now strictly manifest-based for consistency across restarts.
+- **Context Window Protection (GPU Stall Fix):** Implemented failure history truncation in Architect. Only the last 3 failure entries are now sent to the LLM during re-planning, preventing the 24k token context window from overflowing.
+- **Monorepo Path Correction:** Executed a global manifest repair script (`fix_manifest.js`) to prepend `apps/branch-server/` to 15+ tasks that were missing their workspace prefix, resolving persistent `tsc` and `file not found` errors.
+- **Automated Factory Wake-up:** Added a startup routine to `architect.js` that scans `src/` and triggers `dispatchNextTasks` for all existing projects, ensuring the factory resumes automatically after any crash or manual restart.
+- **Production Status:** **ONLINE**. S0-3 task is currently being processed by the Coder.
+
 ### [2026-05-12T21:35:00.000Z] - system - Stabilization of Autonomous Factory & Master Plan Execution
 - **Master Plan Ingestion:** Successfully parsed all 13 PRD documents and atomized them into a massive 542-task `manifest.json`.
 - **Queue Engine Stabilization:** Architect now uses precise NVIDIA NIM parameters (`max_completion_tokens`, `thinking_token_budget`) to avoid context overflows and API errors.

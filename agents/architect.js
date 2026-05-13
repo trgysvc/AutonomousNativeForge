@@ -288,7 +288,7 @@ async function handleMessage(msg) {
                 }
 
                 updateTaskStatus(project_id, task_id, 'DONE');
-                delete retryCounts[task_id];
+                // retry_count is tracked in manifest.json — no in-memory variable needed
                 await notify('TASK_DONE', { project_id, task_id, title, file_path });
                 sendMessage('DOCS', 'WRITE_DOCS', msg);
                 await checkSprintCompletion(project_id, sprintId, branchName);
@@ -322,10 +322,14 @@ async function handleMessage(msg) {
                 updateTaskStatus(project_id, task_id, 'FAILED', { retry_count: currentRetry, failure_log });
                 await notify('TASK_FAILED', { project_id, task_id, title, description, retries: MAX_RETRIES });
 
-                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nHATA GEÇMİŞİ:\n${failure_log.map(f => `- Deneme ${f.attempt} [${f.error_type}]: ${f.error}`).join('\n')}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revise et.`;
-                const rca = await ask('ARCHITECT', planPrompt, __dirname);
+                // Cap to last 3 entries — prevents context overflow from 200+ failure history
+                const recentLog = failure_log.slice(-3);
+                const planPrompt = `GÖREV BAŞARISIZ OLDU: ${task_id}\nToplam ${failure_log.length} deneme yapıldı. Son 3 hata:\n${recentLog.map(f => `- Deneme ${f.attempt} [${f.error_type}]: ${f.error}`).join('\n')}\nLütfen mimariyi ve PRD kurallarını tekrar gözden geçirerek görevi revise et.`;
                 const rcaPath = path.join(__dirname, '..', 'queue', 'error', `${task_id}_RCA.md`);
                 fs.writeFileSync(rcaPath, `# RE-PLANNING REPORT: ${task_id}\n\n${rca}`);
+                
+                // Wake up the factory after re-planning
+                dispatchNextTasks(project_id);
             } else {
                 // Forge V3: Steering Protocol
                 log(`${prefix} 🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (${currentRetry}/${MAX_RETRIES})`);
@@ -548,15 +552,14 @@ SADECE şu JSON formatında yanıt ver (başka hiçbir şey yazma):
 
 setInterval(discoverNewProjects, 60000);
 
-// CLI Support: node agents/architect.js [projectId]
-const cliProjectId = process.argv[2];
-if (cliProjectId) {
-    log(`🚀 [CLI] Proje doğrudan başlatılıyor: ${cliProjectId}`);
-    // discoverNewProjects parametre alacak şekilde geliştirilebilir 
-    // veya doğrudan manifest üzerinden akış tetiklenebilir.
-    dispatchNextTasks(cliProjectId);
-} else {
-    discoverNewProjects();
+// Startup: Dispatch tasks for all existing projects in src/
+const projectsDir = path.join(__dirname, '..', 'src');
+if (fs.existsSync(projectsDir)) {
+    const projects = fs.readdirSync(projectsDir).filter(p => fs.lstatSync(path.join(projectsDir, p)).isDirectory());
+    projects.forEach(projectId => {
+        log(`🚀 [STARTUP] [${projectId}] Görev kuyruğu kontrol ediliyor...`);
+        dispatchNextTasks(projectId);
+    });
 }
 
 start('ARCHITECT', handleMessage).catch(e => log(`KRİTİK HATA: ${e.message}`));

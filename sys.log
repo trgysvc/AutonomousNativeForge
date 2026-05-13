@@ -5326,3 +5326,59 @@
 [2026-05-13T00:50:34.593Z] ⏳ [ARCHITECT] Streaming... 860 tokens so far (finish=generating)
 [2026-05-13T00:51:04.612Z] ⏳ [ARCHITECT] Streaming... 1296 tokens so far (finish=generating)
 [2026-05-13T00:51:34.621Z] ⏳ [ARCHITECT] Streaming... 1733 tokens so far (finish=generating)
+[2026-05-13T07:06:16.570Z] 💾 Saved: display.ts
+[2026-05-13T07:06:19.690Z] 🚀 CODER başlatıldı.
+[2026-05-13T07:06:19.692Z] 🚀 TESTER başlatıldı.
+[2026-05-13T07:06:19.692Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T07:06:19.697Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S0-20
+[2026-05-13T07:06:22.403Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 17.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:06:24.696Z] 🧐 QA GUARDRAIL: [aurapos] S0-20 denetleniyor...
+[2026-05-13T07:06:25.228Z] ❌ SYNC FAIL: display.ts
+[2026-05-13T07:06:29.722Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T07:06:29.759Z] 📖 [ARCHITECT] Skill mühürü okundu.
+[2026-05-13T07:06:29.759Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T07:06:59.812Z] ⏳ [ARCHITECT] Streaming... 400 tokens so far (finish=generating)
+[2026-05-13T07:07:22.408Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:07:29.874Z] ⏳ [ARCHITECT] Streaming... 815 tokens so far (finish=generating)
+[2026-05-13T07:07:59.909Z] ⏳ [ARCHITECT] Streaming... 1217 tokens so far (finish=generating)
+[2026-05-13T07:08:22.467Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:09:22.496Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:10:22.500Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:11:22.560Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:12:22.607Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:13:22.614Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:14:22.663Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:15:22.665Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:16:22.713Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/543) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:16:57.493Z] 🚀 TESTER başlatıldı.
+[2026-05-13T07:16:57.500Z] 🚀 CODER başlatıldı.
+[2026-05-13T07:16:59.537Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T07:17:15.991Z] 🚀 TESTER başlatıldı.
+[2026-05-13T07:17:15.996Z] 🚀 CODER başlatıldı.
+[2026-05-13T07:17:22.719Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/542) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:18:22.779Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/542) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:18:26.870Z] 🚀 [STARTUP] [aurapos] Görev kuyruğu kontrol ediliyor...
+[2026-05-13T07:18:26.872Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Create lightweight AI wrapper for DeepSeek R1 with connection pooling
+[2026-05-13T07:18:26.877Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Shared TypeScript types generated from Supabase schema
+[2026-05-13T07:18:26.879Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Order Service temel CRUD, bölme, birleştirme ve masa taşıma endpoint'lerini oluştur
+[2026-05-13T07:18:26.881Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Ingenico mock entegrasyonunu (sale, cancel, refund, addTip, partialPayment, batchClose) ve karma/yemek çeki ödeme desteği tamamla
+[2026-05-13T07:18:26.884Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Termal yazıcı mock entegrasyonunu ve otomatik yazdırma akışını kur
+[2026-05-13T07:18:26.886Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Create mock test script
+[2026-05-13T07:18:26.888Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: Create dashboard home page and env
+[2026-05-13T07:18:26.895Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T07:18:26.897Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T07:18:26.899Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T07:18:26.902Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T07:18:26.927Z] 🚀 ARCHITECT başlatıldı.
+[2026-05-13T07:18:30.338Z] ✍️ CODER: [aurapos] S0-3 yazılıyor...
+[2026-05-13T07:18:30.338Z] 📖 [CODER] Skill mühürü okundu.
+[2026-05-13T07:18:30.339Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T07:19:00.386Z] ⏳ [CODER] Streaming... 374 tokens so far (finish=generating)
+[2026-05-13T07:19:22.782Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/542) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:19:30.392Z] ⏳ [CODER] Streaming... 791 tokens so far (finish=generating)
+[2026-05-13T07:20:00.457Z] ⏳ [CODER] Streaming... 1209 tokens so far (finish=generating)
+[2026-05-13T07:20:22.809Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/542) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:20:30.511Z] ⏳ [CODER] Streaming... 1617 tokens so far (finish=generating)
+[2026-05-13T07:21:00.535Z] ⏳ [CODER] Streaming... 2025 tokens so far (finish=generating)
+[2026-05-13T07:21:22.864Z] [TELEMETRY] 🟢 ONLINE | Progress: 2.8% (15/542) | Net Speed: 0.00 LoC/min | Total LoC: 1436
+[2026-05-13T07:21:30.542Z] ⏳ [CODER] Streaming... 2439 tokens so far (finish=generating)
