@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  pos:
+    profiles: ["production"]
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    volumes:
+      - "./hardware-drivers:/usr/local/hardware-drivers:ro"
+      - "/var/run/dbus:/var/run/dbus:ro"
+    secrets:
+      - pos_api_key
+      - db_password
+  branch-server:
+    profiles: ["production"]
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+    volumes:
+      - "./hardware-drivers:/usr/local/hardware-drivers:ro"
+    secrets:
+      - branch_api_key
+
+secrets:
+  pos_api_key:
+    file: ./secrets/pos_api_key.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  branch_api_key:
+    file: ./secrets/branch_api_key.txt

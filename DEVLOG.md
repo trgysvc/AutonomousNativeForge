@@ -1212,3 +1212,7 @@ SELECT partman.create_parent(
 - **Kullanılan Teknoloji:** PostgreSQL native DDL, pg_partman uzantısı.
 - **Neden Native?** Veritabanı seviyesinde parti̇yonlama ve ekleme işlemleri yaparak uygulama katmanındaki ekstra bağımlılıkları ortadan kaldırıldı; bu, latency’yi düşürdü ve deployment sürecini basitleştirdi.
 - **Ek:** Migration dosyası `migrations/20250916_apply_pg_partman.sql` olarak depolandır ve CI/CD pipeline’ındaki `release` stage’ında `psql -f migrations/20250916_apply_pg_partman.sql` komutu ile çalıştırıldı.
+
+---
+### [2026-05-13T18:44:47.954Z] - aurapos - undefined
+DOCS_COMPLETE

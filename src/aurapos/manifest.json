@@ -1914,12 +1914,30 @@
       "desc": "Add business_id to all relevant tables, define sync shapes per branch, and update RLS policies.",
       "file_path": "/packages/shared/migrations/202603150004_multibranch.sql",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 1,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T18:12:35.274Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/shared/migrations/202603150004_multibranch.sql"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T18:19:00.561Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/shared/migrations/202603150004_multibranch.sql"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:25:07.626Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/shared/migrations/202603150004_multibranch.sql"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:33:12.928Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/shared/migrations/202603150004_multibranch.sql"
         }
@@ -1931,14 +1949,32 @@
       "desc": "Backend service to manage branches under a business, including activation/deactivation.",
       "file_path": "/packages/backend/src/services/branchService.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 1,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T18:11:10.233Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/branchService.ts"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T18:18:47.422Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:22:07.512Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/branchService.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:30:52.889Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
         }
       ]
     },
@@ -1948,12 +1984,30 @@
       "desc": "Dashboard pages for business owners to view branch performance, push menu updates, and manage users.",
       "file_path": "/apps/dashboard/src/pages/hq.tsx",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 1,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T18:15:27.277Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/pages/hq.tsx"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T18:23:45.761Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/pages/hq.tsx"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:30:36.060Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/pages/hq.tsx"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:36:42.997Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/pages/hq.tsx"
         }
@@ -1965,7 +2019,34 @@
       "desc": "Modify sync queries to include branch_id filter for orders, stock, payments, etc.",
       "file_path": "/packages/backend/src/sync/branchSync.ts",
       "depends_on": [],
-      "status": "IN_PROGRESS"
+      "status": "FAILED",
+      "retry_count": 4,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T18:20:07.445Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/sync/branchSync.ts"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T18:25:10.799Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/sync/branchSync.ts"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:32:22.915Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/sync/branchSync.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:34:26.232Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/sync/branchSync.ts"
+        }
+      ]
     },
     {
       "task_id": "S11-5",
@@ -1973,7 +2054,34 @@
       "desc": "Extend audit log to capture branch‑vs‑cloud conflicts and store resolution details.",
       "file_path": "/packages/backend/src/services/auditService.ts",
       "depends_on": [],
-      "status": "IN_PROGRESS"
+      "status": "FAILED",
+      "retry_count": 4,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T18:36:12.994Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/auditService.ts"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T18:38:06.311Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/auditService.ts"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:39:51.375Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/auditService.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:41:46.452Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/auditService.ts"
+        }
+      ]
     },
     {
       "task_id": "S0-11",
@@ -2220,14 +2328,23 @@
       "desc": "Add override file for production environment with real hardware driver volumes and secrets.",
       "file_path": "/workspace/aurapos/docker-compose.override.yml",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "DONE"
     },
     {
       "task_id": "S12-2",
       "desc": "Deployment script for staging/production: DB migrations, Docker build, image push, and restart.",
       "file_path": "/workspace/aurapos/scripts/deploy-prod.sh",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "FIXING",
+      "retry_count": 1,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T18:47:01.666Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        }
+      ]
     },
     {
       "task_id": "S13-1",

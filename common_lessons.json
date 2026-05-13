@@ -786,6 +786,152 @@
       ],
       "rule": "Always specify file paths relative to the project root; never use absolute paths that could traverse outside the allowed directory.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S10-4_1778694599792",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Do not allow file paths that attempt to escape the project directory (e.g., containing '..' or leading slash outside the project root). All file writes must be confined to the project's workspace.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S10-3_1778694642087",
+      "context": [
+        "token_limit",
+        "stream_empty"
+      ],
+      "rule": "When generating responses, ensure the output does not exceed the model's token limit; if the prompt or expected response is near the limit, truncate, summarize, or split the request into multiple calls to avoid an empty stream due to length cutoff.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S10-2_1778694776407",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never use absolute file paths that attempt to escape the project directory; all file paths must be relative to the project root and validated to remain within the allowed workspace.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S10-4_1778694926042",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never allow file paths that attempt to escape the project root; validate and sanitize all file paths before writing.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S10-1_1778694937326",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never use absolute file paths that attempt to escape the project directory; all file paths must be relative to the project root and validated to prevent directory traversal.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S10-3_1778695311942",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Always validate that file paths are within the project's allowed directory and prevent directory traversal attempts (e.g., no '../' or absolute paths outside project root).",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-2_1778696365561",
+      "context": [
+        "token_limit"
+      ],
+      "rule": "Always ensure LLM responses stay within the model's token limit; if a response would exceed the limit, truncate, summarize, or split the output into multiple calls to avoid empty stream endings.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-1_1778696377338",
+      "context": [
+        "security",
+        "file-path",
+        "path-traversal"
+      ],
+      "rule": "Always validate that file paths are confined to the project's allowed directories; reject any path containing '..' or absolute paths that escape the project root.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-2_1778696554144",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never allow file paths that attempt to escape the project root (e.g., using '../' or absolute paths outside the allowed workspace). Validate and sanitize all file paths before writing.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-3_1778696653365",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never allow file paths that escape the project root; validate and sanitize all file paths to prevent directory traversal.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-4_1778696745166",
+      "context": [
+        "security",
+        "file-path",
+        "path-traversal"
+      ],
+      "rule": "Always validate and sanitize file paths to ensure they remain within the project's allowed root directory; reject any path that attempts to traverse outside (e.g., containing '..' or absolute paths pointing outside the project).",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-1_1778696745966",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Always validate and sanitize file paths before writing: reject any path containing '..', absolute paths outside the project root, or attempts to escape the allowed directory. Use a safe join function that ensures the resolved path stays within the project's designated output directory.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-3_1778697064338",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never allow file paths that escape the project root; validate and sanitize all file paths before writing.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-4_1778697172115",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never use absolute paths or paths containing '..' that attempt to escape the project root. All file paths must be relative to the project root and confined within the allowed project directories.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-5_1778697507660",
+      "context": [
+        "security",
+        "file-path"
+      ],
+      "rule": "Never allow file paths that attempt to escape the project root; validate and sanitize all paths to prevent directory traversal (e.g., block `../` or absolute paths outside the allowed workspace).",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S11-5_1778697610132",
+      "context": [
+        "security",
+        "file-path",
+        "path-validation"
+      ],
+      "rule": "Never allow file writes outside the project root; validate and sanitize all file paths to prevent directory traversal attempts.",
+      "severity": "CRITICAL"
     }
   ]
 }
