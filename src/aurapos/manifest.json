@@ -475,8 +475,34 @@
       "depends_on": [
         "S0-8"
       ],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "FAILED",
+      "retry_count": 5,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-12T23:16:20.165Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/pos/src/components/FloorPlan.tsx\"\n"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-12T23:22:10.480Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/apps/pos/src/components/FloorPlan.tsx\"\n"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-12T23:33:41.047Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/aurapos/apps/pos/src/components/FloorPlan.tsx\"\n"
+        },
+        {
+          "attempt": 5,
+          "timestamp": "2026-05-12T23:51:56.629Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/pos/src/components/FloorPlan.tsx\"\n"
+        }
+      ]
     },
     {
       "task_id": "S0-10",
@@ -486,8 +512,34 @@
       "depends_on": [
         "S0-8"
       ],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "FAILED",
+      "retry_count": 5,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-12T23:17:20.206Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/pos/src/components/ProductSearch.tsx\"\n"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-12T23:26:25.682Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/apps/pos/src/components/ProductSearch.tsx\"\n"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-12T23:40:36.139Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 5,
+          "timestamp": "2026-05-13T00:05:57.476Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/pos/src/components/ProductSearch.tsx\"\n"
+        }
+      ]
     },
     {
       "task_id": "S0-13",
@@ -497,8 +549,34 @@
       "depends_on": [
         "S0-8"
       ],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "FAILED",
+      "retry_count": 5,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-12T23:19:40.329Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-12T23:31:25.948Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-12T23:44:21.325Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 5,
+          "timestamp": "2026-05-13T00:10:32.700Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        }
+      ]
     },
     {
       "task_id": "S0-14",
@@ -519,8 +597,34 @@
       "depends_on": [
         "S0-8"
       ],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "FAILED",
+      "retry_count": 5,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-12T23:49:31.521Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-12T23:56:51.937Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/kds/src/components/OrderList.tsx\"\n"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T00:02:57.254Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 5,
+          "timestamp": "2026-05-13T00:14:12.883Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/apps/kds/src/components/OrderList.tsx\"\n"
+        }
+      ]
     },
     {
       "task_id": "S0-19",
@@ -541,7 +645,34 @@
       "depends_on": [
         "S0-13"
       ],
-      "status": "PENDING"
+      "status": "FAILED",
+      "retry_count": 4,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T00:34:03.614Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T00:41:13.995Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/src/routes/hardware/display.ts\"\n"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T00:44:04.160Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/src/routes/hardware/display.ts\"\n"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T00:49:34.439Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        }
+      ]
     },
     {
       "task_id": "S0-21",
@@ -606,8 +737,28 @@
       "depends_on": [
         "S0-4_Hardware"
       ],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "FAILED",
+      "retry_count": 4,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T00:19:08.125Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T00:25:58.477Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/scripts/test-all-mocks.ts\"\n"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T00:34:53.653Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/scripts/test-all-mocks.ts\"\n"
+        }
+      ]
     },
     {
       "task_id": "S0-7_POS",
@@ -3285,16 +3436,17 @@
       "desc": "Define TypeScript interfaces for all PostgreSQL tables (businesses, branches, staff, orders, etc.) using the schema from PRD §7.",
       "file_path": "/workspace/aurapos/packages/shared/src/types/database.ts",
       "depends_on": [],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "ERROR",
+      "retry_count": 1,
+      "error": "retryCounts is not defined"
     },
     {
       "task_id": "S0-16",
       "desc": "Create Supabase client wrapper with RLS helpers and business‑scoped query utilities.",
       "file_path": "/workspace/aurapos/packages/shared/src/types/supabase.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 3,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 2,
@@ -3307,6 +3459,12 @@
           "timestamp": "2026-05-12T22:52:43.085Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /workspace/aurapos/packages/shared/src/types/supabase.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-12T23:04:24.742Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
         }
       ]
     },
@@ -3315,8 +3473,8 @@
       "desc": "Initialize ElectricSQL sync engine for cloud ↔ local PGlite instances, exposing sync shapes for orders, payments, and stock.",
       "file_path": "/workspace/aurapos/packages/shared/src/lib/electricsql.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 3,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 2,
@@ -3329,6 +3487,12 @@
           "timestamp": "2026-05-12T22:59:24.500Z",
           "error_type": "SYNTAX",
           "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/packages/shared/src/lib/electricsql.ts\"\n"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-12T23:09:30.013Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
         }
       ]
     },
@@ -4915,8 +5079,34 @@
     },
     {
       "depends_on": [],
-      "status": "IN_PROGRESS",
-      "retry_count": 1
+      "status": "FAILED",
+      "retry_count": 5,
+      "failure_log": [
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-12T23:50:16.553Z",
+          "error_type": "GUARDRAIL",
+          "error": "🛡️ PATH VIOLATION: Dosya geçerli bir proje kökünde değil [apps/, packages/, supabase/]: /workspaces/AutonomousNativeForge/src/aurapos/undefined.ts"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-12T23:58:06.994Z",
+          "error_type": "GUARDRAIL",
+          "error": "🛡️ PATH VIOLATION: Dosya geçerli bir proje kökünde değil [apps/, packages/, supabase/]: /workspaces/AutonomousNativeForge/src/aurapos/aurapos/undefined.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T00:04:47.366Z",
+          "error_type": "GUARDRAIL",
+          "error": "🛡️ PATH VIOLATION: Dosya geçerli bir proje kökünde değil [apps/, packages/, supabase/]: /workspaces/AutonomousNativeForge/src/aurapos/aurapos/aurapos/undefined.ts"
+        },
+        {
+          "attempt": 5,
+          "timestamp": "2026-05-13T00:26:48.524Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/undefined.ts\"\n"
+        }
+      ]
     },
     {
       "task_id": "S6-9",

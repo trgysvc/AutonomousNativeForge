@@ -105,6 +105,123 @@
       ],
       "rule": "Always run TypeScript type-check (tsc --noEmit) on new or modified files to catch syntax errors before marking a task as complete.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-9_1778627836707",
+      "context": [
+        "typescript",
+        "syntax"
+      ],
+      "rule": "Always run TypeScript type checking (tsc) as part of the build/CI pipeline to catch syntax errors in .ts/.tsx files early, preventing runtime failures due to invalid syntax.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-10_1778627886058",
+      "context": [
+        "typescript",
+        "syntax-check"
+      ],
+      "rule": "Always run TypeScript compilation (tsc --noEmit) on new or modified TSX/TS files to catch syntax errors before marking a task as done.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-13_1778628007982",
+      "context": [
+        "token_limit",
+        "prompt_size"
+      ],
+      "rule": "Ensure that prompts sent to the Coder agent stay within the model's token limit to avoid empty responses; break down large tasks or trim unnecessary context.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-9_1778628165135",
+      "context": [
+        "typescript",
+        "syntax"
+      ],
+      "rule": "Run TypeScript type-check (tsc --noEmit) on all .ts/.tsx files as a gate before considering a task complete; integrate this check into CI/lint to fail fast on syntax errors.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-10_1778628433660",
+      "context": [
+        "typescript",
+        "syntax"
+      ],
+      "rule": "Always validate TSX/TypeScript syntax with `tsc --noEmit` (or equivalent lint) before committing; fix any syntax errors such as missing parentheses, incorrect JSX, or invalid TypeScript constructs to prevent build failures.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-13_1778628711946",
+      "context": [
+        "token_limit",
+        "stream_empty"
+      ],
+      "rule": "Always ensure the model's response stays within its token limit; if a request risks exceeding the limit (e.g., finish=length with empty stream), truncate the prompt or split the task into smaller calls to avoid empty responses.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-18_1778629797227",
+      "context": [
+        "token_limit",
+        "stream"
+      ],
+      "rule": "Always ensure that generated responses stay within the model's token limit; if a task risks exceeding the limit, break it into smaller subtasks or request a continuation rather than allowing the stream to end with an empty response.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "undefined_1778629848172",
+      "context": [
+        "path-validation"
+      ],
+      "rule": "All generated files must be placed under one of the approved project root directories: apps/, packages/, or supabase/. Files outside these directories will be rejected.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-18_1778630270025",
+      "context": [
+        "typescript",
+        "syntax",
+        "tsx"
+      ],
+      "rule": "Always run TypeScript type checking (tsc --noEmit) on all .ts/.tsx files and resolve any syntax errors before moving forward; treat tsc failures as blocking issues.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "undefined_1778630316883",
+      "context": [
+        "file-path",
+        "project-structure"
+      ],
+      "rule": "All generated source files must be placed within the project's allowed root directories (apps/, packages/, supabase/). Files outside these roots (e.g., under src/) violate the PATH VIOLATION rule and will be rejected.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-6_TestMocks_1778631575030",
+      "context": [
+        "token_limit"
+      ],
+      "rule": "Always keep LLM responses within the model's token limit; if a task risks exceeding the limit, break it into smaller sub‑tasks or request a continuation rather than allowing the stream to end empty.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-6_TestMocks_1778632028789",
+      "context": [
+        "typescript",
+        "testing",
+        "mocks"
+      ],
+      "rule": "When generating test mock files, ensure all imports are resolvable and the file is syntactically valid TypeScript (run `tsc --noEmit` on the mock) before executing the test suite to avoid syntax‑error failures.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-20_1778632905368",
+      "context": [
+        "typescript",
+        "build"
+      ],
+      "rule": "Always run TypeScript type checking (e.g., `tsc --noEmit`) on new or modified .ts/.tsx files and resolve any syntax errors before marking a task as complete.",
+      "severity": "CRITICAL"
     }
   ]
 }

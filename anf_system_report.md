@@ -1,6 +1,6 @@
 # ANF Autonomous System — Live Telemetry Report
-*Last Updated: 2026-05-12T23:00:01.352Z*
-*System Status: **🟢 ONLINE***
+*Last Updated: 2026-05-13T06:49:43.872Z*
+*System Status: **🔴 STALLED (no log for 358 min)***
 
 ---
 
@@ -19,14 +19,14 @@
 | Metric | Value | Notes |
 |:---|:---|:---|
 | **GPU** | NVIDIA GB10 | NVIDIA GB10 Blackwell Superchip |
-| **GPU Compute Load** | 96% | During active inference |
-| **GPU Power Draw** | 39.9 W | Instantaneous (Limit: ~300 W) |
-| **GPU Temperature** | 69°C | Thermal limit: 85°C |
+| **GPU Compute Load** | 5% | During active inference |
+| **GPU Power Draw** | 12.0 W | Instantaneous (Limit: ~300 W) |
+| **GPU Temperature** | 42°C | Thermal limit: 85°C |
 | **Thermal Throttling** | 🟢 NONE | — |
 | **VRAM Usage** | Unified Memory (128 GB) | Model weights ~60 GB |
-| **KV Cache (vLLM)** | **5.4%** | Active context memory usage |
-| **System RAM** | 99.2 GB / 121.6 GB (81.5%) | |
-| **CPU Load Average (1m)** | 3.34 | Agent process pressure |
+| **KV Cache (vLLM)** | **0.0%** | Active context memory usage |
+| **System RAM** | 99.2 GB / 121.6 GB (81.6%) | |
+| **CPU Load Average (1m)** | 0.3 | Agent process pressure |
 
 ---
 
@@ -34,15 +34,15 @@
 
 | Metric | Value | Description |
 |:---|:---|:---|
-| **Generation Speed (TPS)** | **27.3 tokens/sec** | Nemotron-3-Super-120B NVFP4 |
-| **Active Requests** | 3 Running / 0 Waiting | Parallel agent capacity |
+| **Generation Speed (TPS)** | **Calculating...** | Nemotron-3-Super-120B NVFP4 |
+| **Active Requests** | 0 Running / 0 Waiting | Parallel agent capacity |
 | **Prefix Cache Hit Rate** | 0% | Repeated prompt caching efficiency |
-| **Context Window Usage** | ~13K / 24K tokens | Estimated from KV cache ratio |
+| **Context Window Usage** | ~0K / 24K tokens | Estimated from KV cache ratio |
 | **Doc Reading / RAG Time** | **230.1 sec** | Avg over 24 samples |
-| **Code Writing Time** | **326.1 sec** avg | Min: 0.3s / Max: 4500.3s (27 samples) |
-| **QA Testing Time** | **14.4 sec** | Avg over 72 samples |
-| **Self-Healing (STEER)** | **152 corrections** | Failed → Agent autonomously fixed |
-| **QA-Approved Deliveries** | 14 tasks | Passed all quality gates |
+| **Code Writing Time** | **263.5 sec** avg | Min: 0.3s / Max: 4500.3s (35 samples) |
+| **QA Testing Time** | **13.5 sec** | Avg over 88 samples |
+| **Self-Healing (STEER)** | **184 corrections** | Failed → Agent autonomously fixed |
+| **QA-Approved Deliveries** | 16 tasks | Passed all quality gates |
 
 ---
 
@@ -50,18 +50,19 @@
 
 | Metric | Value |
 |:---|:---|
-| **MTBF** | 4.1 minutes |
-| **Syntax Failures (SYNC FAIL)** | 58 |
-| **MAX RETRY Exceeded** | 378 |
-| **Retry Rate** | 1111.8% |
-| **Avg Attempts / Task** | 11.12 |
+| **MTBF** | 4.3 minutes |
+| **Syntax Failures (SYNC FAIL)** | 72 |
+| **MAX RETRY Exceeded** | 392 |
+| **Retry Rate** | 1162.9% |
+| **Avg Attempts / Task** | 11.63 |
 
 **Error Classification (failure_log):**
 
 | Error Type | Count |
 |:---|:---|
-| SYNTAX | 365 |
-| UNKNOWN | 3 |
+| SYNTAX | 383 |
+| UNKNOWN | 11 |
+| GUARDRAIL | 3 |
 
 ---
 
@@ -70,15 +71,15 @@
 | Status | Count | Percentage | Progress Bar |
 |:---|:---:|:---|:---|
 | ✅ **DONE** | 15 | 2.8% | █░░░░░░░░░░░░░░░░░░░ |
-| 🛠️ **IN_PROGRESS** | 9 | 1.7% | 🔄 |
+| 🛠️ **IN_PROGRESS** | 0 | 0.0% | 🔄 |
 | 🩹 **FIXING (Self-Healing)** | 0 | 0.0% | 🩹 |
-| ⏳ **PENDING** | 509 | 93.7% | ⏳ |
-| ❌ **FAILED (Max Retry)** | 10 | 1.8% | ❌ |
+| ⏳ **PENDING** | 508 | 93.6% | ⏳ |
+| ❌ **FAILED (Max Retry)** | 19 | 3.5% | ❌ |
 | **TOTAL** | **543** | **100%** | **Master Plan: AuraPOS** |
 
-**Total Code Produced:** 656 Lines (LoC)  
-**Net Coding Speed:** 8.05 LoC/min (Active Work)  
-**Estimated Time to Completion (ETA):** ~53.3 hours (518 tasks × ~6 min/task)
+**Total Code Produced:** 1392 Lines (LoC)  
+**Net Coding Speed:** 21.13 LoC/min (Active Work)  
+**Estimated Time to Completion (ETA):** ~43.3 hours (508 tasks × ~5 min/task)
 
 ---
 
@@ -86,11 +87,11 @@
 
 | Metric | Value | Notes |
 |:---|:---|:---|
-| **Avg Time Per Task** | 5.7 minutes | Code writing + QA included |
-| **Est. Energy Cost Per Task** | $0.0004 | 39.9W × 0.095h × $0.10/kWh |
+| **Avg Time Per Task** | 4.6 minutes | Code writing + QA included |
+| **Est. Energy Cost Per Task** | $0.0001 | 12.0W × 0.077h × $0.10/kWh |
 | **Parallelization Capacity** | 3 concurrent Coders | vault.concurrency |
 | **Human Intervention Required** | Zero | Fully Autonomous Execution |
-| **vs. Human Engineering Team** | 4–6 Weeks → ~53.3 Hours | Senior full-stack team estimate |
+| **vs. Human Engineering Team** | 4–6 Weeks → ~43.3 Hours | Senior full-stack team estimate |
 
 ---
 
