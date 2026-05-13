@@ -2922,7 +2922,7 @@
       "desc": "Root layout for dashboard with auth guard and sidebar navigation",
       "file_path": "apps/dashboard/app/layout.tsx",
       "depends_on": [],
-      "status": "FIXING",
+      "status": "PENDING",
       "failure_log": [
         {
           "attempt": 1,
@@ -2947,10 +2947,16 @@
           "timestamp": "2026-05-13T22:00:21.281Z",
           "error_type": "UNKNOWN",
           "error": "HATA: Dosya bulunamadı."
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T22:06:16.462Z",
+          "error_type": "SYSTEM_RECOVERY",
+          "error": "WATCHDOG_ACTION: Heartbeat bulunamadı ve işlem dosyası eski."
         }
       ],
-      "recovery_count": 1,
-      "last_recovery": "2026-05-13T21:45:15.793Z",
+      "recovery_count": 2,
+      "last_recovery": "2026-05-13T22:06:16.462Z",
       "retry_count": 3
     },
     {
@@ -2958,17 +2964,24 @@
       "desc": "Login page using email/password and Supabase auth",
       "file_path": "apps/dashboard/app/(auth)/login/page.tsx",
       "depends_on": [],
-      "status": "PENDING",
+      "status": "FIXING",
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T21:51:15.803Z",
           "error_type": "SYSTEM_RECOVERY",
           "error": "WATCHDOG_ACTION: PID 2714206 artık çalışmıyor."
+        },
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T22:06:11.373Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
         }
       ],
       "recovery_count": 1,
-      "last_recovery": "2026-05-13T21:51:15.803Z"
+      "last_recovery": "2026-05-13T21:51:15.803Z",
+      "retry_count": 1
     },
     {
       "task_id": "S14-3",

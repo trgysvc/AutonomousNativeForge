@@ -11320,3 +11320,31 @@
 [2026-05-13T22:04:17.243Z] ⏳ [CODER] Streaming... 2874 tokens so far (finish=generating)
 [2026-05-13T22:04:46.358Z] ⏳ [ARCHITECT] Streaming... 1753 tokens so far (finish=generating)
 [2026-05-13T22:04:47.273Z] ⏳ [CODER] Streaming... 3229 tokens so far (finish=generating)
+[2026-05-13T22:05:16.141Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:05:16.368Z] ⏳ [ARCHITECT] Streaming... 2099 tokens so far (finish=generating)
+[2026-05-13T22:05:17.330Z] ⏳ [CODER] Streaming... 3574 tokens so far (finish=generating)
+[2026-05-13T22:05:46.409Z] ⏳ [ARCHITECT] Streaming... 2451 tokens so far (finish=generating)
+[2026-05-13T22:05:47.408Z] ⏳ [CODER] Streaming... 3928 tokens so far (finish=generating)
+[2026-05-13T22:05:53.028Z] ⚖️ CONSENSUS: [anf_internal] Peer Review başlatılıyor...
+[2026-05-13T22:05:53.028Z] 📖 [REVIEWER_COST] Skill mühürü okundu: reviewer_cost.md
+[2026-05-13T22:05:53.028Z] 🧠 [REVIEWER_COST] Reasoning budget: 1024 tokens | Max Output: 3072
+[2026-05-13T22:05:53.029Z] 📖 [REVIEWER_PERF] Skill mühürü okundu: reviewer_perf.md
+[2026-05-13T22:05:53.029Z] 🧠 [REVIEWER_PERF] Reasoning budget: 1024 tokens | Max Output: 3072
+[2026-05-13T22:06:04.915Z] 💾 Dosya mühürlendi (2701 bytes): page.tsx
+[2026-05-13T22:06:06.197Z] 🧭 STEERING: [aurapos] S14-1 yönlendirme ile düzeltiliyor...
+[2026-05-13T22:06:06.197Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T22:06:06.197Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T22:06:06.367Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S14-2
+[2026-05-13T22:06:06.686Z] 🧐 QA GUARDRAIL: [aurapos] S14-2 denetleniyor...
+[2026-05-13T22:06:11.378Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (1/3)
+[2026-05-13T22:06:11.398Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T22:06:11.398Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T22:06:16.456Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-STEER_CODE-1778709661368.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T22:06:16.456Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-STEER_CODE-1778709661368.json
+[2026-05-13T22:06:16.462Z] 🔄 [WATCHDOG] Manifest durumu sıfırlandı: S14-1 (aurapos) [Kurtarma: 2/3]
+[2026-05-13T22:06:16.466Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-STEER_CODE-1778709661368.json -> coder/inbox
+[2026-05-13T22:06:16.466Z] ✅ Watchdog döngüsü tamamlandı. Bir sonraki kontrol 60s sonra.
+[2026-05-13T22:06:23.117Z] ⏳ [REVIEWER_COST] Streaming... 246 tokens so far (finish=generating)
+[2026-05-13T22:06:23.117Z] ⏳ [REVIEWER_PERF] Streaming... 246 tokens so far (finish=generating)
+[2026-05-13T22:06:36.315Z] ⏳ [CODER] Streaming... 249 tokens so far (finish=generating)
+[2026-05-13T22:06:41.403Z] ⏳ [ARCHITECT] Streaming... 263 tokens so far (finish=generating)
