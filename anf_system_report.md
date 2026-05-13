@@ -1,5 +1,5 @@
 # ANF Autonomous System — Live Telemetry Report
-*Last Updated: 2026-05-13T18:59:43.453Z*
+*Last Updated: 2026-05-13T19:02:14.582Z*
 *System Status: **🟢 ONLINE***
 
 ---
@@ -20,11 +20,11 @@
 |:---|:---|:---|
 | **GPU** | NVIDIA GB10 | Real-time sensor data |
 | **GPU Compute Load** | 96% | During active inference |
-| **GPU Power Draw** | 43.5 W | Instantaneous |
-| **GPU Temperature** | 72°C | Thermal limit: 85°C |
+| **GPU Power Draw** | 40.3 W | Instantaneous |
+| **GPU Temperature** | 70°C | Thermal limit: 85°C |
 | **Thermal Throttling** | 🟢 NONE | — |
-| **System RAM** | 99452 / 124547 MB | Memory pressure |
-| **CPU Load Average (1m)** | 2.47 | Agent process pressure |
+| **System RAM** | 99795 / 124547 MB | Memory pressure |
+| **CPU Load Average (1m)** | 3.53 | Agent process pressure |
 
 ---
 
@@ -32,8 +32,8 @@
 
 | Metric | Value | Description |
 |:---|:---|:---|
-| **Generation Speed (TPS)** | **26.7 tokens/sec** | NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 |
-| **Active Requests** | 3 Running / 0 Waiting | Parallel capacity |
+| **Generation Speed (TPS)** | **24.2 tokens/sec** | NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 |
+| **Active Requests** | 2 Running / 0 Waiting | Parallel capacity |
 | **Prefix Cache Hit Rate** | 0% | Prompt caching efficiency |
 | **Self-Healing (STEER)** | 1 corrections | Agent autonomously fixed |
 | **QA-Approved Deliveries** | 19 tasks | Passed all quality gates |
@@ -76,7 +76,7 @@
 
 | Metric | Value | Notes |
 |:---|:---|:---|
-| **Est. Energy Cost / Task** | $0.0004 | Based on 43.5W draw |
+| **Est. Energy Cost / Task** | $0.0004 | Based on 40.3W draw |
 | **Human vs. ANF** | 4–6 Weeks → ~34.4 Hours | AI Efficiency Advantage |
 
 ---

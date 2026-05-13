@@ -932,6 +932,22 @@
       ],
       "rule": "Never allow file writes outside the project root; validate and sanitize all file paths to prevent directory traversal attempts.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S12-2_1778698345690",
+      "context": [
+        "token_limit"
+      ],
+      "rule": "Always ensure LLM responses stay within the model's token limit; if the prompt or expected output approaches the limit, truncate, summarize, or split the request into multiple calls to avoid empty streams due to length cutoff.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S12-2_1778698451714",
+      "context": [
+        "file-management"
+      ],
+      "rule": "Always verify that file paths exist and that required files are created before they are referenced in subsequent tasks.",
+      "severity": "CRITICAL"
     }
   ]
 }

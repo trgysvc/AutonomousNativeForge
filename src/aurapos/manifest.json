@@ -2335,14 +2335,26 @@
       "desc": "Deployment script for staging/production: DB migrations, Docker build, image push, and restart.",
       "file_path": "/workspace/aurapos/scripts/deploy-prod.sh",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 1,
+      "status": "DONE",
+      "retry_count": 3,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T18:47:01.666Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T18:52:06.916Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:53:46.988Z",
+          "error_type": "UNKNOWN",
+          "error": "HATA: Dosya bulunamadı."
         }
       ]
     },
@@ -2351,105 +2363,105 @@
       "desc": "Create root layout for POS Next.js app with PWA metadata and global styles",
       "file_path": "apps/pos/app/layout.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-2",
       "desc": "Implement PIN entry screen with form validation and Supabase auth call",
       "file_path": "apps/pos/app/(auth)/pin/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-3",
       "desc": "Build table map UI using react‑flow or custom drag‑drop to show table statuses",
       "file_path": "apps/pos/app/(pos)/tables/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-4",
       "desc": "Create order detail page showing items, modifiers, and KDS status",
       "file_path": "apps/pos/app/(pos)/order/[id]/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-5",
       "desc": "Implement payment screen integrating hardware driver via lib/hardware.ts",
       "file_path": "apps/pos/app/(pos)/payment/[id]/page.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-6",
       "desc": "Reusable component for a single table with status coloring and tooltip",
       "file_path": "apps/pos/components/tables/TableItem.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-7",
       "desc": "List current open orders with summary and quick actions",
       "file_path": "apps/pos/components/order/OrderList.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-8",
       "desc": "UI for selecting cash, card, meal voucher, mobile payment methods",
       "file_path": "apps/pos/components/payment/PaymentMethodSelector.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-9",
       "desc": "KDS order card showing item name, quantity, station, and timer badge",
       "file_path": "apps/pos/components/kds/KdsOrderCard.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-10",
       "desc": "Initialize ElectricSQL client using getElectricClient from electric-config",
       "file_path": "apps/pos/lib/electric.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-11",
       "desc": "Create Supabase client with anon key and helper functions for auth",
       "file_path": "apps/pos/lib/supabase.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-12",
       "desc": "Wrap IHardwareDriver implementations and expose async functions for POS",
       "file_path": "apps/pos/lib/hardware.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-13",
       "desc": "Configure Workbox service worker for offline caching and background sync",
       "file_path": "apps/pos/public/sw.js",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-14",
       "desc": "Enable next-pwa, set output: 'export', and configure images domains",
       "file_path": "apps/pos/next.config.js",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S13-15",
       "desc": "Add dependencies: next, react, react-dom, @supabase/supabase-js, @electric-sql/pglite, next-pwa",
       "file_path": "apps/pos/package.json",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S14-1",

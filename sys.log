@@ -9465,3 +9465,111 @@
 [2026-05-13T18:48:31.270Z] ⏳ [CODER] Streaming... 914 tokens so far (finish=generating)
 [2026-05-13T18:49:01.294Z] ⏳ [CODER] Streaming... 1378 tokens so far (finish=generating)
 [2026-05-13T18:49:31.333Z] ⏳ [CODER] Streaming... 1825 tokens so far (finish=generating)
+[2026-05-13T18:50:01.353Z] ⏳ [CODER] Streaming... 2245 tokens so far (finish=generating)
+[2026-05-13T18:50:31.394Z] ⏳ [CODER] Streaming... 2695 tokens so far (finish=generating)
+[2026-05-13T18:51:01.435Z] ⏳ [CODER] Streaming... 3141 tokens so far (finish=generating)
+[2026-05-13T18:51:31.467Z] ⏳ [CODER] Streaming... 3587 tokens so far (finish=generating)
+[2026-05-13T18:52:01.471Z] ⏳ [CODER] Streaming... 4038 tokens so far (finish=generating)
+[2026-05-13T18:52:05.405Z] ❌ CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)
+[2026-05-13T18:52:06.919Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (2/3)
+[2026-05-13T18:52:06.939Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T18:52:06.939Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T18:52:06.940Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T18:52:06.940Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T18:52:25.691Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T18:52:36.231Z] 🧭 STEERING: [aurapos] S12-2 yönlendirme ile düzeltiliyor...
+[2026-05-13T18:52:36.231Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T18:52:36.231Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T18:53:06.261Z] ⏳ [CODER] Streaming... 435 tokens so far (finish=generating)
+[2026-05-13T18:53:36.268Z] ⏳ [CODER] Streaming... 872 tokens so far (finish=generating)
+[2026-05-13T18:53:43.339Z] 💾 Dosya mühürlendi (853 bytes): deploy-prod.sh
+[2026-05-13T18:53:43.914Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S12-2
+[2026-05-13T18:53:44.751Z] 🧐 QA GUARDRAIL: [aurapos] S12-2 denetleniyor...
+[2026-05-13T18:53:46.992Z] [aurapos]  🧭 STEERING: Hata analizi ve yönlendirme yapılıyor (3/3)
+[2026-05-13T18:53:47.011Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T18:53:47.011Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T18:53:47.011Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T18:53:47.011Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T18:54:11.715Z] 🧠 BELLEK GÜNCELLENDİ: Global dersi işlendi.
+[2026-05-13T18:54:12.815Z] 🧭 STEERING: [aurapos] S12-2 yönlendirme ile düzeltiliyor...
+[2026-05-13T18:54:12.815Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T18:54:12.816Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T18:54:42.849Z] ⏳ [CODER] Streaming... 400 tokens so far (finish=generating)
+[2026-05-13T18:55:01.907Z] 💾 Dosya mühürlendi (869 bytes): deploy-prod.sh
+[2026-05-13T18:55:02.029Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S12-2
+[2026-05-13T18:55:02.454Z] 🧐 QA GUARDRAIL: [aurapos] S12-2 denetleniyor...
+[2026-05-13T18:55:02.454Z] 🐳 SANDBOX: [aurapos] S12-2 izole test ortamında denetleniyor...
+[2026-05-13T18:55:02.454Z] ⏭️ SANDBOX ATLANDI: .sh dosyaları için sandbox tanımsız
+[2026-05-13T18:55:02.455Z] 🕵️ SHADOW TESTER: [aurapos] Güvenlik denetimi yapılıyor...
+[2026-05-13T18:55:02.456Z] 📖 [TESTER] Skill mühürü okundu: tester.md
+[2026-05-13T18:55:02.456Z] 🧠 [TESTER] Reasoning budget: 256 tokens | Max Output: 2304
+[2026-05-13T18:55:32.463Z] ⏳ [TESTER] Streaming... 441 tokens so far (finish=generating)
+[2026-05-13T18:55:54.288Z] ✅ [aurapos] S12-2 onaylandı. HEARTBEAT_OK
+[2026-05-13T18:55:57.078Z] [aurapos]  ✅ TEST GEÇİLDİ.
+[2026-05-13T18:55:57.319Z] [aurapos]  ⚠️ GitHub push atlandı: main branch SHA alınamadı [401]
+[2026-05-13T18:55:57.332Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.336Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.340Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.344Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.348Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.351Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.355Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.359Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.363Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.367Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.371Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.375Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.379Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.383Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.387Z] 🎯 [aurapos] Bağımlılıklar tamam, görev başlatılıyor: undefined
+[2026-05-13T18:55:57.421Z] 🏁 [aurapos] Sprint S12 TAMAMLANDI! PR açılıyor: feature/sprint-s12 → main
+[2026-05-13T18:55:57.543Z] ⚠️ [aurapos] PR açılamadı: PR oluşturulamadı [401]: {
+  "message": "Bad credentials",
+  "documentation_url": "https://docs.github.com/rest",
+  "status": "401"
+}
+[2026-05-13T18:55:57.872Z] ✍️ CODER: [aurapos] S13-1 yazılıyor...
+[2026-05-13T18:55:57.872Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T18:55:57.872Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T18:56:01.367Z] ✍️ CODER: [aurapos] S13-2 yazılıyor...
+[2026-05-13T18:56:01.367Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T18:56:01.367Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T18:56:02.413Z] 📄 Dokümantasyon: [aurapos] undefined
+[2026-05-13T18:56:02.414Z] 📖 [DOCS] Skill mühürü okundu: docs.md
+[2026-05-13T18:56:02.415Z] 🧠 [DOCS] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T18:56:27.972Z] ⏳ [CODER] Streaming... 284 tokens so far (finish=generating)
+[2026-05-13T18:56:31.383Z] ⏳ [CODER] Streaming... 274 tokens so far (finish=generating)
+[2026-05-13T18:56:32.416Z] ⏳ [DOCS] Streaming... 281 tokens so far (finish=generating)
+[2026-05-13T18:56:58.035Z] ⏳ [CODER] Streaming... 569 tokens so far (finish=generating)
+[2026-05-13T18:57:01.455Z] ⏳ [CODER] Streaming... 562 tokens so far (finish=generating)
+[2026-05-13T18:57:02.465Z] ⏳ [DOCS] Streaming... 568 tokens so far (finish=generating)
+[2026-05-13T18:57:28.111Z] ⏳ [CODER] Streaming... 869 tokens so far (finish=generating)
+[2026-05-13T18:57:31.467Z] ⏳ [CODER] Streaming... 861 tokens so far (finish=generating)
+[2026-05-13T18:57:32.559Z] ⏳ [DOCS] Streaming... 867 tokens so far (finish=generating)
+[2026-05-13T18:57:58.130Z] ⏳ [CODER] Streaming... 1157 tokens so far (finish=generating)
+[2026-05-13T18:58:01.560Z] ⏳ [CODER] Streaming... 1149 tokens so far (finish=generating)
+[2026-05-13T18:58:02.592Z] ⏳ [DOCS] Streaming... 1155 tokens so far (finish=generating)
+[2026-05-13T18:58:28.207Z] ⏳ [CODER] Streaming... 1449 tokens so far (finish=generating)
+[2026-05-13T18:58:31.599Z] ⏳ [CODER] Streaming... 1441 tokens so far (finish=generating)
+[2026-05-13T18:58:32.625Z] ⏳ [DOCS] Streaming... 1447 tokens so far (finish=generating)
+[2026-05-13T18:58:58.261Z] ⏳ [CODER] Streaming... 1744 tokens so far (finish=generating)
+[2026-05-13T18:59:01.659Z] ⏳ [CODER] Streaming... 1735 tokens so far (finish=generating)
+[2026-05-13T18:59:02.710Z] ⏳ [DOCS] Streaming... 1741 tokens so far (finish=generating)
+[2026-05-13T18:59:28.336Z] ⏳ [CODER] Streaming... 2027 tokens so far (finish=generating)
+[2026-05-13T18:59:31.702Z] ⏳ [CODER] Streaming... 2016 tokens so far (finish=generating)
+[2026-05-13T18:59:32.721Z] ⏳ [DOCS] Streaming... 2021 tokens so far (finish=generating)
+[2026-05-13T18:59:58.350Z] ⏳ [CODER] Streaming... 2296 tokens so far (finish=generating)
+[2026-05-13T19:00:01.726Z] ⏳ [CODER] Streaming... 2286 tokens so far (finish=generating)
+[2026-05-13T19:00:02.786Z] ⏳ [DOCS] Streaming... 2292 tokens so far (finish=generating)
+[2026-05-13T19:00:28.390Z] ⏳ [CODER] Streaming... 2584 tokens so far (finish=generating)
+[2026-05-13T19:00:29.006Z] ✅ Süreç Tamamlandı.
+[2026-05-13T19:00:29.255Z] [aurapos]  📄 Dokümantasyon tamamlandı. Sistem durumu güncelleniyor...
+[2026-05-13T19:00:31.744Z] ⏳ [CODER] Streaming... 2584 tokens so far (finish=generating)
+[2026-05-13T19:00:32.431Z] 📊 Sistem Durumu Güncelleniyor: [aurapos]
+[2026-05-13T19:00:32.431Z] ❌ Hata: Cannot read properties of undefined (reading 'filter')
+[2026-05-13T19:00:58.392Z] ⏳ [CODER] Streaming... 2976 tokens so far (finish=generating)
+[2026-05-13T19:01:01.816Z] ⏳ [CODER] Streaming... 2979 tokens so far (finish=generating)
+[2026-05-13T19:01:28.436Z] ⏳ [CODER] Streaming... 3370 tokens so far (finish=generating)
+[2026-05-13T19:01:31.873Z] ⏳ [CODER] Streaming... 3374 tokens so far (finish=generating)
+[2026-05-13T19:01:58.477Z] ⏳ [CODER] Streaming... 3756 tokens so far (finish=generating)
+[2026-05-13T19:02:01.953Z] ⏳ [CODER] Streaming... 3757 tokens so far (finish=generating)
