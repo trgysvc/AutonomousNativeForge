@@ -91,6 +91,15 @@
       ],
       "rule": "Ensure the TypeScript compiler configuration (tsconfig.json) includes the correct module resolution and target settings for the project, and that all required type definitions are installed before running tsc checks.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-3_1778657538605",
+      "context": [
+        "typescript",
+        "tsc"
+      ],
+      "rule": "Ensure all imported modules in TypeScript files have proper type definitions (install @types packages or declare custom .d.ts) before running tsc; otherwise the compiler will emit syntax errors on missing types.",
+      "severity": "CRITICAL"
     }
   ]
 }

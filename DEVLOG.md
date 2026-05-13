@@ -1,5 +1,12 @@
 
 ---
+### [2026-05-13T07:58:00.000Z] - system - Implementation of Autonomous Recovery Phase & Enhanced Error Diagnostics
+- **Enhanced Diagnostics:** Increased failure log capture from 800 to 2000 characters in `architect.js`. This ensures full visibility of complex TypeScript compiler errors and security stack traces for better re-planning accuracy.
+- **Non-Blocking Execution:** Updated `dispatchNextTasks` to prioritize flow. A task failure (`FAILED`) now only blocks its direct dependencies; the factory will autonomously continue with all other independent branches in the sprint.
+- **Phase 2 (Recovery Mode):** Implemented `checkRecoveryPhase` logic. When all `PENDING` tasks are exhausted, the Architect automatically revisits `FAILED` tasks, resets their state, and triggers a final "Deep Analysis" attempt.
+- **Self-Stabilizing Core:** Pivoted from an external "Guard" process to internal state-safe stabilization. The system now inherently manages infinite loops and stalls via built-in circuit breakers in the core agent logic.
+- **Status:** Factory restarted and operational with Phase 2 capabilities active.
+
 ### [2026-05-13T07:20:00.000Z] - system - Critical Factory Restoration & Infinite Loop Recovery
 - **Root Cause Analysis:** Identified a systemic stall caused by a combination of an undefined variable ReferenceError and LLM context bloating (200+ failure logs sent to vLLM).
 - **Infinite Loop Fix:** Removed the unauthorized `retryCounts` reference in `architect.js`. Status tracking is now strictly manifest-based for consistency across restarts.

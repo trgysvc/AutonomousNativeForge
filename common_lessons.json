@@ -222,6 +222,56 @@
       ],
       "rule": "Always run TypeScript type checking (e.g., `tsc --noEmit`) on new or modified .ts/.tsx files and resolve any syntax errors before marking a task as complete.",
       "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-6_1778657601134",
+      "context": [
+        "typescript"
+      ],
+      "rule": "Always validate TypeScript syntax with `tsc --noEmit` on individual files before committing; fix any syntax errors such as missing semicolons, incorrect import/export statements, or invalid JSX to prevent compilation failures.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-3_1778658186547",
+      "context": [
+        "token-limit"
+      ],
+      "rule": "Keep the context provided to the Coder agent within the model's token limit to prevent empty responses due to length truncation.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-8_1778658484999",
+      "context": [
+        "token_limit",
+        "stream_end"
+      ],
+      "rule": "Always keep the model's response within its token limit; if a response is approaching the limit, truncate it and continue in a subsequent call or request a higher max_tokens setting to avoid empty streams.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-6_1778658778992",
+      "context": [
+        "typescript"
+      ],
+      "rule": "Always validate TypeScript syntax with `tsc --noEmit` (or equivalent linting) before committing changes to prevent build failures due to syntax errors.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-14_1778659069909",
+      "context": [
+        "llm",
+        "token_limit"
+      ],
+      "rule": "Always keep prompts and expected responses within the model's token limit; if a request nears the limit, break the task into smaller subtasks or truncate context to avoid empty stream endings.",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "S0-8_1778659674147",
+      "context": [
+        "token_limit"
+      ],
+      "rule": "Ensure LLM responses stay within the model's token limit; if the response would be truncated, either request a continuation with increased max_tokens or truncate gracefully and ask for the next chunk to avoid empty outputs.",
+      "severity": "CRITICAL"
     }
   ]
 }

@@ -160,7 +160,38 @@ async function dispatchNextTasks(projectId) {
                 project_manifest: manifest,
                 context_files: contextFiles
             });
+            dispatchedAny = true;
         }
+    }
+    
+    // If no tasks were dispatched and no tasks are currently active, check if we need to enter Recovery Phase
+    const activeTasks = manifest.tasks.filter(t => ['IN_PROGRESS', 'TESTING', 'FIXING'].includes(t.status));
+    if (!dispatchedAny && activeTasks.length === 0) {
+        checkRecoveryPhase(projectId);
+    }
+}
+
+/**
+ * Recovery Phase: If no PENDING tasks are left or can start, revisit FAILED ones.
+ */
+async function checkRecoveryPhase(projectId) {
+    const manifest = getManifest(projectId);
+    const failedTasks = manifest.tasks.filter(t => t.status === 'FAILED');
+    const pendingTasks = manifest.tasks.filter(t => t.status === 'PENDING');
+
+    if (failedTasks.length > 0 && pendingTasks.length === 0) {
+        log(`🔄 [${projectId}] RECOVERY PHASE: Başarısız görevler yeniden değerlendiriliyor (${failedTasks.length} görev)...`);
+        for (const task of failedTasks) {
+            log(`🧐 [${projectId}] ${task.task_id} için yeni strateji geliştiriliyor...`);
+            // Reset task for a final deep attempt
+            updateTaskStatus(projectId, task.task_id, 'PENDING', { 
+                retry_count: 0, 
+                status: 'PENDING',
+                recovery_mode: true 
+            });
+        }
+    } else if (failedTasks.length === 0 && pendingTasks.length === 0) {
+        log(`🏁 [${projectId}] TÜM GÖREVLER TAMAMLANDI. Fabrika devri tamamladı.`);
     }
 }
 
@@ -309,7 +340,7 @@ async function handleMessage(msg) {
                 attempt: currentRetry,
                 timestamp: new Date().toISOString(),
                 error_type: msg.error_type || 'UNKNOWN',
-                error: (description || '').substring(0, 800) // limit size
+                error: (description || '').substring(0, 2000) // increased limit for better diagnostics
             };
             const existingLog = taskObj_br?.failure_log || [];
             const failure_log = [...existingLog, failureEntry];
