@@ -1,5 +1,5 @@
 # ANF Autonomous System — Live Telemetry Report
-*Last Updated: 2026-05-13T20:59:24.358Z*
+*Last Updated: 2026-05-13T21:11:30.217Z*
 *System Status: **🟢 ONLINE***
 
 ---
@@ -20,11 +20,11 @@
 |:---|:---|:---|
 | **GPU** | NVIDIA GB10 | Real-time sensor data |
 | **GPU Compute Load** | 96% | During active inference |
-| **GPU Power Draw** | 40.0 W | Instantaneous |
+| **GPU Power Draw** | 43.2 W | Instantaneous |
 | **GPU Temperature** | 69°C | Thermal limit: 85°C |
 | **Thermal Throttling** | 🟢 NONE | — |
-| **System RAM** | 99869 / 124547 MB | Memory pressure |
-| **CPU Load Average (1m)** | 3.09 | Agent process pressure |
+| **System RAM** | 99486 / 124547 MB | Memory pressure |
+| **CPU Load Average (1m)** | 1.56 | Agent process pressure |
 
 ---
 
@@ -32,8 +32,8 @@
 
 | Metric | Value | Description |
 |:---|:---|:---|
-| **Generation Speed (TPS)** | **23.6 tokens/sec** | NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 |
-| **Active Requests** | 2 Running / 0 Waiting | Parallel capacity |
+| **Generation Speed (TPS)** | **38.8 tokens/sec** | NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 |
+| **Active Requests** | 4 Running / 0 Waiting | Parallel capacity |
 | **Prefix Cache Hit Rate** | 0% | Prompt caching efficiency |
 | **Self-Healing (STEER)** | 1 corrections | Agent autonomously fixed |
 | **QA-Approved Deliveries** | 19 tasks | Passed all quality gates |
@@ -44,14 +44,14 @@
 
 | Metric | Value |
 |:---|:---|
-| **Retry Rate** | 301.3% | Avg attempts per task: 3.01 |
+| **Retry Rate** | 306.5% | Avg attempts per task: 3.06 |
 | **Total Failures** | 57 | Max retry exceeded |
 
 **Error Classification (failure_log):**
 
 | Error Type | Count |
 |:---|:---|
-| SYNTAX | 127 |
+| SYNTAX | 131 |
 | UNKNOWN | 88 |
 | PRD_COMPLIANCE | 16 |
 | **MAX_RECOVERY_EXCEEDED** | 57 |
@@ -80,7 +80,7 @@
 | ❌ **FAILED** | 57 | — | ❌ |
 | **TOTAL** | **542** | **100%** | **Master Plan: aurapos** |
 
-**Total Code Produced:** 3488 Lines (LoC)  
+**Total Code Produced:** 3461 Lines (LoC)  
 **Estimated Time to Completion (ETA):** ~31.5 hours
 
 ---
@@ -89,7 +89,7 @@
 
 | Metric | Value | Notes |
 |:---|:---|:---|
-| **Est. Energy Cost / Task** | $0.0002 | Based on 40.0W draw |
+| **Est. Energy Cost / Task** | $0.0003 | Based on 43.2W draw |
 | **Human vs. ANF** | 4–6 Weeks → ~31.5 Hours | AI Efficiency Advantage |
 
 | **Hardware Alignment** | GB10 Blackwell Optimized | Max utilization of NVFP4/KV |
@@ -103,7 +103,7 @@
 | **Context Processing Volume** | 88.5 Pages / 66,363 Tokens | High-fidelity PRD ingestion |
 | **Planning Efficiency** | 3.8 min (Full Plan) | ~150x faster than humans |
 | **Architecture Fidelity** | 542 Atomic Tasks | Zero-gap requirements coverage |
-| **Compute-to-Code Ratio** | 40.0W Peak / 3488 LoC | Eco-efficient production |
+| **Compute-to-Code Ratio** | 43.2W Peak / 3461 LoC | Eco-efficient production |
 | **Hardware Alignment** | GB10 Blackwell Optimized | Max utilization of NVFP4/KV |
 
 ---

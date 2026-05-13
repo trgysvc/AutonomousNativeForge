@@ -2704,7 +2704,7 @@
       "file_path": "apps/pos/lib/supabase.ts",
       "depends_on": [],
       "status": "FAILED",
-      "retry_count": 11,
+      "retry_count": 15,
       "failure_log": [
         {
           "attempt": 1,
@@ -2771,6 +2771,30 @@
           "timestamp": "2026-05-13T20:57:26.935Z",
           "error_type": "SYNTAX",
           "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/apps/pos/lib/supabase.ts\"\n"
+        },
+        {
+          "attempt": 12,
+          "timestamp": "2026-05-13T21:01:47.082Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 13,
+          "timestamp": "2026-05-13T21:03:47.095Z",
+          "error_type": "SYNTAX",
+          "error": "SENTAKS HATASI: Command failed: npx -y --package typescript tsc --noEmit --target esnext --module esnext --esModuleInterop --skipLibCheck \"/workspaces/AutonomousNativeForge/src/aurapos/aurapos/apps/pos/lib/supabase.ts\"\n"
+        },
+        {
+          "attempt": 14,
+          "timestamp": "2026-05-13T21:06:34.292Z",
+          "error_type": "SYNTAX",
+          "error": "HATA: Dosya bulunamadı."
+        },
+        {
+          "attempt": 15,
+          "timestamp": "2026-05-13T21:10:52.124Z",
+          "error_type": "SYNTAX",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
         }
       ],
       "recovery_count": 1,

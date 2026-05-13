@@ -27,7 +27,7 @@ function isPidRunning(pid) {
 /**
  * Recovers a stuck task
  */
-async function recoverTask(processingFile) {
+async function recoverTask(processingFile, reason) {
     const filename = path.basename(processingFile);
     // Format: {agent}-{originalFilename}.json
     const parts = filename.split('-');
@@ -58,10 +58,20 @@ async function recoverTask(processingFile) {
                     if (task && ['IN_PROGRESS', 'TESTING', 'FIXING'].includes(task.status)) {
                         const currentRecovery = (task.recovery_count || 0) + 1;
                         
+                        // Append to failure_log for Architect to analyze
+                        const recoveryEntry = {
+                            attempt: currentRecovery,
+                            timestamp: new Date().toISOString(),
+                            error_type: 'SYSTEM_RECOVERY',
+                            error: `WATCHDOG_ACTION: ${reason}`
+                        };
+                        task.failure_log = task.failure_log || [];
+                        task.failure_log.push(recoveryEntry);
+
                         if (currentRecovery > MAX_RECOVERY_ATTEMPTS) {
                             log(`⛔ [WATCHDOG] KRİTİK DÖNGÜ: ${taskId} çok fazla dondu (${currentRecovery}). FAILED'a çekiliyor.`);
                             task.status = 'FAILED';
-                            task.error = 'MAX_RECOVERY_EXCEEDED: Görev sürekli donuyor veya çöküyor.';
+                            task.error = `MAX_RECOVERY_EXCEEDED: ${reason}`;
                         } else {
                             log(`🔄 [WATCHDOG] Manifest durumu sıfırlandı: ${taskId} (${projectId}) [Kurtarma: ${currentRecovery}/${MAX_RECOVERY_ATTEMPTS}]`);
                             task.status = 'PENDING';
@@ -127,7 +137,7 @@ async function scan() {
 
         if (shouldRecover) {
             log(`⚠️ [WATCHDOG] Donma tespit edildi: ${file}. Sebep: ${reason}`);
-            await recoverTask(processingPath);
+            await recoverTask(processingPath, reason);
             // Clean up stale heartbeat
             if (fs.existsSync(heartbeatPath)) {
                 try { fs.unlinkSync(heartbeatPath); } catch (_) {}

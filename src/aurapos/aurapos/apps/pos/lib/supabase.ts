@@ -9,31 +9,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export const signIn = async (email: string, password: string) => {
-  return await supabase.auth.signInWithPassword({ email, password })
-}
-
-export const signOut = async () => {
-  return await supabase.auth.signOut()
-}
-
-export const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser()
-  if (error) {
-    console.error('Error fetching user:', error)
-    return null
-  }
-  return data.user
-}
-
-export const resetPassword = async (email: string) => {
-  const redirectTo = typeof window !== 'undefined' 
-    ? `${window.location.origin}/reset-password` 
-    : `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
-  
-  return await supabase.auth.resetPasswordForEmail(email, { redirectTo })
-}
-
-export const updatePassword = async (password: string) => {
-  return await supabase.auth.updateUser({ password })
-}
+export const signIn = async

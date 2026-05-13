@@ -10714,3 +10714,134 @@
 [2026-05-13T20:57:26.939Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
 [2026-05-13T20:57:26.970Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
 [2026-05-13T20:57:26.970Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T20:57:52.121Z] ⏳ [CODER] Streaming... 1372 tokens so far (finish=generating)
+[2026-05-13T20:57:53.460Z] ⏳ [CODER] Streaming... 260 tokens so far (finish=generating)
+[2026-05-13T20:57:57.059Z] ⏳ [ARCHITECT] Streaming... 261 tokens so far (finish=generating)
+[2026-05-13T20:58:18.989Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-STEER_CODE-1778704087500.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T20:58:18.990Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-STEER_CODE-1778704087500.json
+[2026-05-13T20:58:18.995Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-STEER_CODE-1778704087500.json -> coder/inbox
+[2026-05-13T20:58:22.214Z] ⏳ [CODER] Streaming... 1659 tokens so far (finish=generating)
+[2026-05-13T20:58:23.559Z] ⏳ [CODER] Streaming... 547 tokens so far (finish=generating)
+[2026-05-13T20:58:27.101Z] ⏳ [ARCHITECT] Streaming... 547 tokens so far (finish=generating)
+[2026-05-13T20:58:52.239Z] ⏳ [CODER] Streaming... 1929 tokens so far (finish=generating)
+[2026-05-13T20:58:53.560Z] ⏳ [CODER] Streaming... 817 tokens so far (finish=generating)
+[2026-05-13T20:58:56.448Z] [aurapos]  📝 RCA Raporu oluşturuldu: S13-11_RCA.md. Diğer görevlere geçiliyor...
+[2026-05-13T20:59:22.310Z] ⏳ [CODER] Streaming... 2272 tokens so far (finish=generating)
+[2026-05-13T20:59:23.582Z] ⏳ [CODER] Streaming... 1163 tokens so far (finish=generating)
+[2026-05-13T20:59:52.350Z] ⏳ [CODER] Streaming... 2625 tokens so far (finish=generating)
+[2026-05-13T20:59:53.628Z] ⏳ [CODER] Streaming... 1517 tokens so far (finish=generating)
+[2026-05-13T21:00:22.373Z] ⏳ [CODER] Streaming... 3002 tokens so far (finish=generating)
+[2026-05-13T21:00:23.638Z] ⏳ [CODER] Streaming... 1893 tokens so far (finish=generating)
+[2026-05-13T21:00:52.415Z] ⏳ [CODER] Streaming... 3394 tokens so far (finish=generating)
+[2026-05-13T21:00:53.648Z] ⏳ [CODER] Streaming... 2286 tokens so far (finish=generating)
+[2026-05-13T21:01:22.476Z] ⏳ [CODER] Streaming... 3787 tokens so far (finish=generating)
+[2026-05-13T21:01:23.708Z] ⏳ [CODER] Streaming... 2679 tokens so far (finish=generating)
+[2026-05-13T21:01:46.181Z] ❌ CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)
+[2026-05-13T21:01:46.184Z] ❌ Hata: ENOENT: no such file or directory, rename '/workspaces/AutonomousNativeForge/queue/processing/coder-STEER_CODE-1778704087500.json' -> '/workspaces/AutonomousNativeForge/queue/done/coder-STEER_CODE-1778704087500.json'
+[2026-05-13T21:01:46.924Z] 🧭 STEERING: [aurapos] S13-11 yönlendirme ile düzeltiliyor...
+[2026-05-13T21:01:46.924Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:01:46.924Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:01:47.140Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T21:01:47.173Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:01:47.173Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:01:53.735Z] ⏳ [CODER] Streaming... 3034 tokens so far (finish=generating)
+[2026-05-13T21:02:17.004Z] ⏳ [CODER] Streaming... 276 tokens so far (finish=generating)
+[2026-05-13T21:02:17.210Z] ⏳ [ARCHITECT] Streaming... 277 tokens so far (finish=generating)
+[2026-05-13T21:02:19.188Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-STEER_CODE-1778704087500.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T21:02:19.189Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-STEER_CODE-1778704087500.json
+[2026-05-13T21:02:19.198Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-STEER_CODE-1778704087500.json -> coder/inbox
+[2026-05-13T21:02:23.811Z] ⏳ [CODER] Streaming... 3326 tokens so far (finish=generating)
+[2026-05-13T21:02:47.064Z] ⏳ [CODER] Streaming... 570 tokens so far (finish=generating)
+[2026-05-13T21:02:47.262Z] ⏳ [ARCHITECT] Streaming... 571 tokens so far (finish=generating)
+[2026-05-13T21:02:53.853Z] ⏳ [CODER] Streaming... 3619 tokens so far (finish=generating)
+[2026-05-13T21:03:17.139Z] ⏳ [CODER] Streaming... 852 tokens so far (finish=generating)
+[2026-05-13T21:03:17.336Z] ⏳ [ARCHITECT] Streaming... 852 tokens so far (finish=generating)
+[2026-05-13T21:03:23.858Z] ⏳ [CODER] Streaming... 3900 tokens so far (finish=generating)
+[2026-05-13T21:03:40.564Z] [aurapos]  📝 RCA Raporu oluşturuldu: S13-11_RCA.md. Diğer görevlere geçiliyor...
+[2026-05-13T21:03:43.447Z] 💾 Dosya mühürlendi (376 bytes): supabase.ts
+[2026-05-13T21:03:43.449Z] ❌ Hata: ENOENT: no such file or directory, rename '/workspaces/AutonomousNativeForge/queue/processing/coder-STEER_CODE-1778704087500.json' -> '/workspaces/AutonomousNativeForge/queue/done/coder-STEER_CODE-1778704087500.json'
+[2026-05-13T21:03:44.133Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S13-11
+[2026-05-13T21:03:44.540Z] 🧐 QA GUARDRAIL: [aurapos] S13-11 denetleniyor...
+[2026-05-13T21:03:45.405Z] ❌ SYNC FAIL: supabase.ts
+[2026-05-13T21:03:47.099Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T21:03:47.132Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:03:47.132Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:03:47.140Z] ⏳ [CODER] Streaming... 1165 tokens so far (finish=generating)
+[2026-05-13T21:03:48.420Z] 🧭 STEERING: [aurapos] S13-11 yönlendirme ile düzeltiliyor...
+[2026-05-13T21:03:48.420Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:03:48.421Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:04:17.170Z] ⏳ [ARCHITECT] Streaming... 266 tokens so far (finish=generating)
+[2026-05-13T21:04:17.170Z] ⏳ [CODER] Streaming... 1432 tokens so far (finish=generating)
+[2026-05-13T21:04:18.472Z] ⏳ [CODER] Streaming... 274 tokens so far (finish=generating)
+[2026-05-13T21:04:19.232Z] ⚠️ [WATCHDOG] Donma tespit edildi: coder-STEER_CODE-1778704087500.json. Sebep: Heartbeat bulunamadı ve işlem dosyası eski.
+[2026-05-13T21:04:19.233Z] 🔍 [WATCHDOG] Kurtarma başlatılıyor: coder-STEER_CODE-1778704087500.json
+[2026-05-13T21:04:19.239Z] ✅ [WATCHDOG] Başarıyla kurtarıldı: coder-STEER_CODE-1778704087500.json -> coder/inbox
+[2026-05-13T21:04:47.222Z] ⏳ [ARCHITECT] Streaming... 550 tokens so far (finish=generating)
+[2026-05-13T21:04:47.222Z] ⏳ [CODER] Streaming... 1716 tokens so far (finish=generating)
+[2026-05-13T21:04:48.515Z] ⏳ [CODER] Streaming... 559 tokens so far (finish=generating)
+[2026-05-13T21:05:17.238Z] ⏳ [CODER] Streaming... 2018 tokens so far (finish=generating)
+[2026-05-13T21:05:17.238Z] ⏳ [ARCHITECT] Streaming... 852 tokens so far (finish=generating)
+[2026-05-13T21:05:18.516Z] ⏳ [CODER] Streaming... 861 tokens so far (finish=generating)
+[2026-05-13T21:05:47.293Z] ⏳ [CODER] Streaming... 2322 tokens so far (finish=generating)
+[2026-05-13T21:05:47.293Z] ⏳ [ARCHITECT] Streaming... 1156 tokens so far (finish=generating)
+[2026-05-13T21:05:48.571Z] ⏳ [CODER] Streaming... 1165 tokens so far (finish=generating)
+[2026-05-13T21:06:17.381Z] ⏳ [ARCHITECT] Streaming... 1456 tokens so far (finish=generating)
+[2026-05-13T21:06:17.381Z] ⏳ [CODER] Streaming... 2621 tokens so far (finish=generating)
+[2026-05-13T21:06:18.654Z] ⏳ [CODER] Streaming... 1464 tokens so far (finish=generating)
+[2026-05-13T21:06:26.522Z] 💾 Dosya mühürlendi (1091 bytes): supabase.ts
+[2026-05-13T21:06:26.524Z] ❌ Hata: ENOENT: no such file or directory, rename '/workspaces/AutonomousNativeForge/queue/processing/coder-STEER_CODE-1778704087500.json' -> '/workspaces/AutonomousNativeForge/queue/done/coder-STEER_CODE-1778704087500.json'
+[2026-05-13T21:06:26.942Z] 🧭 STEERING: [aurapos] S13-11 yönlendirme ile düzeltiliyor...
+[2026-05-13T21:06:26.943Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:06:26.943Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:06:29.280Z] [aurapos]  Kod yazımı bitti. Test ajanı devralıyor: S13-11
+[2026-05-13T21:06:29.702Z] 🧐 QA GUARDRAIL: [aurapos] S13-11 denetleniyor...
+[2026-05-13T21:06:34.295Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T21:06:34.349Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:06:34.349Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:06:47.422Z] ⏳ [ARCHITECT] Streaming... 1729 tokens so far (finish=generating)
+[2026-05-13T21:06:48.742Z] ⏳ [CODER] Streaming... 1738 tokens so far (finish=generating)
+[2026-05-13T21:06:57.000Z] ⏳ [CODER] Streaming... 271 tokens so far (finish=generating)
+[2026-05-13T21:07:04.355Z] ⏳ [ARCHITECT] Streaming... 280 tokens so far (finish=generating)
+[2026-05-13T21:07:17.499Z] ⏳ [ARCHITECT] Streaming... 2017 tokens so far (finish=generating)
+[2026-05-13T21:07:18.789Z] ⏳ [CODER] Streaming... 2025 tokens so far (finish=generating)
+[2026-05-13T21:07:27.095Z] ⏳ [CODER] Streaming... 557 tokens so far (finish=generating)
+[2026-05-13T21:07:34.365Z] ⏳ [ARCHITECT] Streaming... 564 tokens so far (finish=generating)
+[2026-05-13T21:07:47.569Z] ⏳ [ARCHITECT] Streaming... 2307 tokens so far (finish=generating)
+[2026-05-13T21:07:48.884Z] ⏳ [CODER] Streaming... 2316 tokens so far (finish=generating)
+[2026-05-13T21:07:57.104Z] ⏳ [CODER] Streaming... 851 tokens so far (finish=generating)
+[2026-05-13T21:08:04.403Z] ⏳ [ARCHITECT] Streaming... 861 tokens so far (finish=generating)
+[2026-05-13T21:08:17.646Z] ⏳ [ARCHITECT] Streaming... 2604 tokens so far (finish=generating)
+[2026-05-13T21:08:18.975Z] ⏳ [CODER] Streaming... 2613 tokens so far (finish=generating)
+[2026-05-13T21:08:27.132Z] ⏳ [CODER] Streaming... 1147 tokens so far (finish=generating)
+[2026-05-13T21:08:34.460Z] ⏳ [ARCHITECT] Streaming... 1157 tokens so far (finish=generating)
+[2026-05-13T21:08:47.717Z] ⏳ [ARCHITECT] Streaming... 2899 tokens so far (finish=generating)
+[2026-05-13T21:08:49.038Z] ⏳ [CODER] Streaming... 2909 tokens so far (finish=generating)
+[2026-05-13T21:08:57.169Z] ⏳ [CODER] Streaming... 1443 tokens so far (finish=generating)
+[2026-05-13T21:09:04.465Z] ⏳ [ARCHITECT] Streaming... 1453 tokens so far (finish=generating)
+[2026-05-13T21:09:17.779Z] ⏳ [ARCHITECT] Streaming... 3192 tokens so far (finish=generating)
+[2026-05-13T21:09:19.088Z] ⏳ [CODER] Streaming... 3206 tokens so far (finish=generating)
+[2026-05-13T21:09:27.254Z] ⏳ [CODER] Streaming... 1741 tokens so far (finish=generating)
+[2026-05-13T21:09:34.494Z] ⏳ [ARCHITECT] Streaming... 1750 tokens so far (finish=generating)
+[2026-05-13T21:09:47.857Z] ⏳ [ARCHITECT] Streaming... 3485 tokens so far (finish=generating)
+[2026-05-13T21:09:49.175Z] ⏳ [CODER] Streaming... 3503 tokens so far (finish=generating)
+[2026-05-13T21:09:57.258Z] ⏳ [CODER] Streaming... 2037 tokens so far (finish=generating)
+[2026-05-13T21:10:04.578Z] ⏳ [ARCHITECT] Streaming... 2047 tokens so far (finish=generating)
+[2026-05-13T21:10:17.938Z] ⏳ [ARCHITECT] Streaming... 3781 tokens so far (finish=generating)
+[2026-05-13T21:10:19.270Z] ⏳ [CODER] Streaming... 3799 tokens so far (finish=generating)
+[2026-05-13T21:10:27.266Z] ⏳ [CODER] Streaming... 2330 tokens so far (finish=generating)
+[2026-05-13T21:10:34.655Z] ⏳ [ARCHITECT] Streaming... 2338 tokens so far (finish=generating)
+[2026-05-13T21:10:46.383Z] [aurapos]  📝 RCA Raporu oluşturuldu: S13-11_RCA.md. Diğer görevlere geçiliyor...
+[2026-05-13T21:10:49.300Z] ⏳ [CODER] Streaming... 4082 tokens so far (finish=generating)
+[2026-05-13T21:10:50.919Z] ❌ CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)
+[2026-05-13T21:10:52.181Z] [aurapos]  ⛔ MAX RETRY (3) AŞILDI. Re-planning başlatılıyor.
+[2026-05-13T21:10:52.213Z] 📖 [ARCHITECT] Skill mühürü okundu: architect.md
+[2026-05-13T21:10:52.213Z] 🧠 [ARCHITECT] Reasoning budget: 4096 tokens | Max Output: 6144
+[2026-05-13T21:10:53.447Z] 🧭 STEERING: [aurapos] S13-12 yönlendirme ile düzeltiliyor...
+[2026-05-13T21:10:53.448Z] 📖 [CODER] Skill mühürü okundu: coder.md
+[2026-05-13T21:10:53.448Z] 🧠 [CODER] Reasoning budget: 2048 tokens | Max Output: 4096
+[2026-05-13T21:10:57.361Z] ⏳ [CODER] Streaming... 2598 tokens so far (finish=generating)
+[2026-05-13T21:11:04.662Z] ⏳ [ARCHITECT] Streaming... 2605 tokens so far (finish=generating)
+[2026-05-13T21:11:22.258Z] ⏳ [ARCHITECT] Streaming... 273 tokens so far (finish=generating)
+[2026-05-13T21:11:23.467Z] ⏳ [CODER] Streaming... 281 tokens so far (finish=generating)
+[2026-05-13T21:11:27.383Z] ⏳ [CODER] Streaming... 2889 tokens so far (finish=generating)
+[2026-05-13T21:11:34.683Z] ⏳ [ARCHITECT] Streaming... 2896 tokens so far (finish=generating)
