@@ -1774,8 +1774,8 @@
       "desc": "Add insight cards for daily/weekly/monthly revenue change, low‑performing products, and forecasted rush hours.",
       "file_path": "/packages/backend/src/services/aiInsightEngine.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 2,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
@@ -1788,6 +1788,18 @@
           "timestamp": "2026-05-13T17:43:54.025Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/aiInsightEngine.ts"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T17:54:51.491Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/aiInsightEngine.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:04:14.920Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/aiInsightEngine.ts"
         }
       ]
     },
@@ -1797,8 +1809,8 @@
       "desc": "Frontend components to render AI Insight cards in a responsive grid.",
       "file_path": "/apps/dashboard/src/components/AIInsightGrid.tsx",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 2,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
@@ -1811,6 +1823,18 @@
           "timestamp": "2026-05-13T17:44:06.030Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/components/AIInsightGrid.tsx"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T17:52:21.386Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/components/AIInsightGrid.tsx"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T17:57:31.596Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/components/AIInsightGrid.tsx"
         }
       ]
     },
@@ -1820,14 +1844,32 @@
       "desc": "Realtime updates of insight cards when new data arrives via Redis pub/sub.",
       "file_path": "/apps/dashboard/src/hooks/useAIInsight.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 1,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T17:42:13.984Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T17:50:06.318Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: Stream ended but response is empty (tokens=4097, finish=length)"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T18:01:21.664Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/hooks/useAIInsight.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:09:32.017Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/hooks/useAIInsight.ts"
         }
       ]
     },
@@ -1837,12 +1879,30 @@
       "desc": "Vitest suite covering all insight triggers and edge cases.",
       "file_path": "/packages/backend/src/services/__tests__/aiInsightEngine.test.ts",
       "depends_on": [],
-      "status": "FIXING",
-      "retry_count": 1,
+      "status": "FAILED",
+      "retry_count": 4,
       "failure_log": [
         {
           "attempt": 1,
           "timestamp": "2026-05-13T17:42:30.995Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/__tests__/aiInsightEngine.test.ts"
+        },
+        {
+          "attempt": 2,
+          "timestamp": "2026-05-13T17:49:24.297Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/__tests__/aiInsightEngine.test.ts"
+        },
+        {
+          "attempt": 3,
+          "timestamp": "2026-05-13T17:54:44.513Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/__tests__/aiInsightEngine.test.ts"
+        },
+        {
+          "attempt": 4,
+          "timestamp": "2026-05-13T18:04:36.810Z",
           "error_type": "UNKNOWN",
           "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/__tests__/aiInsightEngine.test.ts"
         }
@@ -1854,7 +1914,16 @@
       "desc": "Add business_id to all relevant tables, define sync shapes per branch, and update RLS policies.",
       "file_path": "/packages/shared/migrations/202603150004_multibranch.sql",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "FIXING",
+      "retry_count": 1,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T18:12:35.274Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/shared/migrations/202603150004_multibranch.sql"
+        }
+      ]
     },
     {
       "task_id": "S11-2",
@@ -1862,7 +1931,16 @@
       "desc": "Backend service to manage branches under a business, including activation/deactivation.",
       "file_path": "/packages/backend/src/services/branchService.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "FIXING",
+      "retry_count": 1,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T18:11:10.233Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /packages/backend/src/services/branchService.ts"
+        }
+      ]
     },
     {
       "task_id": "S11-3",
@@ -1870,7 +1948,16 @@
       "desc": "Dashboard pages for business owners to view branch performance, push menu updates, and manage users.",
       "file_path": "/apps/dashboard/src/pages/hq.tsx",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "FIXING",
+      "retry_count": 1,
+      "failure_log": [
+        {
+          "attempt": 1,
+          "timestamp": "2026-05-13T18:15:27.277Z",
+          "error_type": "UNKNOWN",
+          "error": "CODER HATASI: 🛡️ GÜVENLİK İHLALİ: Geçersiz dosya yolu (Dizin dışına çıkma denemesi): /apps/dashboard/src/pages/hq.tsx"
+        }
+      ]
     },
     {
       "task_id": "S11-4",
@@ -1878,7 +1965,7 @@
       "desc": "Modify sync queries to include branch_id filter for orders, stock, payments, etc.",
       "file_path": "/packages/backend/src/sync/branchSync.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S11-5",
@@ -1886,7 +1973,7 @@
       "desc": "Extend audit log to capture branch‑vs‑cloud conflicts and store resolution details.",
       "file_path": "/packages/backend/src/services/auditService.ts",
       "depends_on": [],
-      "status": "PENDING"
+      "status": "IN_PROGRESS"
     },
     {
       "task_id": "S0-11",
