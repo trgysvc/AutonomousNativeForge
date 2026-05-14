@@ -101,7 +101,13 @@ async function handleMessage(msg) {
     const projectPath = path.join(SRC, project_id);
     if (!fs.existsSync(projectPath)) fs.mkdirSync(projectPath, { recursive: true });
 
-    const ext = path.extname(file_path || (task_id + '.ts')).toLowerCase();
+    // file_path zorunlu — undefined ise undefined.ts gibi bozuk dosya oluşmasını önle
+    if (!file_path || typeof file_path !== 'string' || !path.extname(file_path)) {
+        log(`❌ CODER: [${project_id}] ${task_id} için geçerli file_path yok (${file_path}) — görev atlandı.`);
+        return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: `HATA: file_path geçersiz veya uzantısız: "${file_path}"` });
+    }
+
+    const ext = path.extname(file_path).toLowerCase();
     const targetLang = LANG_MAP[ext] || 'Code';
 
     const projectTree = getProjectTree(projectPath);

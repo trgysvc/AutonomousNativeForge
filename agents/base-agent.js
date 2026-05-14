@@ -130,14 +130,21 @@ function getAuthorizedPath(projectPath, targetRelativePath) {
         }
     }
 
-    // PROJECT ID REDUNDANCY FIX: Eğer yol proje ID'si ile başlıyorsa temizle
-    // Örn: aurapos/packages/shared/... -> packages/shared/...
+    // PROJECT ID REDUNDANCY FIX: İteratif temizle — LLM çift prefix üretebilir
+    // Örn: aurapos/aurapos/apps → apps | src/aurapos/apps → apps
     const projectDirName = path.basename(projectPath); // Örn: 'aurapos'
-    if (cleanPath.startsWith(projectDirName + '/')) {
-        cleanPath = cleanPath.substring(projectDirName.length + 1);
-    } else if (cleanPath === projectDirName) {
-        cleanPath = '.';
+
+    // src/{projectDirName}/ prefix temizle (LLM bazen 'src/aurapos/apps/...' üretir)
+    const srcProjectPrefix = `src/${projectDirName}/`;
+    if (cleanPath.startsWith(srcProjectPrefix)) {
+        cleanPath = cleanPath.substring(srcProjectPrefix.length);
     }
+
+    // İteratif project name prefix temizle — aurapos/aurapos/... gibi çift durumları da yakala
+    while (cleanPath.startsWith(projectDirName + '/')) {
+        cleanPath = cleanPath.substring(projectDirName.length + 1);
+    }
+    if (cleanPath === projectDirName) cleanPath = '.';
 
     const resolvedPath = path.resolve(projectPath, cleanPath);
     const resolvedProjectRoot = path.resolve(projectPath);
@@ -200,8 +207,9 @@ async function ask(agentName, prompt, agentDir = __dirname) {
         const reasoningBudget = agentBudgetRaw ? parseInt(agentBudgetRaw) : 2048;
 
         // OFFICIAL RULE: max_tokens MUST be greater than reasoning_budget
-        // We allocate the requested reasoning budget + 2048 tokens for the actual response.
-        const maxTokens = reasoningBudget + 2048;
+        // 4096 output buffer: SQL migrations and large TS modules need 3000-5000 tokens.
+        // 2048 caused finish=length (content_len=0) on large code generation tasks.
+        const maxTokens = reasoningBudget + 4096;
 
         // VLLM CRASH PREVENTION: Max Context is 24576. 
         // We must ensure Input Tokens + maxTokens < 24576.

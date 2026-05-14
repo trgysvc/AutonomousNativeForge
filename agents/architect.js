@@ -166,11 +166,18 @@ async function dispatchNextTasks(projectId) {
 
             // Context Files: Planlamada belirtilen + tamamlanan bağımlılıkların çıktı dosyaları
             // Coder bu dosyaların içeriğini okuyarak mevcut kod tabanıyla uyumlu yazar.
+            // dep.file_path manifest'te göreceli — mutlak yola çevirerek kontrol et
+            const projectSrcPath = path.join(__dirname, '..', 'src', projectId);
             const depContextFiles = (task.depends_on || [])
                 .map(depId => manifest.tasks.find(t => t.task_id === depId))
-                .filter(dep => dep && dep.file_path && fs.existsSync(dep.file_path))
-                .map(dep => dep.file_path);
-            const plannedContextFiles = task.context_files || [];
+                .filter(dep => dep && dep.file_path)
+                .map(dep => path.isAbsolute(dep.file_path)
+                    ? dep.file_path
+                    : path.join(projectSrcPath, dep.file_path))
+                .filter(fullPath => fs.existsSync(fullPath));
+            const plannedContextFiles = (task.context_files || []).map(cf =>
+                cf && !path.isAbsolute(cf) ? path.join(projectSrcPath, cf) : cf
+            ).filter(Boolean);
             const contextFiles = [...new Set([...plannedContextFiles, ...depContextFiles])];
 
             sendMessage('CODER', 'WRITE_CODE', {
@@ -587,16 +594,21 @@ async function discoverNewProjects() {
                 // Phase 4: Stack Rules Extraction
                 // Görev dağıtımından ÖNCE manifest'e yazılır — Tester ilk görevi aldığında kurallar hazır olur.
                 log(`📋 STACK RULES: [${project_id}] PRD'den teknoloji kuralları çıkarılıyor...`);
-                const stackPrompt = `Aşağıdaki teknik PRD içeriğini analiz et ve proje teknoloji kurallarını çıkar.
+                const stackPrompt = `Analyze the following PRD and extract the technology constraints for this project.
 
-İÇERİK:
+CONTENT:
 ${combinedContent.substring(0, 10000)}
 
-SADECE şu JSON formatında yanıt ver (başka hiçbir şey yazma):
+Return ONLY valid JSON, no other text. Use this exact format:
 {
-  "forbidden_libs": ["yasaklı kütüphane/paket adlarının listesi — import veya require içinde görülmemeli"],
-  "monorepo_roots": ["geçerli dizin köklerinin listesi, örn. apps/, packages/, supabase/"]
-}`;
+  "forbidden_libs": ["exact-npm-package-name-1", "exact-npm-package-name-2"],
+  "monorepo_roots": ["apps/", "packages/", "supabase/"]
+}
+
+Instructions:
+- forbidden_libs: List the exact npm package names that the PRD explicitly bans or marks YASAK/forbidden (e.g. "dexie", "express", "axios"). If none are banned, return [].
+- monorepo_roots: List the valid top-level directory roots where source files should live (with trailing slash).
+- Do NOT include descriptions inside the arrays — only real package names and directory paths.`;
                 try {
                     const stackRaw = await ask('ARCHITECT', stackPrompt, __dirname);
                     const stackMatch = stackRaw.match(/\{[\s\S]*\}/);

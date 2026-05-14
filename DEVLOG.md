@@ -1,5 +1,52 @@
 
 ---
+### [2026-05-14] - human - Derin Pipeline Analizi & 4 Kritik Bug Düzeltmesi
+
+**Bağlam:** Fabrika çalışıyor ancak AuraPOS projesi 542 görevde 62 FAILED ve 18 IN_PROGRESS durumunda takılı kalmıştı. Tam analiz sonrası tespit edilen 4 yapısal hata düzeltildi.
+
+#### Bug #1 — Tester'da Göreceli Yol Sorunu (`tester.js`) [KRİTİK]
+- **Kök Neden:** `handleMessage` fonksiyonu `file_path` değişkenini doğrudan `fs.existsSync(file_path)` ve `fs.readFileSync(file_path)` ile kullanıyordu. Oysa Coder'dan gelen `file_path` değeri `path.relative(projectPath, absoluteFilePath)` ile üretilmiş göreceli bir yoldu (örn. `apps/api/src/routes/auth.ts`). `fs.existsSync` bunu process CWD'ye (`AutonomousNativeForge/`) göre çözümlüyordu → `AutonomousNativeForge/apps/api/...` → dosya bulunamadı. Gerçek konum ise `src/aurapos/apps/api/...`.
+- **Etki:** Tüm monorepo altı dosyalar (apps/, packages/, supabase/) için `HATA: Dosya bulunamadı.` hatası. Dosya başarıyla yazılmış olsa bile test aşamasında FAILED sayılıyor. S1'deki 13 görevin bu nedenle başarısız olduğu doğrulandı.
+- **Düzeltme:** `projectPath = path.join(SRC, project_id)` hesaplaması existence check'ten **önce** taşındı. Tüm dosya operasyonları için `fullFilePath = path.isAbsolute(file_path) ? file_path : path.join(projectPath, file_path)` kullanılıyor. `TEST_PASSED` mesajında `file_path: fullFilePath` (mutlak yol) gönderiliyor — Architect'in `fs.readFileSync` ve `pushToGithub` çağrıları da artık doğru çalışıyor.
+
+#### Bug #2 — Output Token Bütçesi Çok Dar (`base-agent.js`) [KRİTİK]
+- **Kök Neden:** `maxTokens = reasoningBudget + 2048`. Nemotron için `max_tokens` thinking + content toplamını sayar. CODER için `reasoningBudget = 4096` → `maxTokens = 6144`. Model 4096+ token düşündükten sonra içerik için sadece ~2000 token kalıyordu. Büyük SQL migration dosyaları (3000+ token) veya karmaşık TypeScript servisleri (4000+ token) bu limiti aşıyordu.
+- **Etki:** `finish=length, content_len=0` — model thinking aşamasında kesildi, hiç içerik üretemedi. LLM logunda doğrulandı: `tokens=4097, finish=length, content_len=0`. S1-0 (initial schema SQL), S1-5, S1-8, S1-9 ve daha fazlası bu nedenle FAILED.
+- **Düzeltme:** `+2048` → `+4096`. Yeni formül: `maxTokens = reasoningBudget + 4096`. CODER için: `4096 + 4096 = 8192` (4096 token kod çıktısı). ARCHITECT için: `16384 + 4096 = 20480` (mevcut `maxSafeInputChars` kırpma mekanizması bu durumu zaten yönetiyor).
+
+#### Bug #3 — Path Prefix Temizleme Eksik (`base-agent.js`) [ORTA]
+- **Kök Neden:** `getAuthorizedPath()` içindeki PROJECT ID REDUNDANCY FIX tek bir `if` ile sadece ilk `aurapos/` prefix'ini siliyordu. LLM zaman zaman `aurapos/aurapos/apps/...` (çift prefix) veya `src/aurapos/apps/...` üretebiliyordu. Bunlar yakalanmıyordu.
+- **Etki:** `src/aurapos/aurapos/` iç içe dizin oluştu. `src/aurapos/src/routes/` gibi hatalı yollar ortaya çıktı. Dosyalar yanlış konuma yazıldı.
+- **Düzeltme:** İki ek kural eklendi:
+  1. `src/{projectDirName}/` prefix temizleme (LLM'in ürettiği `src/aurapos/apps/...` durumunu yakalar)
+  2. `if` → `while` döngüsü: `aurapos/aurapos/...` gibi çoklu prefix durumlarını iteratif olarak temizler
+
+#### Bug #4 — `file_path` Undefined Guard Eksik (`coder.js`) [ORTA]
+- **Kök Neden:** `handleMessage` başında `file_path` kontrolü yoktu. Eğer manifest'ten gelen görevde `file_path` tanımsız veya uzantısız gelirse, `path.extname(file_path || (task_id + '.ts'))` ifadesinde `task_id` da undefined olduğunda `task_id + '.ts'` = `'undefined.ts'` üretiliyordu.
+- **Etki:** `src/aurapos/undefined.ts` dosyası oluştu (11 byte, bozuk). Sonraki test aşamasında bu dosya incelenip BUG_REPORT dönüyordu.
+- **Düzeltme:** `handleMessage` başına erken çıkış guard eklendi. `file_path` yoksa veya uzantısız ise `BUG_REPORT` ile ARCHITECT'e bildirilir, dosya hiç yazılmaz.
+
+#### Bonus — `forbidden_libs` Extraction Prompt Düzeltmesi (`architect.js`) [ORTA]
+- **Kök Neden:** Stack rules extraction prompta JSON şablon içinde açıklama metni yerleştirilmişti (`"yasaklı kütüphane/paket adlarının listesi — ..."`). LLM bu metni gerçek değer olarak yorumladı ya da boş dizi döndürdü. Sonuç: `forbidden_libs = []`, tüm mimari guardrail pasif.
+- **Etki:** AuraPOS PRD'sinde yasaklı kütüphaneler (dexie, express, axios vb.) coder tarafından kullanılsa bile tester yakalamıyordu.
+- **Düzeltme:** Prompt İngilizce'ye çevrildi, array içine açıklama değil örnek değerler konuldu (`"dexie"`, `"express"`, `"axios"`). Açıklamalar ayrı `Instructions:` bölümüne taşındı.
+
+#### Bug #5 — Dependency Context Files Hiç Enjekte Edilemiyor (`architect.js`) [ORTA]
+- **Kök Neden:** `dispatchNextTasks` içinde `dep.file_path` manifest'ten okunuyor (göreceli: `apps/api/src/routes/auth.ts`). `fs.existsSync(dep.file_path)` bu göreceli yolu ANF root'a göre çözümlüyor → `AutonomousNativeForge/apps/api/...` → bulunamıyor → her zaman `false`. Bağımlılık dosyaları coder'a hiç iletilemiyor. `context_files` dizisi de aynı sorundan etkileniyordu.
+- **Etki:** Coder, bağımlı görevin dosyasını görmeden yeni kodu yazıyor. Interface uyuşmazlıkları, type import hataları, API sözleşme ihlalleri — hepsinin olasılığı artıyor.
+- **Düzeltme:** `projectSrcPath = path.join(__dirname, '..', 'src', projectId)` hesaplandı. Her `dep.file_path` için `path.isAbsolute()` kontrolü yapılıp gerekirse `path.join(projectSrcPath, dep.file_path)` ile mutlak yola çevriliyor. `plannedContextFiles` (architect'in plan aşamasında belirlediği context dosyaları) için de aynı normalizasyon uygulandı.
+
+#### Genel Durum (Düzeltme Öncesi)
+| Metric | Değer |
+|---|---|
+| Toplam görev | 542 |
+| DONE | 21 (%3.9) |
+| FAILED | 62 (%11.4) |
+| IN_PROGRESS | 18 |
+| PENDING | 441 |
+| Ana başarısızlık nedeni | finish=length + dosya bulunamadı |
+
+---
 ### [2026-05-13T21:47:00.000Z] - system - Sovereign Architecture & Autonomous Self-Patching Protocol
 - **Autonomous Self-Patching (Sovereign Protocol):** Deployed a groundbreaking feature where the system identifies and fixes its own agent code. 
     - **Quarantine Mode:** Watchdog now detects "Crash Loops" (3 crashes in 5 mins) and isolates the failing agent.

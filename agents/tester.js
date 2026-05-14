@@ -121,35 +121,40 @@ async function handleMessage(msg) {
     if (type !== 'RUN_TEST') return;
 
     log(`🧐 QA GUARDRAIL: [${project_id}] ${task_id} denetleniyor...`);
-    
-    if (!file_path || !fs.existsSync(file_path)) {
+
+    const projectPath = path.join(SRC, project_id);
+    // file_path göreceli olabilir (coder'dan gelen path) — mutlak yola çevir
+    const fullFilePath = file_path
+        ? (path.isAbsolute(file_path) ? file_path : path.join(projectPath, file_path))
+        : null;
+
+    if (!fullFilePath || !fs.existsSync(fullFilePath)) {
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, description: "HATA: Dosya bulunamadı." });
     }
 
-    const code = fs.readFileSync(file_path, 'utf8');
+    const code = fs.readFileSync(fullFilePath, 'utf8');
 
     // 1. ADIM: Native Syntax Check (TSC/Node) — hızlı ön filtre
-    const syntax = await validateCode(file_path);
+    const syntax = await validateCode(fullFilePath);
     if (!syntax.valid) {
-        log(`❌ SYNC FAIL: ${path.basename(file_path)}`);
+        log(`❌ SYNC FAIL: ${path.basename(fullFilePath)}`);
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'SYNTAX', description: `SENTAKS HATASI: ${syntax.error}` });
     }
 
     // 1.5 ADIM: Docker Sandbox — izole ortamda çalıştırma kontrolü
-    const projectPath = path.join(SRC, project_id);
     log(`🐳 SANDBOX: [${project_id}] ${task_id} izole test ortamında denetleniyor...`);
-    const sandbox = await runInSandbox(projectPath, file_path);
+    const sandbox = await runInSandbox(projectPath, fullFilePath);
     if (sandbox.skipped) {
         log(`⏭️ SANDBOX ATLANDI: ${sandbox.reason}`);
     } else if (!sandbox.passed) {
-        log(`❌ SANDBOX FAIL: ${path.basename(file_path)}`);
+        log(`❌ SANDBOX FAIL: ${path.basename(fullFilePath)}`);
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'SANDBOX', description: `SANDBOX HATASI (İzole Ortam):\n${sandbox.output}` });
     } else {
-        log(`🐳 SANDBOX GEÇTİ: ${path.basename(file_path)}`);
+        log(`🐳 SANDBOX GEÇTİ: ${path.basename(fullFilePath)}`);
     }
 
     // 2. ADIM: Governance (PRD Guardrails — manifest.stack_rules tabanlı)
-    const guardrailIssues = await checkArchitectureGuardrails(code, file_path, project_id);
+    const guardrailIssues = await checkArchitectureGuardrails(code, fullFilePath, project_id);
     if (guardrailIssues.length > 0) {
         log(`🛡️ GUARDRAIL FAIL: [${project_id}] Mimari İhlal!`);
         return sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'GUARDRAIL', description: guardrailIssues.join('\n') });
@@ -201,7 +206,8 @@ async function handleMessage(msg) {
 
         if (result.status === 'PASSED') {
             log(`✅ [${project_id}] ${task_id} onaylandı. ${SILENT_REPLY_TOKEN}`);
-            sendMessage('ARCHITECT', 'TEST_PASSED', msg);
+            // fullFilePath'i geçir — architect'in fs.readFileSync ve pushToGithub doğru çalışsın
+            sendMessage('ARCHITECT', 'TEST_PASSED', { ...msg, file_path: fullFilePath });
         } else {
             sendMessage('ARCHITECT', 'BUG_REPORT', { ...msg, error_type: 'PRD_COMPLIANCE', description: `PRD UYUMSUZLUĞU: ${result.reason}` });
         }
