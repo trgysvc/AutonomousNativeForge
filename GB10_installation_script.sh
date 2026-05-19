@@ -7,8 +7,27 @@
 # ============================================================
 set -e
 
-echo "🚀 BLACKWELL AUTONOMOUS FORGE v4.3.0 — KURULUM BAŞLIYOR"
+echo "🚀 BLACKWELL AUTONOMOUS FORGE v4.4.0 — KURULUM BAŞLIYOR"
 echo "========================================================"
+
+# --- UBUNTU SİSTEM GÜNCELLEMESİ (KURULUMDAN ÖNCE) ---
+echo ">>> [PRE] Ubuntu sistem güncellemesi yapılıyor..."
+
+# Paket yöneticisi serbest olana kadar bekle
+while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
+      ps aux | grep -v grep | grep -E "apt-get|dpkg" >/dev/null 2>&1; do
+    echo "⏳ Paket yöneticisi meşgul, bekleniyor (5sn)..."
+    sleep 5
+done
+
+# Tüm Ubuntu paketlerini güncelle — script'teki sabit versiyonlar (CUDA 13.2, cu132 vb.)
+# pip ile yönetildiğinden apt upgrade bunlara dokunmaz.
+sudo apt-get update -qq
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold"
+sudo DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+echo "✅ Ubuntu sistem güncellemesi tamamlandı."
 
 # --- ADIM 0: ÖNCÜL DÜZELTMELER (KRİTİK SİSTEM YAMALARI) ---
 echo ">>> [0/12] Sistem kilitleri ve ortam değişkenleri mühürleniyor..."
@@ -20,13 +39,23 @@ sudo pip install --upgrade --ignore-installed packaging jsonschema --break-syste
 sudo chown -R nvidia:nvidia /home/nvidia/.cache 2>/dev/null || true
 
 # 3. CUDA 13.2 ortam değişkenleri — subprocess'lere de taşınır (export zorunlu)
-export CUDA_HOME="/usr/local/cuda-13.2"
+# Tercih sırası: 13.2 (hedef) → 13.x (kurulu herhangi) → /usr/local/cuda symlink
+if [ -d "/usr/local/cuda-13.2" ]; then
+    export CUDA_HOME="/usr/local/cuda-13.2"
+elif [ -d "/usr/local/cuda-13.0" ]; then
+    export CUDA_HOME="/usr/local/cuda-13.0"
+elif [ -L "/usr/local/cuda" ]; then
+    export CUDA_HOME=$(readlink -f /usr/local/cuda)
+else
+    export CUDA_HOME="/usr/local/cuda"
+fi
 export PATH="$CUDA_HOME/bin:$PATH"
 export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
+echo "CUDA_HOME mühürlendi: $CUDA_HOME"
 
-# Blackwell SM121 (GB10) + önceki arch'lar için tam liste.
+# Blackwell SM12.1 (GB10) — tek SM hedef yeterli, derleme süresi kısalır.
 # KRİTİK: Adım 6'da ÜZERINE YAZILMAMALI — bu değer derleme boyunca korunur.
-export TORCH_CUDA_ARCH_LIST="9.0 10.0 12.0 12.1"
+export TORCH_CUDA_ARCH_LIST="12.1"
 
 # --- SABİTLER ---
 VLLM_DIR="/home/nvidia/vllm"
@@ -38,10 +67,19 @@ SITE_PACKAGES="/usr/local/lib/python${PYTHON_VER}/dist-packages"
 NCCL_PRELOAD="${SITE_PACKAGES}/nvidia/nccl/lib/libnccl.so.2"
 LD_LIB="${SITE_PACKAGES}/torch/lib:${SITE_PACKAGES}/nvidia/nccl/lib:${CUDA_HOME}/targets/sbsa-linux/lib:${CUDA_HOME}/lib64"
 
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/cuda-13.2/bin:$HOME/.local/bin:$PATH"
+export PATH="/usr/local/bin:/usr/bin:/bin:${CUDA_HOME}/bin:$HOME/.local/bin:$PATH"
 
 # --- ADIM 1: CUDA 13.2 KURULUMU ---
 echo ">>> [1/12] CUDA 13.2 Blackwell kurulumu kontrol ediliyor..."
+
+# Sistem mimarisi — GB10 aarch64/sbsa, x86_64 değil
+SYS_ARCH=$(uname -m)
+if [[ "$SYS_ARCH" == "aarch64" ]]; then
+    CUDA_ARCH="sbsa"
+else
+    CUDA_ARCH="$SYS_ARCH"
+fi
+echo "Sistem mimarisi: $SYS_ARCH (CUDA repo arch: $CUDA_ARCH)"
 
 # CUDA'nın yüklü olup olmadığını kontrol et
 CUDA_INSTALLED=false
@@ -53,54 +91,66 @@ if command -v nvcc &> /dev/null; then
     else
         echo "⚠️ CUDA $CUDA_VER yüklü ama 13.2 gerekli. Yükseltiliyor..."
     fi
+elif [ -d "/usr/local/cuda-13.2" ]; then
+    echo "✅ CUDA 13.2 dizini mevcut (nvcc PATH dışında olabilir)"
+    export CUDA_HOME="/usr/local/cuda-13.2"
+    export PATH="$CUDA_HOME/bin:$PATH"
+    CUDA_INSTALLED=true
 else
-    echo "❌ CUDA bulunamadı. CUDA 13.2 yükleniyor..."
+    echo "❌ CUDA 13.2 bulunamadı. Kurulum başlıyor..."
 fi
 
 # CUDA 13.2 yükle (eğer gerekirse)
 if [ "$CUDA_INSTALLED" = false ]; then
-    echo "CUDA Toolkit indiriliyor ve kuruluyor..."
+    echo "CUDA Toolkit 13.2 indiriliyor ve kuruluyor..."
 
     # Ubuntu sürümünü belirle
-    UBUNTU_VER=$(lsb_release -rs | cut -d '.' -f1-2 | tr -d '.')
+    UBUNTU_VER=$(lsb_release -rs | tr -d '.')
     echo "Ubuntu sürümü: $UBUNTU_VER"
 
-    # NVIDIA CUDA repository ekle (Ubuntu 24.04 için 22.04 repo kullan)
+    # Ubuntu 24.04 için ubuntu2404, yoksa ubuntu2204
     if [[ "$UBUNTU_VER" == "2404" ]]; then
+        REPO_VER="ubuntu2404"
+    elif [[ "$UBUNTU_VER" == "2204" ]]; then
         REPO_VER="ubuntu2204"
     else
-        REPO_VER="ubuntu${UBUNTU_VER}04"
+        REPO_VER="ubuntu2204"
     fi
 
-    echo "Repository: $REPO_VER kullanılıyor"
+    echo "Repository: cuda.network/$REPO_VER/$CUDA_ARCH kullanılıyor"
 
-    # NVIDIA GPG anahtarını ve repository'i ekle
-    wget https://developer.download.nvidia.com/compute/cuda/repos/$REPO_VER/x86_64/cuda-keyring_1.0-1_all.deb
-    sudo dpkg -i cuda-keyring_1.0-1_all.deb
+    # NVIDIA GPG anahtarını ve repository'i doğru mimari ile ekle (aarch64 → sbsa)
+    KEYRING_URL="https://developer.download.nvidia.com/compute/cuda/repos/${REPO_VER}/${CUDA_ARCH}/cuda-keyring_1.1-1_all.deb"
+    echo "Keyring indiriliyor: $KEYRING_URL"
+    wget -q "$KEYRING_URL" -O /tmp/cuda-keyring.deb || \
+        wget -q "https://developer.download.nvidia.com/compute/cuda/repos/${REPO_VER}/${CUDA_ARCH}/cuda-keyring_1.0-1_all.deb" -O /tmp/cuda-keyring.deb
+    sudo dpkg -i /tmp/cuda-keyring.deb
 
-    # Repository'yi güncelle
     sudo apt-get update
 
-    # Önce NVIDIA driver kurulumunu kontrol et
+    # NVIDIA driver kontrolü — en son sürüm (595)
     if ! nvidia-smi &> /dev/null; then
-        echo "NVIDIA driver yükleniyor..."
-        sudo apt-get install -y nvidia-driver-535 nvidia-utils-535
+        echo "NVIDIA driver yükleniyor (en son: 595)..."
+        sudo apt-get install -y nvidia-driver-595 nvidia-utils-595 || \
+        sudo apt-get install -y nvidia-driver-590 nvidia-utils-590 || \
+        sudo apt-get install -y nvidia-driver-580 nvidia-utils-580 || true
     else
-        echo "✅ NVIDIA driver zaten yüklü"
+        CURRENT_DRIVER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -1 | cut -d'.' -f1)
+        echo "✅ NVIDIA driver zaten yüklü (v$CURRENT_DRIVER). En son: 595."
     fi
 
-    # CUDA Toolkit yükle
-    sudo apt-get install -y cuda-toolkit-12-6 || \
-    sudo apt-get install -y cuda-toolkit-12-5 || \
-    sudo apt-get install -y cuda-toolkit
+    # CUDA 13.2 Toolkit yükle
+    sudo apt-get install -y cuda-toolkit-13-2 || \
+    sudo apt-get install -y cuda-toolkit-13-0 || \
+    { echo "❌ CUDA 13.x paketi bulunamadı — mevcut kurulumu kontrol edin"; exit 1; }
 
-    # CUDA environment variables ayarla
-    if [ -d "/usr/local/cuda" ]; then
-        export CUDA_HOME="/usr/local/cuda"
-    elif [ -d "/usr/local/cuda-12.6" ]; then
-        export CUDA_HOME="/usr/local/cuda-12.6"
-    elif [ -d "/usr/local/cuda-12.5" ]; then
-        export CUDA_HOME="/usr/local/cuda-12.5"
+    # CUDA environment variables güncelle — 13.2 tercih et
+    if [ -d "/usr/local/cuda-13.2" ]; then
+        export CUDA_HOME="/usr/local/cuda-13.2"
+    elif [ -d "/usr/local/cuda-13.0" ]; then
+        export CUDA_HOME="/usr/local/cuda-13.0"
+    elif [ -L "/usr/local/cuda" ]; then
+        export CUDA_HOME=$(readlink -f /usr/local/cuda)
     else
         export CUDA_HOME="/usr/local/cuda"
     fi
@@ -108,14 +158,21 @@ if [ "$CUDA_INSTALLED" = false ]; then
     export PATH="$CUDA_HOME/bin:$PATH"
     export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
 
-    # Profile'a kalıcı olarak ekle
-    echo "export CUDA_HOME=\"$CUDA_HOME\"" >> ~/.bashrc
-    echo 'export PATH="$CUDA_HOME/bin:$PATH"' >> ~/.bashrc
-    echo 'export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"' >> ~/.bashrc
+    # Profile'a kalıcı olarak ekle (duplicate korumalı)
+    grep -qxF "export CUDA_HOME=\"$CUDA_HOME\"" ~/.bashrc || \
+        echo "export CUDA_HOME=\"$CUDA_HOME\"" >> ~/.bashrc
+    grep -qxF 'export PATH="$CUDA_HOME/bin:$PATH"' ~/.bashrc || \
+        echo 'export PATH="$CUDA_HOME/bin:$PATH"' >> ~/.bashrc
+    grep -qxF 'export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"' ~/.bashrc || \
+        echo 'export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"' >> ~/.bashrc
 
     echo "✅ CUDA kurulumu tamamlandı: $CUDA_HOME"
-    echo "⚠️ Sistem yeniden başlatılması önerilir"
 fi
+
+# LD_LIB'i CUDA_HOME güncellendikten SONRA yeniden hesapla
+# (Adım 0'da tanımlandıysa CUDA 13.0 path'i taşıyor olabilir)
+LD_LIB="${SITE_PACKAGES}/torch/lib:${SITE_PACKAGES}/nvidia/nccl/lib:${CUDA_HOME}/targets/sbsa-linux/lib:${CUDA_HOME}/lib64"
+echo "LD_LIB yeniden hesaplandı: $CUDA_HOME"
 
 # --- ADIM 2: SİSTEM BAĞIMLILIKLARI VE NODE.JS ---
 echo ">>> [2/12] OS paketleri ve Node.js v22..."
@@ -145,12 +202,17 @@ echo "✅ vLLM kaynak kodu hazır."
 
 # --- ADIM 4: MODEL OTOMATİK İNDİRME (NEMOTRON NVFP4 — SafeTensors) ---
 echo ">>> [4/12] Nemotron-3-Super-120B-A12B-NVFP4 indiriliyor (~60GB SafeTensors)..."
-# CUDA'nın varlığını kontrol et — CUDA_HOME'u adım 0'daki 13.2 değerinden EZME
+# CUDA_HOME adım 0'da mühürlendi — 13.2 tercih sırasıyla doğrulama
 echo "CUDA durumu kontrol ediliyor..."
 if [ -d "/usr/local/cuda-13.2" ]; then
-    echo "CUDA bulundu: /usr/local/cuda-13.2 (adım 0 değeri korunuyor)"
+    export CUDA_HOME="/usr/local/cuda-13.2"
+    export PATH="$CUDA_HOME/bin:$PATH"
+    export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
+    echo "CUDA bulundu: $CUDA_HOME"
+elif [ -d "$CUDA_HOME" ]; then
+    echo "CUDA bulundu: $CUDA_HOME (adım 0 değeri)"
 elif [ -d "/usr/local/cuda" ]; then
-    export CUDA_HOME="/usr/local/cuda"
+    export CUDA_HOME=$(readlink -f /usr/local/cuda)
     export PATH="$CUDA_HOME/bin:$PATH"
     export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
     echo "CUDA bulundu: $CUDA_HOME"
@@ -162,8 +224,8 @@ if command -v nvcc &> /dev/null; then
     CUDA_VERSION=$(nvcc --version | grep "release" | sed -n 's/.*release \([0-9]\+\.[0-9]\+\).*/\1/p')
     echo "CUDA sürümü: $CUDA_VERSION"
 else
-    echo "⚠️  nvcc bulunamadı, CUDA 12.1 varsayılıyor"
-    CUDA_VERSION="12.1"
+    echo "⚠️  nvcc bulunamadı, CUDA 13.2 varsayılıyor"
+    CUDA_VERSION="13.2"
 fi
 
 # HuggingFace CLI yükle (sistem paket çakışmalarını önle)
@@ -172,15 +234,31 @@ sudo pip3 install --upgrade --force-reinstall --no-deps huggingface_hub --break-
 sudo pip3 install --upgrade tqdm filelock requests --break-system-packages
 echo "✅ HuggingFace CLI kuruldu"
 
-export HF_TOKEN="YOUR_HF_TOKEN"  # huggingface.co/settings/tokens adresinden al
+export HF_TOKEN="${HF_TOKEN:-}"
 
 if [ ! -d "$MODEL_DIR" ] || [ -z "$(ls -A "$MODEL_DIR" 2>/dev/null)" ]; then
     hash -r 2>/dev/null
+    mkdir -p "$MODEL_DIR"
     echo "🚀 HuggingFace CLI ile model indirme başlıyor..."
     # NOT: --include filtresi KULLANILMAZ. Bu SafeTensors modelidir (GGUF/llama.cpp değil).
     # vLLM tüm shard dosyalarına ihtiyaç duyar.
-    # Yeni hf komutunu kullan (symlinks parametresi kaldırıldı)
-    hf download "$MODEL_ID" \
+    # huggingface-cli kullan (eski 'hf' komutu güvenilir değil)
+    HF_CLI=$(which huggingface-cli 2>/dev/null || which hf 2>/dev/null || echo "")
+    if [ -z "$HF_CLI" ]; then
+        # PATH'i yenile ve tekrar dene
+        export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+        hash -r
+        HF_CLI=$(which huggingface-cli 2>/dev/null || which hf 2>/dev/null || echo "")
+    fi
+    if [ -z "$HF_CLI" ]; then
+        echo "❌ huggingface-cli bulunamadı. Yeniden yükleniyor..."
+        sudo pip3 install --upgrade huggingface_hub --break-system-packages
+        export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+        hash -r
+        HF_CLI=$(which huggingface-cli 2>/dev/null || echo "huggingface-cli")
+    fi
+    echo "HuggingFace CLI: $HF_CLI"
+    "$HF_CLI" download "$MODEL_ID" \
         --local-dir "$MODEL_DIR" \
         --token "$HF_TOKEN"
 else
@@ -195,7 +273,9 @@ sudo find . -name "*.so" -delete
 sudo pip3 uninstall vllm torch torchvision torchaudio -y --break-system-packages 2>/dev/null || true
 sudo pip3 cache purge
 
-# --- ADIM 6: PYTORCH cu132 (BLACKWELL ULTRA) ---
+# --- ADIM 6: PYTORCH cu132 (BLACKWELL ULTRA — aarch64 doğrulanmış) ---
+# cu132: aarch64 wheel'leri mevcut (manylinux_2_28_aarch64). CUDA 13.2 ile eşleşir.
+# Doğrulama: download.pytorch.org/whl/nightly/cu132/ → torch-2.12.0.dev+cu132-cp312-...-aarch64.whl
 echo ">>> [6/12] PyTorch cu132 Nightly yükleniyor..."
 sudo pip3 install --pre torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/nightly/cu132 \
@@ -217,14 +297,21 @@ else
         sentencepiece "numpy<2.3" --break-system-packages
 fi
 
-echo ">>> FlashInfer (SM121 kernel yaması) derleniyor..."
+echo ">>> FlashInfer (SM12.1 Blackwell kernel — kaynak derleme) kuruluyor..."
+# FlashInfer cu132 hazır wheel YOK — kaynak derlemesi gerekli.
+# flashinfer-python: Python bindings (pure python, hızlı)
+# flashinfer: tam C++/CUDA derleme (--mamba-backend flashinfer için gerekli)
+sudo pip3 install flashinfer-python \
+    --index-url https://flashinfer.ai/whl/nightly/cu130/ \
+    --break-system-packages 2>/dev/null || true
+# Tam CUDA derleme (SM12.1 için) — cu132 PyTorch ile uyumlu
 sudo pip3 install git+https://github.com/flashinfer-ai/flashinfer.git \
-    -c /tmp/torch_constraints.txt --break-system-packages || echo "⚠️ FlashInfer atlandı."
+    -c /tmp/torch_constraints.txt --break-system-packages || echo "⚠️ FlashInfer kaynak derleme atlandı, JIT modu kullanılacak."
 
 # --- ADIM 7: ÇEVRESEL DEĞİŞKENLER VE YAMA ---
 echo ">>> [7/12] pyproject.toml yaması ve performans flagleri..."
 # UYARI: TORCH_CUDA_ARCH_LIST burada ÜZERINE YAZILMAZ.
-# Adım 0'da set edilen "9.0 10.0 12.0 12.1" korunur.
+# Adım 0'da set edilen "12.1" korunur.
 export CUDA_HOME="$CUDA_HOME"
 export VLLM_TARGET_DEVICE="cuda"
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
@@ -272,23 +359,30 @@ ExecStart=/usr/bin/python3 -m vllm.entrypoints.openai.api_server \\
     --quantization nvfp4 \\
     --kv-cache-dtype fp8 \\
     --tensor-parallel-size 1 \\
-    --max-model-len 24576 \\
-    --gpu-memory-utilization 0.92 \\
+    --max-model-len 32768 \\
+    --gpu-memory-utilization 0.90 \\
+    --mamba-backend flashinfer \\
+    --enable-expert-parallel \\
+    --speculative-config '{"method":"mtp","num_speculative_tokens":5}' \\
     --reasoning-parser nemotron_v3 \\
     --enable-auto-tool-choice \\
     --tool-call-parser hermes \\
     --port 8000 \\
-    --trust-remote-code
+    --trust-remote-code \\
+    --enforce-eager
 Restart=always
 RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
 EOF"
-# Not: --enforce-eager KALDIRILDI — CUDA graph'lar GB10'da throughput'u 2-3x artırır.
-# Not: VLLM_USE_V1=0 KALDIRILDI — V1 engine varsayılan ve daha hızlı; V0'a gerek yok.
-# Not: --max-model-len 65536 (128K VRAM'de NVFP4 + fp8 KV ile güvenli sınır).
-#      131072 denemek için VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 zaten mevcut.
+# --mamba-backend flashinfer: Nemotron Super hibrit Mamba+Attention mimarisi için zorunlu.
+#   Kaynak: vLLM tests/evals/gsm8k/configs/Nemotron-3-Super-120B-A12B-NVFP4.yaml
+# --enable-expert-parallel: MoE katmanları için. Tek GPU'da da gerekli (vLLM internal).
+# --speculative-config mtp: Multi-Token Prediction ile ücretsiz hız artışı.
+# --reasoning-parser nemotron_v3: vllm/reasoning/__init__.py'de kayıtlı, geçerli parser.
+# --enforce-eager: Mamba mimarisi CUDA graph ile uyum sorunları yaşayabilir; resmi config de kullanıyor.
+# --max-model-len 32768: NVFP4 (~60GB model) + FP8 KV cache ile 128GB VRAM'de güvenli.
 
 # --- ADIM 11: ATEŞLEME ---
 echo ">>> [11/12] Nemotron-Super servisi başlatılıyor..."
@@ -320,7 +414,7 @@ echo "=================================================="
 echo "✅ ANF FABRİKA KALBİ HAZIR"
 echo "   Model : Nemotron-3-Super-120B-A12B-NVFP4"
 echo "   Engine: vLLM V1 | Marlin NVFP4 | FP8 KV Cache"
-echo "   CUDA  : 13.2 | SM121 (Blackwell GB10)"
+echo "   CUDA  : 13.2 | SM12.1 (Blackwell GB10)"
 echo "   Port  : http://localhost:8000"
 echo "=================================================="
 echo ""
